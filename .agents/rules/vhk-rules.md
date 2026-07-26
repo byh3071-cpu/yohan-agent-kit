@@ -1,4 +1,4 @@
-# yohan-cc-skills — Cursor Rules
+# yohan-cc-skills — Antigravity Rules
 
 > 코딩/디자인 전용. 기록/운영 → CLAUDE.md 참조.
 > ⚡ 이 파일은 RULES.md에서 자동 생성됨 (vhk sync). 직접 수정 금지.

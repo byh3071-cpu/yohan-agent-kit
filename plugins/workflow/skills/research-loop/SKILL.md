@@ -125,3 +125,9 @@ description: "Use when 요한 wants to run a research question through the full 
 - 복리 배선: `yohan-brain/memory/rules/source-to-summary-protocol.md` (#10) · `docs/KNOWLEDGE-LOOP.md` · `memory/rules/wiki-ops.md`
 - 무인 루프 레퍼런스(B단계 이식 원형): `../overnight-autoloop/` (얇은 스킬 + workflow.js 엔진 + LF 사본 실행 + 되돌릴 수 없는 작업 차단)
 - 범용 코어 독트린(되돌릴 수 없는 작업 4중 안전장치) = 글로벌 PAT-003.
+
+## 파이프라인 계약
+계약 SoT: `C:\Users\Public\dev\.agents\SKILL_PIPELINE.md` (골 사이클 ①조사)
+- **받는 것:** 바통 `goal` · `open`(미결정). **`open`이 비면 실행하지 않는다** — 결정할 게 없는 조사는 연극.
+- **남기는 것:** `open` 축소(답이 나온 항목 삭제) · `artifacts`(리포트·assets 경로) · `cost`(⑪ 계측 후 — 카운터 정의는 위 표가 정본)
+- **다음:** 스펙 · `thought-to-prompt` 또는 `prd-generator` (gate: human)
