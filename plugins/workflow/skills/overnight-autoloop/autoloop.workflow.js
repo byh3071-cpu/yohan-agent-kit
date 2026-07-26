@@ -78,6 +78,10 @@ cfg.repos.forEach((r, i) => {
   if (!r.name || typeof r.name !== 'string') die(`repos[${i}].name 누락/무효`)
   if (!r.path || typeof r.path !== 'string') die(`repos[${i}].path 누락/무효`)
   if (!VALID_KIND.includes(r.kind)) die(`repos[${i}].kind 무효 (받음=${JSON.stringify(r.kind)}, 허용=${VALID_KIND.join('|')})`)
+  // vhk ADR-007: Workflow 자동 push/PR 오케스트레이션 금지 레포 — name·path 양쪽 차단(우회 방지)
+  if (/^vhk$/i.test(r.name.trim()) || /[\\/]vhk[\\/]?$/i.test(r.path.trim())) {
+    die(`repos[${i}]=vhk 금지 — vhk ADR-007 이 Workflow 자동 push 오케스트레이션을 금지한다 (vhk 는 수동 vhk-auto 계약 사용)`)
+  }
 })
 if (!Number.isInteger(cfg.capPRs) || cfg.capPRs < 1) die(`capPRs 누락/무효 (받음=${JSON.stringify(cfg.capPRs)}, 양의 정수 필요)`)
 // [2026-07-04] 이월(carry-over) 선택 파라미터 — 관용 처리(silent fallback 아님, 명시 기본값):
