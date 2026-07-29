@@ -4,3 +4,6 @@
 # Workflow 스크립트는 Windows 에서도 LF 강제.
 # Workflow tool 권한층이 CR(\r) 을 control character 로 거부하는 gotcha 예방.
 *.workflow.js text eol=lf
+
+# 범용 스킬 manifest는 체크아웃 OS와 무관하게 같은 바이트를 사용한다.
+skills/** text eol=lf

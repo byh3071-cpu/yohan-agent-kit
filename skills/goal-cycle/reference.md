@@ -1,41 +1,45 @@
-# goal-cycle — 대조·리서치 메모
+# goal-cycle 운영 참고
 
-## Agentic SDLC ↔ 골 사이클
+이 문서는 프로젝트에 아래 도구가 실제로 있을 때만 읽는다. 이름이 같아도 프로젝트 규칙이 다르면 가장 가까운 규칙과 활성 로스터가 우선한다.
 
-| Agentic 패턴 (문헌·가이드 공통) | 골 사이클 |
-|----------------------------------|-----------|
-| Human orchestrates, agents execute | 요한=머지판정·스펙승인, AI=조사~PR |
-| Work unit = minutes–hours | **티켓** |
-| Builder ≠ Validator | 만들기 ≠ 검수 |
-| Plan/quality gate before code | 스펙·설계 승인 전 만들기 금지 |
-| Observe after ship | 지켜보기 · 다듬기 |
+## 단계와 역할 대조
 
-참고(외부, 2025–26 대조):
-- TestQuality Agentic SDLC — builder–validator chain, acceptance 기준 독립 검증
-- Port AI Builder — Plan Mode 승인 후 실행 (사람 게이트)
-- smarzban/agent-sdlc — idea→AC→arch→atomic plan→gate→test-first build→PR
-- richard-devbot/SDLC-rstack — Orchestrator / Builder / Validator 샌드박스 분리
-- Cursor Plan Mode — 만들기 전 조사~티켓나누기
+| 일반 패턴 | 골 사이클 |
+|---|---|
+| 사람이 결정하고 에이전트가 실행 | 사람=ADR·Plan·머지 게이트, 에이전트=승인 범위 내 조사~PR |
+| 작은 작업 단위 | 티켓 |
+| Builder와 Validator 분리 | 만들기와 검수 분리 |
+| 구현 전 합의 | 스펙·설계·티켓나누기 뒤 승인 |
+| 배포 뒤 관찰 | 지켜보기·다듬기 |
 
-## 생태계 매핑
+## 생태계 도구의 조건부 매핑
 
-| 요한 도구 | 골 사이클 역할 |
-|-----------|----------------|
-| dump-gate / thought-to-prompt | 사이클 **전** 생각→지시문 |
-| Plan 모드 + goal-cycle | 조사~티켓나누기 |
-| /goal + orca conductor | 멀티벤더 만들기·검수 |
-| vhk-auto | 만들기(커밋만) |
-| overnight-vhk-auto + auto_pr | PR올리기 |
-| overnight-autoloop | **사용 금지**(다른 트랙) |
-| check-goal / CI | 검증 |
-| cavecrew-reviewer / 다른 벤더 | 검수 |
-| morning-merge-check | 머지판정 지원 |
-| improvement-loop | 다듬기 |
-| research-scout | 경쟁사만 — **조사(코드) 아님** |
+| 도구가 존재할 때 | 역할 |
+|---|---|
+| `dump-gate`, `thought-to-prompt` | 사이클 전에 생각을 실행 가능한 요청으로 정리 |
+| Plan 모드 + `goal-cycle` | 조사~티켓나누기 |
+| VHK goal | 프로젝트 Git의 지속 goal 상태와 검증 게이트 |
+| Orca | L 작업의 worktree·터미널·에이전트 실행과 런타임 상태 |
+| `vhk-auto` | 현재 계약이 허용하는 구현·커밋; 자동 PR이나 머지로 간주하지 않음 |
+| `overnight-vhk-auto` + `auto_pr` | 해당 프로젝트 계약이 있을 때 PR올리기까지 연결 |
+| `check-goal`, CI | 검증 증거 |
+| 다른 벤더·독립 검토자 | 만든 이와 분리된 검수 |
+| `morning-merge-check` | 사람의 머지판정 지원; 직접 머지하지 않음 |
+| improvement loop | 다듬기와 교훈 역전파 |
+
+`overnight-autoloop`처럼 이름이 비슷한 별도 트랙을 goal-cycle 실행기로 추정하지 않는다. 실제 계약 문서를 먼저 읽는다.
 
 ## 이름 충돌 방지
 
-- Scout(조사) ≠ research-scout  
-- Plan(설계·합의 단계) ≠ “아무 계획 문서”  
-- Verify(검증=CI) ≠ 검수(Review)  
-- handoff(인계 쪽지) ≠ 티켓
+- 조사(Scout)는 경쟁사 조사 전용 `research-scout`와 다르다.
+- Plan은 합의·설계 단계이며 임의의 계획 문서 전체를 뜻하지 않는다.
+- 검증(Verify)은 테스트 증거이고 검수(Review)는 다른 눈의 실패 탐색이다.
+- handoff는 컨텍스트 인계이며 티켓의 대체물이 아니다.
+- `/goal`은 goal 상태를 지속하는 표면이며 Orca 사용 여부는 L 라우팅과 환경 계약이 결정한다.
+
+## 한도와 실패 처리
+
+1. 사용량 표시만으로 한도 소진을 추측하지 않는다.
+2. 자동 failover는 현재 Orca·로스터 계약이 명시한 명령과 횟수 안에서만 수행한다.
+3. CLI 이전이 자동화되어 있지 않으면 필요한 재개 지점과 근거를 사용자에게 전달한다.
+4. 완료 신호 형식은 현재 실행 계약에서 읽고, 모든 환경에 `worker_done`을 강제하지 않는다.
