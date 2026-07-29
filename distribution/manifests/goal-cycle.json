@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "skill": "goal-cycle",
+  "files": [
+    {
+      "path": "agents/openai.yaml",
+      "bytes": 309,
+      "sha256": "8182798BF5A9A8AD949DD5B60E0EAC34ABE5670481DF83CEDBDCF9109455ADD2"
+    },
+    {
+      "path": "reference.md",
+      "bytes": 2671,
+      "sha256": "7F33966F1D3BB12561BBDA3D65C72A70F584016C5F2C277B8AB1211888C626DC"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 7333,
+      "sha256": "35457D136B6D0EFF5EAD869BA70DB62FB24EB268C555CBD23FD248785CCB3AD2"
+    }
+  ],
+  "digest": "3960117BFF0CC3D5B0B05B8D852C99FD6EFC80CB32B4F63DE522998EB95C836D"
+}

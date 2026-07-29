@@ -1,0 +1,7 @@
+interface:
+  display_name: "ADR 사이클"
+  short_description: "되돌리기 비싼 결정을 ADR로 조사·작성·검토합니다"
+  default_prompt: "이 시스템 경계 결정을 $adr-cycle로 검토하고 Proposed ADR 초안을 작성해 주세요."
+
+policy:
+  allow_implicit_invocation: true

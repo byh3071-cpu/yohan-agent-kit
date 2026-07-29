@@ -21,3 +21,6 @@ settings.json.bak-*
 !.env.example
 *.pem
 *.key
+
+# Deterministic local fixtures for skill distribution tests
+tests/.work/
