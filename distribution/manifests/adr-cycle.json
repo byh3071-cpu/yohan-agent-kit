@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "skill": "adr-cycle",
+  "files": [
+    {
+      "path": "agents/openai.yaml",
+      "bytes": 300,
+      "sha256": "5AA2DADE2219DCD323604EFFA6345D69FB51E2B4387B2345FA33FE09FF338E00"
+    },
+    {
+      "path": "references/review-checklist.md",
+      "bytes": 2221,
+      "sha256": "B2D8C4839CDAD2B58DE0A4069A3DCB73FC542B5DDC4BBEB878DE2712D5C5B87F"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 4885,
+      "sha256": "E582B0FD92E8DD145933B431E6E69664D21F35145D329D0687BE6CDC4929DD6A"
+    }
+  ],
+  "digest": "6F1475391459EEE5A8585CBA1D481294726BAF53386C61C9B233B9B53E85C948"
+}
