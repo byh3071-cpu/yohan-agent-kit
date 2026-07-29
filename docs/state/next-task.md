@@ -10,3 +10,7 @@
 - [x] 2026-07-21 plan-audit `0.3.14`~`0.3.18` 출시 완료 — PR #54·#55·#57·#58·#59·#60 머지, yohan-core `0.3.18` 설치. Codex 벤더 교차검증 15건 처리(치명 3·높음 3·중간 7, 의도적 보류 1), V7·V8 블라인드 트리거 검증 6/6, 절차 실행 실전 검증 PASS. studio-post 규율 7 분량 정정(`0.3.16`) + PR #29 close. **다음: 블라인드 경로(2-C critic) 실전 미검증 — 다음 세션에서 미승인 계획 세우고 `검증 및 리뷰` 치면 자연 검증됨.** (선택) Codex가 의도적 보류한 `#10`(2회차 상호작용), 커서 연동 조사. 상세 `docs/log/2026-07-21-plan-audit.md`
 - [ ] 2026-07-29 ADR-013·014 기반 adr-cycle·goal-cycle 멀티벤더 정본화 — active goal: `goals/1-multivendor-skill-sot.md`. 사용자 홈 설치와 dirty checkout 정리는 비범위.
 - [ ] 2026-07-29 멀티벤더 정본·배포 구현과 격리 상태 전이 43 assertions 완료 — 다음: 독립 호출 검수·실홈 read-only Check·시크릿 검사·Draft PR. 실제 홈 Install은 별도 승인 대기.
+- [ ] 2026-07-29 보안 재검토 보강과 격리 회귀 84 assertions 완료 — 실제 홈 Check는 기존 goal-cycle 내용 차이로 Conflict. 다음: 독립 재리뷰→시크릿 검사→Draft PR. 전역 Install·기존 사본 전환은 수동 화해와 별도 승인 대기.
+- [ ] 2026-07-29 중단 복구·경로 원자성 2차 보강과 격리 회귀 144 assertions 완료 — 다음: 독립 재리뷰 최종 판정→시크릿 검사→Draft PR. 전역 Install·기존 사본 전환은 수동 화해와 별도 승인 대기.
+- [ ] 2026-07-29 junction 소유권 schema 3 보강과 격리 회귀 167 assertions 완료 — 다음: 독립 재리뷰 최종 판정→시크릿 검사→Draft PR. 전역 Install·기존 사본 전환은 수동 화해와 별도 승인 대기.
+- [ ] 2026-07-29 독립 최종 재리뷰 HIGH 0·MEDIUM 0로 Draft PR 가능 판정 — 다음: 시크릿 검사→논리 커밋→Draft PR. 전역 Install과 새 벤더 세션 검증은 기존 사본 화해·별도 승인 뒤 진행.

@@ -19,7 +19,7 @@
 | Antigravity 표준 | `~/.gemini/config/skills/<name>/` | `~/.gemini/skills/<name>/` |
 | Antigravity CLI 조건부 | `~/.gemini/antigravity-cli/skills/<name>/` | 유효한 표준 경로 발견 실패 증거가 있을 때만 사용 |
 
-현재 Windows 환경에서는 관리자 권한이나 개발자 모드가 필요 없는 directory junction을 사용한다. 정본 디렉터리 내부의 reparse point는 manifest 검사에서 실패한다.
+현재 Windows 환경에서는 관리자 권한이나 개발자 모드가 필요 없는 directory junction을 사용한다. 정본 디렉터리 내부의 reparse point는 manifest 검사에서 실패한다. 사용자 홈 대상과 백업 경로의 **모든 기존 조상**도 reparse point가 아니어야 하며, 부모 junction을 통한 허용 루트 탈출은 작업 전에 거부한다.
 
 ## Check
 
@@ -30,13 +30,16 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 Check는 디렉터리·백업·로그를 만들지 않는 읽기 전용 작업이다. 다음을 검사한다.
 
-- 정본이 tracked·clean 상태인지
+- 정본과 baseline이 tracked·clean 상태인지, 실제 스킬 파일 중 ignored·untracked 파일이 없는지, 각 working file blob이 Git index blob과 같은지
 - `SKILL.md` frontmatter가 `name`·`description`만 갖는지
 - 전체 파일의 상대 경로·바이트·SHA-256과 baseline manifest가 일치하는지
 - 특정 PC 절대경로가 스킬에 남아 있지 않은지
 - 대상이 올바른 junction인지, 같은 manifest의 일반 디렉터리인지, 내용 충돌인지
 - 제품별 활성 발견 경로에 중복본이 있는지
 - 미완료 transaction이나 근거 없는 AGY fallback이 있는지
+- destination 조상·백업 transaction·transaction 파일에 경로 탈출 reparse point가 없는지
+
+Git 검사는 `GIT_OPTIONAL_LOCKS=0`인 프로세스 범위에서 수행하고 각 파일을 index blob과 직접 비교한다. 회귀 테스트는 같은 크기·수정 시각으로 위장한 내용 변경도 잡으며, Check 전후 worktree index의 바이트 해시와 수정 시각이 같은지도 확인한다.
 
 | 상태 | exit | 의미 |
 |---|---:|---|
@@ -64,7 +67,11 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 정본과 다른 일반 디렉터리, 파일 장애물, 잘못된 junction은 승인 여부와 무관하게 실패한다. `Force`나 불일치 우회 옵션은 없다.
 
-안전한 Install은 사용자 홈의 `.yohan-skill-backups/<BackupId>/`에 write-ahead transaction을 기록한다. 동일한 기존 디렉터리는 활성 발견 루트 밖으로 이동해 manifest를 다시 확인하고, 정본 junction을 만든 뒤 전체 Check가 `Healthy`인지 확인한다. 중간 실패 시 원래 상태로 rollback하며 rollback도 실패하면 `RecoveryRequired`로 남긴다. 이미 Healthy이면 백업을 추가하지 않는 no-op이다.
+안전한 Install은 HomeRoot별 named mutex로 다른 Install·Restore와 직렬화하고, 사용자 홈의 `.yohan-skill-backups/<BackupId>/`에 schema 3 write-ahead transaction을 기록한다. 정본 junction은 먼저 transaction 내부의 결정적 staging 경로에 만들고 NTFS file ID·target 기반 객체 지문을 저널에 저장한다. 그다음 동일한 기존 디렉터리를 활성 발견 루트 밖으로 이동해 전·후 manifest를 검증하고, staging junction을 active leaf로 `[IO.Directory]::Move`한다. 이 이동은 목적지 leaf가 이미 생기면 실패하며 NTFS file ID를 보존하므로, commit 전 중단도 저장된 객체 지문으로 소유권을 판정할 수 있다. active 경로와 staging 경로는 별도로 seal·재계산하므로 객체 지문 자체에 이동 전 경로를 넣지 않는다.
+
+transaction JSON은 같은 디렉터리에 완전한 임시 파일을 쓴다. 최초 생성은 `[IO.File]::Move`, 갱신은 고유한 non-null backup 경로를 제공한 `[IO.File]::Replace`를 사용하고 성공 뒤 임시 backup을 제거한다. 설치 전 고정 메타데이터와 staging binding의 `installSeal`, 커밋 시점의 상태·junction 지문을 포함한 `commitSeal`이 우발적 transaction 변조를 검출한다. identity가 기록되기 전 프로세스가 죽었거나 현재 junction의 identity가 다르면 같은 target이라도 도구 소유물로 채택하지 않고 Conflict로 중단한다.
+
+모든 항목을 적용한 뒤 전체 Check가 `Healthy`인지 확인한다. 중간 실패 시 원래 상태로 rollback하며, 백업 manifest가 달라졌다면 활성 경로에 옮기지 않는다. rollback도 실패하면 `RecoveryRequired`로 남긴다. 프로세스 종료로 `Executing`에 멈췄거나 `commitSeal` 없이 `RecoveryRequired`가 된 transaction도 exact BackupId의 Check·Restore로 `InstallRollback` 계획을 만들 수 있다. 이미 Healthy이면 백업을 추가하지 않는 no-op이다.
 
 ## Restore
 
@@ -80,7 +87,9 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
   -ApproveGlobalHomeWrite
 ```
 
-Restore는 현재 junction이 해당 transaction이 만든 정본 연결인지, 백업 manifest가 변조되지 않았는지 확인한다. 자신이 만든 junction만 제거하고 설치 전의 `Absent`·일반 디렉터리·junction 상태를 복원한다. 백업은 자동 삭제하지 않는다. 복원 뒤 이전 활성 중복본이 다시 나타날 수 있으므로 성공 기준은 일반 Healthy가 아니라 transaction의 설치 전 상태와 일치하는 것이다.
+Restore는 transaction의 HomeRoot·RepositoryRoot·skill·role·source·target·backup·staging 경로를 현재 CLI 입력에서 결정적으로 다시 계산한다. `installSeal`은 항상 검증하고, 완료된 설치는 `commitSeal`도 검증한다. 커밋 전 중단은 봉인된 action과 현재 파일시스템을 함께 읽어 `InstallRollback`으로 분류한다. 완료 여부와 무관하게 active·staging junction은 transaction에 선저널링된 NTFS 객체 지문이 실제 객체와 같을 때만 소유물로 인정한다. 같은 대상을 가리키더라도 삭제 후 다시 만들었거나 저널 identity가 비어 있으면 제거하지 않는다. Check가 확인한 active·staging identity와 항목 상태는 Restore PlanDigest에 묶인다.
+
+각 항목은 `Original`·`Installed`·`RestorePending`·`Conflict`로 다시 판정한다. junction 제거 뒤 프로세스가 멈춰 target은 없고 유효한 backup만 남은 `RestorePending`도 재개한다. `Restoring`·`RecoveryRequired` transaction은 이미 원복된 항목을 건너뛴다. 모든 항목이 실제 설치 전 상태인지 확인한 뒤에만 `recoverySeal`과 `Restored`를 함께 기록하며, 상태 문자열만 바뀐 경우에는 no-op으로 인정하지 않는다. 백업은 자동 삭제하지 않는다. 복원 뒤 이전 활성 중복본이 다시 나타날 수 있으므로 성공 기준은 일반 Healthy가 아니라 transaction의 설치 전 상태와 일치하는 것이다.
 
 ## Antigravity CLI fallback
 
@@ -90,7 +99,8 @@ Restore는 현재 junction이 해당 transaction이 만든 정본 연결인지, 
 powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
   -Mode Check -Skill goal-cycle `
   -IncludeAgyCliFallback `
-  -AgyEvidenceDirectory <EVIDENCE_DIRECTORY>
+  -AgyEvidenceDirectory <EVIDENCE_DIRECTORY> `
+  -AgyCurrentVersion <AGY_VERSION>
 ```
 
 증거 파일명은 `<skill>.json`이며 다음 필드를 가진다.
@@ -109,7 +119,7 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 }
 ```
 
-호스트·버전·정본 digest·표준 경로가 바뀌거나 새 세션 검사가 아니면 증거는 무효다. 표준 경로에서 발견에 성공했다면 fallback 생성은 금지한다.
+`-AgyCurrentVersion`에는 실행 직전 읽은 현재 CLI 버전을 전달한다. 도구도 `agy --version`을 직접 실행해 전달값과 설치된 CLI를 대조한다. 증거의 호스트·버전·정본 digest·표준 경로가 바뀌거나 `newSession`·`standardDiscovered`가 JSON boolean이 아니면 무효다. `testedAt`은 ISO-8601 round-trip 형식이어야 하며 미래 5분을 넘거나 24시간보다 오래되어도 무효다. 표준 경로에서 발견에 성공했다면 fallback 생성은 금지한다.
 
 ## 정본 변경과 테스트
 
@@ -120,7 +130,13 @@ powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass `
   -File tests\Manage-MultivendorSkills.Tests.ps1
 ```
 
-테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다.
+테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다. 정상 상태 전이뿐 아니라 부모·목적지 junction 탈출, transaction·backup 변조, 커밋 전 Install 중단 복구, identity 없는 InstallRollback 거부, staging→active 원자 이동의 file ID 보존, HomeRoot 동시 mutation 차단, transaction JSON 원자 교체, `RestorePending` 재개, NTFS file ID 교체, ignored 파일과 동일 stat의 tracked 파일 주입, Git index 무변경, AGY 실제 CLI·타입·만료·버전 불일치를 실패 고정한다.
+
+## 운영 한계
+
+- `Local\` named mutex는 같은 Windows 로그인 세션의 동일 정규화 HomeRoot만 직렬화한다. 다른 로그인 세션이나 경로 별칭을 통한 동시 실행은 별도 운영 통제가 필요하다.
+- mutation 직전까지 reparse 조상을 반복 검사하지만, 적대적 외부 프로세스가 검사 직후 경로를 바꾸는 경쟁을 완전히 제거하는 directory-handle 기반 보안 경계는 아니다.
+- 같은 볼륨의 `File.Move`·`File.Replace`는 프로세스 중단에 대한 원자 교체를 제공하지만, 별도 flush-through가 없으므로 갑작스러운 전원 손실까지 완전한 내구성을 보장하지 않는다.
 
 ## 범위 밖
 

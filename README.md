@@ -8,7 +8,7 @@
 - Git의 `skills/<name>/`이 원문 정본이다.
 - 사용자 홈에는 정본을 가리키는 directory junction만 둔다.
 - 전체 파일 manifest로 추가·누락·내용 drift를 검사한다.
-- 설치 전 백업과 정확한 BackupId 복원을 제공한다.
+- 설치 전 백업과 exact BackupId·transaction seal·NTFS 파일 ID 기반 junction 객체 지문을 검증하는 재개 가능한 복원을 제공한다.
 - 다른 PC와 원격 Orca 호스트는 각 호스트에서 별도로 설치·검증한다.
 
 일반 ChatGPT 웹·데스크톱 대화와 Codex Cloud는 로컬 사용자 홈 스킬을 자동으로 읽지 않는다.
@@ -28,7 +28,7 @@
 powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 -Mode Check -Skill All
 ```
 
-Check는 사용자 홈을 바꾸지 않는다. `Installable`이면 exit code 2와 `PlanDigest`를, 충돌이면 exit code 3과 다른 상대 경로를 반환한다. 실제 Install·Restore는 사용자 홈 쓰기이므로 실행 직전 별도 사람 승인이 필요하다.
+Check는 사용자 홈과 Git index를 바꾸지 않는다. `Installable`이면 exit code 2와 `PlanDigest`를, 충돌이면 exit code 3과 다른 상대 경로를 반환한다. 중단된 Install은 반환된 exact `BackupId`로 복구 계획을 다시 만들 수 있다. 실제 Install·Restore는 사용자 홈 쓰기이므로 실행 직전 별도 사람 승인이 필요하다.
 
 ```powershell
 # 승인 뒤에만 직전 Check의 PlanDigest를 사용한다.

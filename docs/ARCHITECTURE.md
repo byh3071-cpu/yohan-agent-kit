@@ -64,7 +64,7 @@ yohan-cc-skills/
 - 특정 PC 홈이나 Public/dev 절대경로를 런타임 계약에 넣지 않는다.
 - `skills/**`는 Git에서 LF로 고정한다.
 
-`distribution/manifests/<name>.json`은 모든 일반 파일의 상대 경로·바이트·SHA-256과 정렬된 전체 digest를 고정한다. 타임스탬프·ACL은 제외하고, 추가·누락·줄바꿈 차이는 drift로 본다. 스킬 내부 reparse point와 대소문자 충돌은 거부한다.
+`distribution/manifests/<name>.json`은 모든 일반 파일의 상대 경로·바이트·SHA-256과 정렬된 전체 digest를 고정한다. 타임스탬프·ACL은 제외하고, 추가·누락·줄바꿈 차이는 drift로 본다. 스킬 내부 reparse point와 대소문자 충돌을 거부하고, 실제 파일이 모두 Git tracked인지 확인한 뒤 working blob을 index blob과 직접 비교한다. ignored 파일이나 같은 크기·수정 시각으로 위장한 변경도 정본에 섞이지 못한다.
 
 ## 4. 배포 대상 모델
 
@@ -95,33 +95,39 @@ Source + Target snapshot
 
 Check는 stdout 외에 어떤 파일도 만들지 않는다.
 
+대상·백업 경로는 문자열 prefix만 보지 않는다. 볼륨 루트부터 destination 부모까지 기존 reparse point가 없는지 확인해 junction 조상을 통한 허용 루트 탈출을 차단한다. 디렉터리 이동은 정확한 destination leaf만 허용하는 `Directory.Move`를 쓰며, junction 소유 지문에는 NTFS file ID를 포함한다. Git 검사는 optional index lock을 끄며 index 바이트와 수정 시각 무변경을 테스트한다.
+
 ### 5.2 Install
 
 ```text
 Check 재계산
   → 사용자 홈 쓰기 승인 + 같은 PlanDigest
-  → transaction=Executing 기록
+  → HomeRoot 전용 named mutex 획득
+  → schema 3 transaction=Executing + installSeal 기록
+  → transaction 내부 staging junction 생성 + NTFS file ID 선저널링
   → 동일 디렉터리 backup / legacy junction 제거
-  → canonical junction 생성
+  → staging junction을 active leaf로 원자 이동
   → post-Check=Healthy
-  → transaction=Committed
+  → commitSeal + transaction=Committed
 ```
 
-실패하면 변경 항목을 역순 rollback한다. rollback 실패는 `RecoveryRequired`로 기록하며 새 Install을 막는다. Healthy 상태의 Install은 백업 없는 no-op이다.
+transaction JSON은 첫 생성에 `File.Move`, 갱신에 같은 디렉터리 임시 파일과 명시적 backup 경로를 둔 `File.Replace`를 사용한다. 실패하면 변경 항목을 역순 rollback한다. backup은 이동 전·후 manifest를 검증하며, 변조된 backup은 활성 경로에 두지 않는다. rollback 실패는 `RecoveryRequired`로 기록하며 새 Install을 막는다. `Executing` 또는 commitSeal 없는 `RecoveryRequired`는 exact BackupId의 `InstallRollback` 경로로 복구한다. active·staging junction은 transaction에 미리 기록된 동일 NTFS file ID가 있을 때만 제거하며, identity가 없거나 다르면 안전하게 중단한다. Healthy 상태의 Install은 백업 없는 no-op이다.
 
 ### 5.3 Restore
 
 ```text
 정확한 BackupId
-  → backup manifest + 현재 junction preflight
+  → 입력에서 source·target·backup 경로 재계산
+  → installSeal + [완료 설치면] commitSeal + backup manifest + junction 객체 지문 preflight
+  → Original | Installed | RestorePending | Conflict 판정
   → Restore PlanDigest
   → 사용자 홈 쓰기 승인
   → 자신이 만든 junction만 제거
   → 원래 Absent / Directory / Junction 복원
-  → transaction=Restored
+  → 실제 원상태 확인 + recoverySeal + transaction=Restored
 ```
 
-백업은 자동 삭제하지 않는다. 두 번째 Restore는 no-op이다.
+Restore는 항목별 완료를 기록한다. 중단된 `Restoring`·`RecoveryRequired` 상태는 이미 원복된 항목과 junction 제거 뒤 backup만 남은 `RestorePending`을 식별해 재개할 수 있다. `Restored` 문자열만 신뢰하지 않고 recoverySeal과 실제 원상태를 다시 확인한다. 백업은 자동 삭제하지 않는다. 두 번째 Restore는 no-op이다.
 
 ## 6. ADR과 goal 악수
 
@@ -129,7 +135,7 @@ Check 재계산
 되돌리기 비싼 미확정 결정
   → adr-cycle
   → Proposed ──사람 승인──▶ Accepted
-  → {ADR 경로, 결정, 제약, 후속 작업, 위험}
+  → {ADR 경로, 결정, 제약, 후속 작업, 미해결 위험, 남은 사람 게이트}
   → goal-cycle
   → S 직접 | M 서브에이전트 | L Orca
 ```
@@ -160,7 +166,7 @@ RULES.md
 
 - skill-creator 구조 검증: 두 `SKILL.md`
 - PowerShell 5.1 AST parser
-- 격리 HomeRoot 상태 전이 테스트: `tests/Manage-MultivendorSkills.Tests.ps1`
+- 격리 HomeRoot 상태 전이·경로 탈출·변조·복구 재개 테스트: `tests/Manage-MultivendorSkills.Tests.ps1`
 - full manifest baseline Check
 - PR 전 시크릿 검사와 staged diff 검토
 - 새 벤더 세션의 자동·명시·부정 호출 smoke test
