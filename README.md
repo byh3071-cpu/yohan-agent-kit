@@ -1,15 +1,50 @@
 # yohan-cc-skills
 
-요한 개인 Claude Code 플러그인 마켓플레이스. 멀티 머신(데스크탑·노트북·새 PC)에 동일한 스킬을 한 줄로 배포하기 위한 git 기반 레포.
+요한의 **멀티벤더 범용 스킬 Git 정본**이자 기존 **Claude Code 플러그인 마켓플레이스**다. 범용 스킬은 Codex·Cursor·Claude Code·Antigravity가 같은 원문을 읽고, Claude 전용 훅·명령·에이전트 번들은 기존 `plugins/`에서 독립적으로 유지한다.
 
 ## 왜 레포인가
-Claude Code 스킬은 **로컬 파일**(`~/.claude/skills/`)이라 머신·제품 경계를 자동으로 넘지 않는다:
-- 같은 머신 CLI ↔ VSCode 확장: `~/.claude` 공유 → 자동 공통
-- 다른 머신 / claude.ai 앱: 자동 동기화 **안 됨**
+에이전트 스킬은 사용자 홈의 제품별 경로에 설치되므로 수동 복사만으로는 정본·리뷰·복원이 보장되지 않는다.
 
-→ git 마켓플레이스로 패키징하면 각 머신에서 `install` 한 줄로 동기화된다. (`caveman`·`lazyweb`·`codex` 와 동일한 방식)
+- Git의 `skills/<name>/`이 원문 정본이다.
+- 사용자 홈에는 정본을 가리키는 directory junction만 둔다.
+- 전체 파일 manifest로 추가·누락·내용 drift를 검사한다.
+- 설치 전 백업과 정확한 BackupId 복원을 제공한다.
+- 다른 PC와 원격 Orca 호스트는 각 호스트에서 별도로 설치·검증한다.
 
-## 새 머신에 설치
+일반 ChatGPT 웹·데스크톱 대화와 Codex Cloud는 로컬 사용자 홈 스킬을 자동으로 읽지 않는다.
+
+## 범용 스킬
+
+| 스킬 | 책임 |
+|---|---|
+| `adr-cycle` | 되돌리기 비싼 결정의 조사·Proposed 초안·검토·대체·폐기와 사람 승인 게이트 |
+| `goal-cycle` | 승인된 결정 아래 조사→스펙→설계→티켓→구현→검증→검수→품질확인→PR→관찰·개선 |
+
+자동 호출은 모델 판단이므로 100% 강제되지 않는다. 확실한 호출은 **“adr-cycle로 …”**, **“goal-cycle로 …”**처럼 벤더 공통 자연어를 사용한다.
+
+### 읽기 전용 검사
+
+```powershell
+powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 -Mode Check -Skill All
+```
+
+Check는 사용자 홈을 바꾸지 않는다. `Installable`이면 exit code 2와 `PlanDigest`를, 충돌이면 exit code 3과 다른 상대 경로를 반환한다. 실제 Install·Restore는 사용자 홈 쓰기이므로 실행 직전 별도 사람 승인이 필요하다.
+
+```powershell
+# 승인 뒤에만 직전 Check의 PlanDigest를 사용한다.
+powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
+  -Mode Install -Skill All -PlanDigest <CHECK_DIGEST> -ApproveGlobalHomeWrite
+
+# 정확한 BackupId를 먼저 Check한 뒤 복원한다.
+powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
+  -Mode Check -BackupId <BACKUP_ID>
+powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
+  -Mode Restore -BackupId <BACKUP_ID> -PlanDigest <RESTORE_DIGEST> -ApproveGlobalHomeWrite
+```
+
+내용이 정본과 다르면 승인 플래그가 있어도 덮어쓰지 않는다. 자세한 경로·상태·AGY fallback 계약은 [멀티벤더 스킬 배포](docs/MULTIVENDOR_SKILL_DISTRIBUTION.md)를 따른다.
+
+## Claude Code 플러그인을 새 머신에 설치
 GitHub 에 push 된 뒤:
 ```
 claude plugin marketplace add byh3071-cpu/yohan-cc-skills
@@ -27,7 +62,7 @@ claude plugin install statusline@yohan-cc-skills
 /setup-statusline
 ```
 
-## 수록 플러그인 (4종)
+## 수록 Claude Code 플러그인
 
 > 열거·버전 SoT는 `.claude-plugin/marketplace.json` + 각 `plugin.json`. 아래 표는 그 미러다(하드코딩 버전 금지).
 
@@ -52,6 +87,12 @@ claude plugin install statusline@yohan-cc-skills
 ## 구조
 ```
 .claude-plugin/marketplace.json        # 마켓플레이스 매니페스트 (플러그인 4종)
+skills/
+  adr-cycle/                           # 범용 ADR 워크플로 정본
+  goal-cycle/                          # 범용 개발 목표 워크플로 정본
+distribution/manifests/               # 스킬 전체 파일 manifest
+scripts/Manage-MultivendorSkills.ps1   # Check · Install · Restore
+tests/Manage-MultivendorSkills.Tests.ps1
 plugins/
   yohan-core/                          # 공통 코어 "두뇌"
     .claude-plugin/plugin.json

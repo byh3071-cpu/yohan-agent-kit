@@ -9,3 +9,4 @@
 - [x] 2026-07-16 `/handoff` 채팅 종료 검증 출시 완료 — PR #32 머지·workflow 0.3.4 설치·prac worktree 삭제. **다음: Claude 재시작 후 라이브 `채팅 종료 검증 ㄱㄱ`**. (선택) gone 로컬 브랜치 `fix/overnight-autoloop-crlf-launch` 삭제. 상세 log 동일 파일 §후속.
 - [x] 2026-07-21 plan-audit `0.3.14`~`0.3.18` 출시 완료 — PR #54·#55·#57·#58·#59·#60 머지, yohan-core `0.3.18` 설치. Codex 벤더 교차검증 15건 처리(치명 3·높음 3·중간 7, 의도적 보류 1), V7·V8 블라인드 트리거 검증 6/6, 절차 실행 실전 검증 PASS. studio-post 규율 7 분량 정정(`0.3.16`) + PR #29 close. **다음: 블라인드 경로(2-C critic) 실전 미검증 — 다음 세션에서 미승인 계획 세우고 `검증 및 리뷰` 치면 자연 검증됨.** (선택) Codex가 의도적 보류한 `#10`(2회차 상호작용), 커서 연동 조사. 상세 `docs/log/2026-07-21-plan-audit.md`
 - [ ] 2026-07-29 ADR-013·014 기반 adr-cycle·goal-cycle 멀티벤더 정본화 — active goal: `goals/1-multivendor-skill-sot.md`. 사용자 홈 설치와 dirty checkout 정리는 비범위.
+- [ ] 2026-07-29 멀티벤더 정본·배포 구현과 격리 상태 전이 43 assertions 완료 — 다음: 독립 호출 검수·실홈 read-only Check·시크릿 검사·Draft PR. 실제 홈 Install은 별도 승인 대기.

@@ -1,157 +1,168 @@
 # ARCHITECTURE — yohan-cc-skills
 
-> 실제 디렉토리/모듈 구조·마켓플레이스 구조·MCP 연동을 파일 직접 확인 기준으로 기술한다. 미확정은 `TBD`.
+## 1. 세 평면
 
-## 1. 한눈에
+이 레포는 범용 스킬, Claude Code 플러그인, 프로젝트 규칙을 서로 다른 평면으로 관리한다.
 
-git 레포 = **Claude Code 플러그인 마켓플레이스**. 루트 매니페스트(`marketplace.json`)가 `plugins/` 아래 4개 플러그인(`yohan-core`·`statusline`·`workflow`·`critical-thinking`)을 가리키고, 각 플러그인은 자체 매니페스트(`.claude-plugin/plugin.json`)와 구성요소(skills · agents · hooks · commands · MCP)를 갖는다. 규칙은 `RULES.md`(SoT)에서 `vhk sync`로 `AGENTS.md`·`.cursorrules`에 전파된다.
+```text
+범용 스킬 평면                     Claude 플러그인 평면
+skills/<name>/                     plugins/<plugin>/
+  ├─ SKILL.md                        ├─ .claude-plugin/plugin.json
+  ├─ references                     ├─ skills · agents · commands
+  └─ agents/openai.yaml              └─ hooks · MCP · output styles
+         │                                      │
+distribution/manifests                         .claude-plugin/marketplace.json
+         │
+Manage-MultivendorSkills.ps1
+         │
+사용자 홈의 제품별 junction
 
-## 2. 디렉토리 구조 (실측)
-
+규칙 평면
+RULES.md ──vhk sync──▶ AGENTS.md · .cursorrules
 ```
+
+VHK 규칙 평면은 사용자 홈 스킬을 설치하지 않는다. 범용 스킬은 Claude 플러그인 디렉터리에 중복 복사하지 않는다.
+
+## 2. 디렉터리 구조
+
+```text
 yohan-cc-skills/
-├─ .claude-plugin/
-│  └─ marketplace.json              # 마켓플레이스 매니페스트 (플러그인 4종 등록)
-├─ .agents/
-│  └─ CORE-RULES.md
-├─ .cursor/
-│  ├─ mcp.json.example
-│  └─ rules/ecosystem.mdc           # vhk inject-bootstrap (생태계 규칙)
-├─ .vhk/                            # VHK CLI 상태(context.md, README.md)
-├─ .cursorrules                     # RULES.md에서 자동 생성 (직접 수정 금지)
-├─ AGENTS.md                        # RULES.md에서 자동 생성 (직접 수정 금지)
-├─ RULES.md                         # 규칙 단일 소스(SoT)
-├─ README.md
-├─ CLAUDE-CODE-SETUP-HANDOFF.md
-├─ dotfiles/claude/settings.json
+├─ skills/
+│  ├─ adr-cycle/
+│  │  ├─ SKILL.md
+│  │  ├─ references/review-checklist.md
+│  │  └─ agents/openai.yaml
+│  └─ goal-cycle/
+│     ├─ SKILL.md
+│     ├─ reference.md
+│     └─ agents/openai.yaml
+├─ distribution/manifests/
+│  ├─ adr-cycle.json
+│  └─ goal-cycle.json
+├─ scripts/Manage-MultivendorSkills.ps1
+├─ tests/Manage-MultivendorSkills.Tests.ps1
 ├─ docs/
-│  ├─ PRD.md                        # 본 PRD
-│  ├─ ARCHITECTURE.md               # 본 문서
-│  ├─ state/                        # next-task / blockers (append-only)
-│  ├─ analysis/2026-06-18-work-patterns.md
-│  └─ patterns/PAT-001-ps-statusline-encoding.md 등 (PAT-NNN 시리즈)
-└─ plugins/
-   ├─ yohan-core/                   # 공통 코어 플러그인 (plugin.json v0.3.2)
-   ├─ statusline/                   # 상태줄 셋업 (v0.1.0)
-   ├─ workflow/                     # 워크플로 스킬 묶음 (v0.3.0)
-   └─ critical-thinking/            # 비판적 사고 모드 (v0.1.0, 기본 OFF 옵트인)
+│  ├─ MULTIVENDOR_SKILL_DISTRIBUTION.md
+│  ├─ audits/
+│  ├─ patterns/
+│  └─ state/
+├─ .claude-plugin/marketplace.json
+├─ plugins/                         # 기존 Claude Code 플러그인
+├─ RULES.md                         # 생성 규칙 SoT
+├─ AGENTS.md                        # 생성물
+└─ .cursorrules                     # 생성물
 ```
 
-## 3. 마켓플레이스 구조
+## 3. 범용 스킬 정본
 
-`.claude-plugin/marketplace.json`:
-- `name`: `yohan-cc-skills`, `owner`: 요한, `metadata.version`: `0.1.0`.
-- `plugins[]`: 각 항목이 `{ name, source(상대경로 ./plugins/<x>), description, version }`. **버전 SoT는 각 `plugin.json`**(아래 값은 plugin.json 실측 — marketplace.json 은 **수동 미러**라 plugin.json 변경 시 사람이 맞춰 정렬해야 한다. `sync-marketplace.ps1` 은 버전 정합을 **하지 않는다**. 문서는 하드코딩 대신 매니페스트 참조 — PAT-004):
-  - `yohan-core` → `./plugins/yohan-core` (v0.3.2)
-  - `statusline` → `./plugins/statusline` (v0.1.0)
-  - `workflow` → `./plugins/workflow` (v0.3.0)
-  - `critical-thinking` → `./plugins/critical-thinking` (v0.1.0)
+각 스킬은 다음 계약을 갖는다.
 
-각 플러그인 디렉토리는 `.claude-plugin/plugin.json`(name·description·version·author·homepage)을 자체 매니페스트로 갖는다. **불변식**: 플러그인 매니페스트 변경 시 `marketplace.json` 버전·메타 정합을 **사람이 수동으로** 유지(`RULES.md` 코딩 규칙). SessionEnd 훅 `sync-marketplace.ps1`은 `git fetch`로 원격 최신화 여부만 알림하며, 버전·매니페스트 정합은 수행하지 않는다.
+- `SKILL.md` frontmatter는 `name`·`description`만 둔다.
+- description이 자동 호출의 주 라우팅 표면이며 명시·부정 호출 조건도 포함한다.
+- 상세 자료는 SKILL에서 한 단계 상대 링크로 연결한다.
+- `agents/openai.yaml`은 Codex UI 이름·짧은 설명·기본 프롬프트·implicit policy를 제공한다.
+- 특정 PC 홈이나 Public/dev 절대경로를 런타임 계약에 넣지 않는다.
+- `skills/**`는 Git에서 LF로 고정한다.
 
-## 4. 플러그인 모듈 구조
+`distribution/manifests/<name>.json`은 모든 일반 파일의 상대 경로·바이트·SHA-256과 정렬된 전체 digest를 고정한다. 타임스탬프·ACL은 제외하고, 추가·누락·줄바꿈 차이는 drift로 본다. 스킬 내부 reparse point와 대소문자 충돌은 거부한다.
 
-### 4.1 yohan-core (공통 코어)
-```
-plugins/yohan-core/
-├─ .claude-plugin/plugin.json
-├─ .mcp.json                        # yohan MCP 서버 정의
-├─ CLAUDE.md                        # 공통 운영 메모리(상속용)
-├─ loop.md                          # 세션 점검 체크리스트
-├─ agents/      explorer · planner · critic · shipper · prd-generator · prd-validator   (.md, frontmatter에 model/tools)
-├─ commands/    flow.md             (/yohan-core:flow)
-├─ hooks/       hooks.json + 9 ps1
-├─ output-styles/ yohan-voice.md
-├─ references/  claude-code-docs.md
-└─ skills/      cc-docs · cost-guard · cross-check · cursor-docs · naver-convert · plan-audit · ship-it · studio-post · yohan-writing · youtube-summary
+## 4. 배포 대상 모델
+
+```text
+skills/<name> (Git 정본)
+  ├─junction─▶ ~/.agents/skills/<name>          Codex + Cursor
+  ├─junction─▶ ~/.claude/skills/<name>          Claude Code
+  ├─junction─▶ ~/.gemini/config/skills/<name>   Antigravity 표준
+  └─조건부───▶ ~/.gemini/antigravity-cli/skills/<name>
 ```
 
-- **서브에이전트 파이프라인**: `/yohan-core:flow`가 explorer(탐색)→planner(설계)→critic(적대검증, 문제0까지 반복)→shipper(출시) 순으로 위임. (출처: `commands/flow.md`)
-- **모델 배치**(tier, alias=세대 자동 승계): 탐색 explorer=haiku · 구현 shipper=sonnet · 판단·검증 planner/critic=opus · 지휘=세션 모델. **SoT는 `agents/*.md` frontmatter**(값은 항상 거기서 확인 — 이 줄은 파생 미러).
-- **skills**는 각 `SKILL.md`(frontmatter `name`/`description`, 일부 `allowed-tools`·`disable-model-invocation`)로 정의. `ship-it`은 `disable-model-invocation: true` + git 전용 allowed-tools.
-  ⚠️ **서브에이전트를 위임하는 스킬은 `allowed-tools`를 생략해야 한다** — 목록에 Agent가 빠지면 위임이 막힌다(`cross-check`가 그 예). `plan-audit`이 생략 이유.
-- **plan-audit**(역추출 대조): 계획 승인 직전 감사. 감사자에게 계획을 주지 않고 대화 원문만 줘서 요구사항을 독립 추출 → 계획과 대조(앵커링 차단). critic=원문만, explorer=경로목록만, 대조는 지휘자. 계획 사본 파일을 만들지 않는 게 차단의 본체.
+`~/.codex/skills`, `~/.cursor/skills`, `~/.gemini/skills`의 같은 이름 사본은 활성 중복 후보로 읽기 전용 검사한다. 정본과 동일할 때만 Install이 backup transaction으로 발견 루트 밖에 이동한다. 내용이 다르면 Conflict다.
 
-### 4.2 statusline
-```
-plugins/statusline/
-├─ .claude-plugin/plugin.json
-└─ skills/setup-statusline/
-   ├─ SKILL.md                      # 배포·병합·검증 절차 + 인코딩 불변식
-   └─ assets/statusline.ps1         # 배포되는 실제 스크립트(검증본)
-```
+Antigravity CLI fallback은 별도 소비자 표면으로 취급한다. 표준 경로에서 새 세션 발견에 실패했다는 호스트·버전·manifest 결합 증거가 유효할 때만 표준 앱 경로와 공존할 수 있다.
 
-### 4.3 workflow
-```
-plugins/workflow/
-├─ .claude-plugin/plugin.json
-└─ skills/
-   ├─ release-gate/        SKILL.md  # 게이트(tsc→eslint→build)+테스트+적대리뷰 문제0, PR→머지→태그
-   ├─ dogfood-crosscheck/  SKILL.md  # VHK 독푸딩 교차검증 · 결함 역추적
-   ├─ visualize/           SKILL.md  # 디자인 시안/HTML 시각화 보고
-   ├─ handoff/             SKILL.md  # 세션 핸드오프 · 멀티머신 복원
-   ├─ new-repo/            SKILL.md  # 새 GitHub 레포 생성·그룹분류·repos.json
-   ├─ parallel/            SKILL.md  # git worktree 자동 격리(병렬 작업)
-   └─ overnight-autoloop/  SKILL.md  # 무인 야간 결함 발굴→수정→검증→PR 루프(머지 금지)
+## 5. 상태기계
+
+### 5.1 Check
+
+```text
+Source + Target snapshot
+  ├─ all canonical junctions, no duplicate ─▶ Healthy(0)
+  ├─ missing or identical directory        ─▶ Installable(2) + PlanDigest
+  ├─ content/wrong link/file/evidence      ─▶ Conflict(3)
+  ├─ source/frontmatter/Git drift          ─▶ SourceInvalid(3)
+  └─ unfinished transaction                ─▶ RecoveryRequired(3)
 ```
 
-### 4.4 critical-thinking (비판적 사고 모드 — 기본 OFF 옵트인)
+Check는 stdout 외에 어떤 파일도 만들지 않는다.
+
+### 5.2 Install
+
+```text
+Check 재계산
+  → 사용자 홈 쓰기 승인 + 같은 PlanDigest
+  → transaction=Executing 기록
+  → 동일 디렉터리 backup / legacy junction 제거
+  → canonical junction 생성
+  → post-Check=Healthy
+  → transaction=Committed
 ```
-plugins/critical-thinking/
-├─ .claude-plugin/plugin.json
-├─ agents/skeptic.md            # 추론·의사결정 적대검증 (model: sonnet)
-├─ commands/critical.md         # /critical lite|full|ultra|auto|off 토글
-└─ skills/critical-thinking/    # 소크라테스식 질문·CoVe 자가검증·steelman-attack
+
+실패하면 변경 항목을 역순 rollback한다. rollback 실패는 `RecoveryRequired`로 기록하며 새 Install을 막는다. Healthy 상태의 Install은 백업 없는 no-op이다.
+
+### 5.3 Restore
+
+```text
+정확한 BackupId
+  → backup manifest + 현재 junction preflight
+  → Restore PlanDigest
+  → 사용자 홈 쓰기 승인
+  → 자신이 만든 junction만 제거
+  → 원래 Absent / Directory / Junction 복원
+  → transaction=Restored
 ```
 
-- 대화·추론 시점의 아첨(sycophancy)·할루시네이션 억제 렌즈. **코드용 `critic` 서브에이전트와 분리 계통** — skeptic=추론/설계/결정, critic=코드 결함. (출처: `agents/skeptic.md`, `plugin.json`)
+백업은 자동 삭제하지 않는다. 두 번째 Restore는 no-op이다.
 
-## 5. 훅(hook) 생명주기
+## 6. ADR과 goal 악수
 
-`plugins/yohan-core/hooks/hooks.json`이 Claude Code 이벤트에 PowerShell 스크립트를 연결한다(모두 `powershell -NoProfile -ExecutionPolicy Bypass -File`, `${CLAUDE_PLUGIN_ROOT}` 기준 경로):
-
-| 이벤트 | matcher / 조건 | 스크립트 | 용도(파일명·CLAUDE.md 근거) |
-|---|---|---|---|
-| SessionStart | `startup\|resume` | context-hint.ps1 | 세션 시작 컨텍스트 힌트 |
-| PreToolUse | `Bash\|Write\|Edit\|Read` | protect-secrets.ps1 | 비밀 파일 읽기/노출 차단 |
-| PreToolUse | `Bash` + `git commit *` | pre-commit-check.ps1 | 커밋 전 토큰·키 유출 점검 |
-| PreToolUse | `Bash` + `git push *` | critic-gate.ps1 | push 전 게이트(critic) |
-| PostToolUse | `Write\|Edit` | auto-format.ps1 | 편집 후 자동 포맷 |
-| Stop | (전체) | log-session.ps1 | 세션 로그 기록(CLAUDE.md: Notion EXECUTION LOG, SoT Key 멱등) |
-| SessionEnd | (전체) | sync-marketplace.ps1 | 마켓플레이스 동기화 |
-
-> 보안 불변식: `.env`·`secrets/`·`*.pem`·`*.key`·토큰 파일은 읽기/커밋 금지(protect-secrets·pre-commit-check 훅이 강제). (출처: `CLAUDE.md` 보안 섹션)
-
-## 6. MCP 연동
-
-`plugins/yohan-core/.mcp.json`:
-```json
-{ "mcpServers": { "yohan": { "command": "python",
-  "args": ["C:/Users/Public/dev/yohan-ecosystem/yohan-mcp/server.py"] } } }
+```text
+되돌리기 비싼 미확정 결정
+  → adr-cycle
+  → Proposed ──사람 승인──▶ Accepted
+  → {ADR 경로, 결정, 제약, 후속 작업, 위험}
+  → goal-cycle
+  → S 직접 | M 서브에이전트 | L Orca
 ```
-- `yohan` MCP = 별도 레포(`yohan-mcp`)의 Python 서버. Notion 등 외부 연동은 이 서버를 통한다. (출처: `CLAUDE.md` MCP 섹션)
-- 현재 base 브랜치 기준 경로는 절대경로 하드코딩 → 머신별 개발 루트가 다르면 이식성 제약(TBD: 환경변수 기반 경로화).
-- Cursor용 예시는 `.cursor/mcp.json.example` 제공.
 
-## 7. 규칙 전파 체인 (운영 아키텍처)
+Proposed를 근거로 조사·계획할 수 있지만 결정 의존 구현은 금지한다. Orca와 `/goal`, `worker_done`, failover는 L 작업에서 현재 환경 계약이 제공할 때만 사용한다.
 
+## 7. Claude Code 플러그인 평면
+
+`.claude-plugin/marketplace.json`이 `plugins/` 아래 플러그인을 등록한다. 각 플러그인은 자체 `.claude-plugin/plugin.json`과 선택적 skills·agents·commands·hooks·MCP를 가진다.
+
+- 플러그인 버전 SoT는 각 `plugin.json`이다.
+- marketplace의 버전은 수동 mirror이므로 plugin manifest 변경과 함께 맞춘다.
+- 범용 top-level 스킬 변경만으로 plugin 버전을 올리지 않는다.
+- handoff·release-gate·parallel 등 Claude 전용 묶음은 `plugins/`에 남긴다.
+
+## 8. 규칙 전파
+
+```text
+RULES.md
+  └─ vhk sync
+      ├─ AGENTS.md
+      └─ .cursorrules
 ```
-RULES.md  (단일 소스 SoT)
-   │  vhk sync
-   ├─▶ AGENTS.md      (에이전트 작동 규약 — 손수 편집 금지)
-   └─▶ .cursorrules   (Cursor 규칙 — 손수 편집 금지)
-```
-- 생태계(cross-repo) 계약 SoT: yohan-brain `memory/core/ecosystem-contract.yaml`, tier 레지스트리 `inheritance-registry.yaml`. (출처: `AGENTS.md` Ecosystem)
-- Cursor 생태계 규칙은 `.cursor/rules/ecosystem.mdc`(vhk inject-bootstrap).
-- Loop Protocol: `context → goal next → 작업 → goal check → goal done`, `.vhk/HARD_STOP` 존재 시 자동화 즉시 중단, active goal만 작업, `docs/state`(next-task/blockers)는 append-only. (출처: `AGENTS.md`)
 
-## 8. 배포 흐름 (요약)
-1. 레포를 GitHub에 push.
-2. 머신에서 `claude plugin marketplace add byh3071-cpu/yohan-cc-skills`.
-3. `claude plugin install <plugin>@yohan-cc-skills` 또는 `settings.json`에 직접 등록.
-4. statusline은 `/setup-statusline`으로 `~/.claude`에 배포·병합. (출처: `README.md`)
+생성물을 직접 편집하지 않는다. 규칙 동기화 성공이 범용 스킬 설치 성공을 뜻하지 않으며, 사용자 홈 상태는 배포 도구의 Check로만 판정한다.
 
-## 9. TBD
-- 빌드/테스트 게이트(`tsc`/`test:run`/`build`) 실제 정의·CI: 레포 루트에 해당 스크립트 없음 → TBD.
-- MCP 경로 이식성(절대경로 → 환경변수) → TBD.
-- 루트 `CLAUDE.md` 부재 vs `.cursorrules`/`RULES.md` 참조 정합 → TBD.
+## 9. 검증
+
+- skill-creator 구조 검증: 두 `SKILL.md`
+- PowerShell 5.1 AST parser
+- 격리 HomeRoot 상태 전이 테스트: `tests/Manage-MultivendorSkills.Tests.ps1`
+- full manifest baseline Check
+- PR 전 시크릿 검사와 staged diff 검토
+- 새 벤더 세션의 자동·명시·부정 호출 smoke test
+
+실제 사용자 홈 Install·Restore와 새 벤더 세션 검증은 각각 사람 승인과 제품 세션이 필요한 외부 게이트다.

@@ -1,94 +1,103 @@
 # PRD — yohan-cc-skills
 
-> 이 문서는 레포 실제 내용(`README.md` · `RULES.md` · `.claude-plugin/marketplace.json` · `plugins/*`)을 근거로 작성됐다. 추측은 `[추론]`, 미확정은 `TBD`로 표기한다.
+> 정본: `RULES.md`, `skills/`, `distribution/`, `.claude-plugin/marketplace.json`, `plugins/`
 
 ## 1. 제품 정의
 
-요한 개인용 **Claude Code 플러그인 마켓플레이스**. Claude Code 스킬·서브에이전트·훅·MCP 설정을 git 레포로 패키징해, 멀티 머신(데스크탑·노트북·새 PC)에 동일 환경을 `install` 한 줄로 배포·동기화하는 것이 핵심이다. (출처: `README.md`)
+yohan-cc-skills는 두 배포 표면을 한 Git 이력에서 관리한다.
 
-- 레포: https://github.com/byh3071-cpu/yohan-cc-skills (출처: `RULES.md`)
-- 한 줄 설명: "Claude Code operations — handoff · parallel · release-gate (Claude-only)" + 공통 코어(yohan-core). (출처: `RULES.md`, `marketplace.json`)
-- 소유자: 요한 (byh3071@gmail.com). (출처: `marketplace.json` owner)
+1. Codex·Cursor·Claude Code·Antigravity가 공유하는 범용 개인 스킬의 원문·무결성 manifest·Windows 설치 자동화
+2. Claude Code 전용 스킬·서브에이전트·훅·명령·MCP를 묶는 기존 플러그인 마켓플레이스
+
+범용 스킬은 레포 루트 `skills/<name>/`이 정본이며, Claude 플러그인은 `plugins/`가 정본이다. 두 표면은 같은 이름의 파일을 중복 복사하지 않는다.
 
 ## 2. 해결하는 문제
 
-Claude Code 스킬은 **로컬 파일**(`~/.claude/skills/`)이라 머신·제품 경계를 자동으로 넘지 않는다. (출처: `README.md`)
-
-- 같은 머신의 CLI ↔ VSCode 확장: `~/.claude` 공유 → 자동 공통.
-- 다른 머신 / claude.ai 앱: 자동 동기화 **안 됨**.
-
-→ git 마켓플레이스로 패키징하면 각 머신에서 `claude plugin install ...` 한 줄로 동기화된다(`caveman`·`lazyweb`·`codex`와 동일 방식).
+- 사용자 홈의 제품별 스킬 사본이 서로 달라지고 어느 것이 최신인지 알 수 없다.
+- 새 PC·새 CLI에 설치가 누락되어도 “배포 완료”로 오인한다.
+- 기존 파일을 정본으로 덮어쓸 때 사용자의 미수집 변경을 잃을 수 있다.
+- VHK 규칙 동기화와 사용자 스킬 설치의 책임이 섞여 있다.
+- Claude Code 플러그인 자산을 유지하면서도 다른 벤더가 같은 워크플로를 써야 한다.
 
 ## 3. 목표
 
-1. 멀티 머신 스킬/설정 동기화를 git 한 줄 설치로 달성. (출처: `README.md` "새 머신에 설치")
-2. 모든 yohan 생태계 레포에 상속되는 공통 코어(`yohan-core`) 제공 — 말투·보안·작업방식·MCP를 일원화. (출처: `plugins/yohan-core/CLAUDE.md`, `marketplace.json`)
-3. 반복 작업을 스킬로 표준화 — 작업 패턴 분석(history 618프롬프트/76세션)에서 도출한 워크플로를 재사용 가능한 스킬로. (출처: `docs/analysis/2026-06-18-work-patterns.md`, `README.md`)
+1. 범용 스킬을 Git에서 리뷰하고 전체 디렉터리 manifest로 drift를 검출한다.
+2. Check를 완전 읽기 전용으로 제공한다.
+3. 사용자 홈 쓰기 승인과 최신 PlanDigest가 있을 때만 동일본을 백업·junction으로 전환한다.
+4. 정확한 BackupId로 설치 전 상태를 복원한다.
+5. 자동·명시·부정 호출 계약과 사람 승인 게이트를 스킬 원문에 고정한다.
+6. 기존 Claude Code 플러그인 마켓플레이스 구조와 이력을 보존한다.
 
-## 4. 범위 (Scope)
+## 4. 범위
 
-### In scope
-- Claude Code 플러그인 4종(`yohan-core`, `statusline`, `workflow`, `critical-thinking`) 패키징·버전관리.
-- 마켓플레이스 매니페스트(`marketplace.json`)와 플러그인 매니페스트 정합 유지.
-- Windows + PowerShell 우선 환경의 훅·상태줄. (출처: `RULES.md` 기술 스택)
-- `yohan` MCP(Python) 번들을 통한 Notion 등 외부 연동. (출처: `plugins/yohan-core/.mcp.json`, `CLAUDE.md`)
+### 포함
 
-### Out of scope
-- Claude-only 운영 스킬(handoff · release-gate · parallel)은 Cursor에서 중복 구현 금지. (출처: `RULES.md`, `.cursorrules`)
-- 비밀값은 코드/훅에 평문 노출 금지 — 머신 환경변수(DPAPI)로만 주입. (출처: `CLAUDE.md` 보안)
+- `adr-cycle`: 되돌리기 비싼 결정의 Proposed 초안·검토·수명주기·goal-cycle 악수
+- `goal-cycle`: 승인된 결정 아래 12단계 개발 목표 흐름과 S/M/L 라우팅
+- Codex UI 메타데이터 `agents/openai.yaml`
+- 전체 파일 manifest baseline
+- PowerShell 5.1 Check·Install·Restore
+- Codex·Cursor 공용, Claude Code, Antigravity 표준 발견 경로
+- 실측 실패 증거가 있을 때만 허용하는 Antigravity CLI fallback
+- 기존 Claude Code 플러그인·마켓플레이스
 
-## 5. 주요 구성요소
+### 제외
 
-### 5.1 마켓플레이스
-- `.claude-plugin/marketplace.json` — 매니페스트(`metadata.version` 0.1.0). 플러그인 **4종** 등록: `yohan-core`, `statusline`, `workflow`, `critical-thinking`. **열거·버전 SoT는 marketplace.json + 각 `plugin.json`**(하드코딩 미러 금지 — PAT-004; 버전은 아래 §5.2~5.5의 plugin.json 실측). (출처: 파일 직접 확인)
+- 일반 ChatGPT 웹·데스크톱 대화와 Codex Cloud의 로컬 스킬 자동 발견
+- 원격 Orca 호스트와 다른 사용자 프로필의 자동 배포
+- 기존 dirty checkout의 이동·삭제·덮어쓰기
+- 사용자 승인 없는 전역 홈 쓰기
+- main/master 자동 머지
 
-### 5.2 `yohan-core` 플러그인 (plugin.json v0.3.2) — 공통 코어 "두뇌"
-모든 레포에 상속되는 공통 운영 메모리. (출처: `plugins/yohan-core/CLAUDE.md`)
+## 5. 사용자 흐름
 
-- **skills** (7): `cc-docs`, `cost-guard`, `cross-check`, `cursor-docs`, `ship-it`, `yohan-writing`, `studio-post`.
-- **agents** (4): `explorer`(haiku, 탐색) · `planner`(opus, 설계) · `critic`(opus, 적대검증) · `shipper`(sonnet, 출시). (SoT: `agents/*.md` frontmatter — 값은 거기서 확인)
-- **commands** (1): `/yohan-core:flow` — explorer→planner→critic→shipper 4단계 오케스트레이션. (출처: `commands/flow.md`)
-- **hooks** (`hooks/hooks.json` + PowerShell 7종): SessionStart `context-hint`, PreToolUse `protect-secrets`/`pre-commit-check`(git commit)/`critic-gate`(git push), PostToolUse `auto-format`, Stop `log-session`, SessionEnd `sync-marketplace`. (출처: `hooks/hooks.json`)
-- **output-styles**: `yohan-voice` (한국어 반말·두괄식).
-- **references**: `claude-code-docs.md`.
-- **loop.md**: 세션 점검 체크리스트.
-- **.mcp.json**: `yohan` MCP 서버 번들.
+### 5.1 결정에서 구현까지
 
-### 5.3 `statusline` 플러그인 (v0.1.0)
-- skill `setup-statusline` — Windows PowerShell 상태줄을 `~/.claude`에 배포하고 `settings.json` 병합. ctx 1M 자동감지, tok은 cache_read 제외, UTF-8 출력. (출처: `plugins/statusline/.claude-plugin/plugin.json`, `SKILL.md`)
-- assets: `statusline.ps1`(배포 실체).
-
-### 5.4 `workflow` 플러그인 (plugin.json v0.3.0)
-반복 작업 워크플로 스킬 묶음 (7): `release-gate`, `dogfood-crosscheck`, `visualize`, `handoff`, `new-repo`, `parallel`, `overnight-autoloop`. (출처: `plugins/workflow/skills/*`)
-
-> 참고: `workflow/.claude-plugin/plugin.json`의 description은 일부 스킬만 예시로 열거하므로(전체 미열거) 발견성이 낮다. 실제 `skills/` 디렉토리에는 7개가 모두 있다 — SoT는 디렉토리. (사실 관찰)
-
-### 5.5 `critical-thinking` 플러그인 (plugin.json v0.1.0) — 비판적 사고 모드
-대화·추론 시점의 아첨(sycophancy)·할루시네이션·비현실적 답변을 억제하는 토글형 추론 렌즈. **기본 OFF 옵트인**. (출처: `plugins/critical-thinking/.claude-plugin/plugin.json`)
-
-- **command** (1): `/critical lite|full|ultra|auto|off` — 강도 토글.
-- **agent** (1): `skeptic` (model: `sonnet`) — 아이디어·주장·의사결정을 적대적으로 2차 검토(steelman-then-attack). **코드용 `critic`과 분리 계통** — skeptic=추론·설계·결정, critic=코드 결함 역추적. (출처: `agents/skeptic.md`)
-- **skill** (1): `critical-thinking` — 소크라테스식 질문·CoVe 자가검증·steelman-attack 절차.
-
-### 5.6 MCP 연동
-- `plugins/yohan-core/.mcp.json` — `yohan` 서버를 `python <root>/yohan-mcp/server.py`로 기동. 현재 base 브랜치에서는 경로가 절대경로 하드코딩(`C:/Users/Public/dev/yohan-ecosystem/yohan-mcp/server.py`). Notion 등 외부 연동은 이 서버를 통한다. (출처: 파일 직접 확인, `CLAUDE.md` MCP 섹션)
-
-## 6. 사용자 / 이해관계자
-- 1인: 요한(개발자 겸 사용자). 비전공 1인 개발자, 자작 도구 VHK CLI를 만들며 독푸딩. (출처: `docs/analysis/2026-06-18-work-patterns.md`)
-
-## 7. 설치·사용 (요약)
+```text
+대화·인박스
+  → 되돌리기 비용 분류
+  → [필요 시] adr-cycle: Proposed → 사람 승인 → Accepted
+  → goal-cycle: 조사→스펙→설계→티켓→승인
+  → S 직접 | M 서브에이전트 | L Orca
+  → 만들기→검증→검수→품질확인→PR
+  → 사람 머지판정→지켜보기→다듬기
 ```
-claude plugin marketplace add byh3071-cpu/yohan-cc-skills
-claude plugin install statusline@yohan-cc-skills
+
+### 5.2 로컬 배포
+
+```text
+Git 정본 + baseline manifest
+  → Check(읽기 전용)
+  → Healthy | Installable | Conflict | SourceInvalid | RecoveryRequired
+  → 사람 홈 쓰기 승인 + PlanDigest
+  → backup transaction → junction → post-Check
+  → 필요 시 BackupId preflight → 사람 승인 → Restore
 ```
-또는 `~/.claude/settings.json`의 `extraKnownMarketplaces`/`enabledPlugins`에 직접 등록. (출처: `README.md`)
 
-## 8. 규칙 전파 (운영 불변식)
-- 규칙 단일 소스: `RULES.md` → `vhk sync`로 `AGENTS.md` · `.cursorrules` 전파. AGENTS.md/.cursorrules 손수 편집 금지. (출처: `RULES.md`, `AGENTS.md`)
-- 플러그인 매니페스트 변경 시 `marketplace.json` 정합 유지. (출처: 코딩 규칙)
+## 6. 성공 조건
 
-## 9. 미확정 / TBD
-- **게이트 명령**: AGENTS.md는 `tsc / test:run / build` 통과를 `vhk goal done` 조건으로 명시하나, 이 레포는 Markdown·PowerShell 위주로 해당 빌드/테스트 스크립트가 레포 루트에 없다. 실제 게이트 정의·CI 구성: **TBD**.
-- **MCP 경로 이식성**: `.mcp.json` 절대경로 하드코딩 → 머신별 루트가 다르면 이식성 제약. 환경변수 기반 경로화 여부: **TBD**.
-- **루트 CLAUDE.md**: `.cursorrules`·`RULES.md`가 `CLAUDE.md` 참조를 명시하나 레포 루트에 `CLAUDE.md`는 없고 공통 운영 메모리는 `plugins/yohan-core/CLAUDE.md`에 있다(상속용). 루트 참조 정합: **TBD**.
-- **향후 스킬 후보**: 작업 패턴 분석에서 도출 예정(별도 분석 결과 참조). (출처: `README.md` "향후 추가 후보")
+- 두 스킬의 frontmatter·참조·UI 메타데이터가 구조 검증을 통과한다.
+- `skills/**`가 OS와 무관하게 LF 바이트를 유지하고 baseline manifest와 일치한다.
+- 테스트 HomeRoot에서 Check→Install→Check→Restore가 결정론적으로 통과한다.
+- 내용 drift, stale PlanDigest, 승인 누락, 활성 중복, 근거 없는 AGY fallback이 무변경 실패한다.
+- Install 두 번째 실행과 Restore 두 번째 실행은 추가 백업 없는 no-op이다.
+- PR 전 시크릿 검사와 변경 파일 검토를 통과한다.
+
+## 7. 운영 불변식
+
+- VHK sync는 `RULES.md`에서 AGENTS·Cursor 규칙을 생성할 뿐 사용자 홈 스킬을 설치하지 않는다.
+- 자동 호출은 모델 판단이며 사람 게이트를 대체하지 않는다.
+- 새 ADR은 `Proposed`로 시작하고 승인 전 결정 의존 구현을 금지한다.
+- 내용이 다른 기존 사본은 승인 플래그가 있어도 덮어쓰지 않는다.
+- AGY fallback은 새 세션에서 표준 경로 발견 실패를 실측한 뒤에만 허용한다.
+- 플러그인 manifest 변경 시 marketplace mirror 정합을 유지한다.
+
+## 8. 검증 명령
+
+```powershell
+python <SKILL_CREATOR_ROOT>\scripts\quick_validate.py skills\adr-cycle
+python <SKILL_CREATOR_ROOT>\scripts\quick_validate.py skills\goal-cycle
+powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File tests\Manage-MultivendorSkills.Tests.ps1
+```
+
+첫 두 명령의 skill-creator 설치 경로는 개발 호스트별로 다를 수 있으며 제품 배포 계약이 아니다. 배포 도구 자체는 특정 PC 절대경로를 사용하지 않는다.
