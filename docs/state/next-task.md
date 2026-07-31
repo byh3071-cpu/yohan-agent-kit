@@ -15,3 +15,6 @@
 - [ ] 2026-07-29 junction 소유권 schema 3 보강과 격리 회귀 167 assertions 완료 — 다음: 독립 재리뷰 최종 판정→시크릿 검사→Draft PR. 전역 Install·기존 사본 전환은 수동 화해와 별도 승인 대기.
 - [ ] 2026-07-29 독립 최종 재리뷰 HIGH 0·MEDIUM 0로 Draft PR 가능 판정 — 다음: 시크릿 검사→논리 커밋→Draft PR. 전역 Install과 새 벤더 세션 검증은 기존 사본 화해·별도 승인 뒤 진행.
 - [x] 2026-07-29 yohan-cc-skills PR #65·yohan-brain PR #169 머지와 실홈 기존 사본 의미 재화해 완료 — Claude Code·Cursor·AGY 사본의 범용 의미는 정본 이력과 현행 계약에 모두 보존되었고 실홈 쓰기는 없었다. **다음: 기존 사본의 정확한 백업·이동 계획 확인→전역 홈 변경 재승인→Check·Install→네 벤더 새 세션 스모크.** 강제 덮어쓰기와 자동 머지는 금지한다.
+- [ ] 2026-07-30 기존 goal-cycle 3사본 별도 보존·표준 6개 junction 설치·Codex/Cursor/Orca 스모크 완료 — 일반 Check `Healthy`, 공식 Restore `RestoreReady`, 기존 파일 해시 6/6 PASS. **다음: AGY CLI fallback 2개 전역 junction 별도 승인→AGY 스모크→Claude 한도 리셋 후 스모크→Dev Log·역전파 PR.** 상세: `docs/audits/multivendor-install-smoke-2026-07-30.md`.
+- [ ] 2026-07-31 AGY 최초 fallback junction 설치·post-Check·RestoreReady는 완료했으나 새 세션 발견 실패로 런타임 반증 — schema 4 물리 생성 어댑터·schema 3 Restore 호환·직접 `git.exe` 해석을 격리 검증하고 별도 PR로 올린다. **다음: 회귀·자체 적대 리뷰→시크릿 검사→Draft PR→사람 머지 게이트. 전역 `~/.gemini/skills` 생성과 이전 fallback junction 이관은 새 승인 전 금지.**
+- [x] 2026-07-31 schema 4 AGY 물리 생성 어댑터·schema 3 Restore 호환·재귀 `git.cmd` 우회 구현 — 전체 Goal 게이트 PASS, 시크릿 검사 PASS, 실제 schema 3 BackupId 두 건 `RestoreReady`. **다음: Draft PR→사람 머지 게이트. 머지 뒤 새 AGY 증거·정확한 전역 변경 재승인 전에는 실제 홈을 쓰지 않는다.**

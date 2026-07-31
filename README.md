@@ -6,9 +6,9 @@
 에이전트 스킬은 사용자 홈의 제품별 경로에 설치되므로 수동 복사만으로는 정본·리뷰·복원이 보장되지 않는다.
 
 - Git의 `skills/<name>/`이 원문 정본이다.
-- 사용자 홈에는 정본을 가리키는 directory junction만 둔다.
+- 사용자 홈의 표준 경로에는 정본을 가리키는 directory junction을 둔다. AGY CLI 1.1.8처럼 junction을 실제로 발견하지 못하는 소비자에는 출처가 봉인된 물리 생성 어댑터만 예외로 둔다.
 - 전체 파일 manifest로 추가·누락·내용 drift를 검사한다.
-- 설치 전 백업과 exact BackupId·transaction seal·NTFS 파일 ID 기반 junction 객체 지문을 검증하는 재개 가능한 복원을 제공한다.
+- 설치 전 백업과 exact BackupId·transaction seal·NTFS 파일 ID 기반 junction 객체 지문·생성 어댑터 해시를 검증하는 재개 가능한 복원을 제공한다.
 - 다른 PC와 원격 Orca 호스트는 각 호스트에서 별도로 설치·검증한다.
 
 일반 ChatGPT 웹·데스크톱 대화와 Codex Cloud는 로컬 사용자 홈 스킬을 자동으로 읽지 않는다.

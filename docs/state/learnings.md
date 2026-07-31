@@ -19,3 +19,6 @@ _Append-only. 한 줄 = 한 교훈._
 - 2026-07-29 — commit 전 junction 복구는 현재 same-target 객체를 사후 채택하지 말고 transaction staging에서 file ID를 선저널링한 객체만 active로 원자 이동해야 다른 프로세스의 junction을 삭제하지 않는다.
 - 2026-07-29 — 사용자 홈 mutation은 HomeRoot별 named mutex로 직렬화하되 Check는 읽기 전용으로 남기고, identity가 없거나 다르면 자동 복구보다 fail-closed를 우선한다.
 - 2026-07-29 — 로컬 배포 안전성의 위협 모델은 명시해야 한다. `Local\` mutex·reparse 재검사·원자 파일 교체는 동일 세션 프로세스 중단에는 강하지만, 교차 로그인 세션·적대적 handle race·전원 손실 내구성까지 자동으로 보장하지 않는다.
+- 2026-07-30 — 배포 도구의 `Healthy`는 junction·manifest 정합이지 벤더 실행기의 발견 성공이 아니므로, 완료 판정에는 새 세션의 명시·자동·부정 호출 forward test가 필요하다.
+- 2026-07-31 — 벤더 문서의 발견 경로와 현재 CLI의 실제 주입 경로가 다를 수 있다. 표준·fallback 모두 새 세션에서 반증되면 물리 workspace probe로 소비 형식을 최소 재현하고, 정본 경로·commit·digest·CLI version이 봉인된 생성 어댑터로만 예외를 좁힌다.
+- 2026-07-31 — 호스트가 PATH 선두에 넣은 `git.cmd` wrapper는 bare `git` 재귀를 만들 수 있다. 자동화는 환경 설정을 바꾸지 말고 실제 `git.exe`를 해석해 절대경로로 호출한다. 범용 패턴은 `PAT-008`에 기록했다.

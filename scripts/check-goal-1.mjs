@@ -7,6 +7,7 @@
 
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
+import { delimiter, join } from 'node:path'
 
 const SHIM = new Set(['pnpm', 'npm', 'npx', 'yarn'])
 // cmd.exe /c 래핑 경로는 따옴표+&|<>^% 조합 인자로 인용 경계를 탈출당할 수 있다(CVE-2024-27980
@@ -32,6 +33,16 @@ function run(cmd, args) {
     if (out.trim()) console.log(out.split('\n').slice(-25).join('\n'))
     return false
   }
+}
+
+function resolveWindowsExe(name) {
+  if (process.platform !== 'win32') return name
+  for (const directory of (process.env.PATH ?? '').split(delimiter)) {
+    if (!directory) continue
+    const candidate = join(directory, name + '.exe')
+    if (existsSync(candidate)) return candidate
+  }
+  return name + '.exe'
 }
 
 if (existsSync('.vhk/HARD_STOP')) {
@@ -75,7 +86,7 @@ must(adrUi?.includes('$adr-cycle') && adrUi?.includes('allow_implicit_invocation
 must(goalUi?.includes('$goal-cycle') && goalUi?.includes('allow_implicit_invocation: true'), 'goal-cycle Codex UI metadata')
 must(existsSync('distribution/manifests/adr-cycle.json'), 'adr-cycle 전체 manifest')
 must(existsSync('distribution/manifests/goal-cycle.json'), 'goal-cycle 전체 manifest')
-gate('git diff --check', run('git', ['diff', '--check']))
+gate('git diff --check', run(resolveWindowsExe('git'), ['diff', '--check']))
 if (!skipDeep) {
   gate('PowerShell distribution state machine', run('powershell', [
     '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',

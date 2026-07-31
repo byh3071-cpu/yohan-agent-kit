@@ -333,6 +333,29 @@ function Get-AbsoluteReferenceFindings {
     return $findings
 }
 
+function Get-GitExecutable {
+    $candidates = @(Get-Command git.exe -CommandType Application -All -ErrorAction SilentlyContinue)
+    foreach ($candidate in $candidates) {
+        $source = [string]$candidate.Source
+        if (-not [string]::IsNullOrWhiteSpace($source) -and [IO.File]::Exists($source)) {
+            return $source
+        }
+    }
+    throw 'git.exe is not installed or is not available on PATH'
+}
+
+function Get-RepositoryCommit {
+    param([Parameter(Mandatory = $true)][string]$RepoRoot)
+
+    $gitExecutable = Get-GitExecutable
+    $output = @(& $gitExecutable -C $RepoRoot rev-parse HEAD 2>&1)
+    $commit = [string]::Join('', @($output | ForEach-Object { ([string]$_).Trim() })).Trim()
+    if ($LASTEXITCODE -ne 0 -or $commit -notmatch '^[a-fA-F0-9]{40,64}$') {
+        throw 'Unable to read canonical repository commit'
+    }
+    return $commit.ToLowerInvariant()
+}
+
 function Test-SourceGitState {
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -342,24 +365,27 @@ function Test-SourceGitState {
     $skillRelative = "skills/$SkillName"
     $baselineRelative = "distribution/manifests/$SkillName.json"
     $errors = @()
+    $gitExecutable = $null
     $previousOptionalLocks = [Environment]::GetEnvironmentVariable('GIT_OPTIONAL_LOCKS', 'Process')
     try {
         [Environment]::SetEnvironmentVariable('GIT_OPTIONAL_LOCKS', '0', 'Process')
-        $inside = & git -C $RepoRoot rev-parse --is-inside-work-tree 2>&1
+        try { $gitExecutable = Get-GitExecutable }
+        catch { return @($_.Exception.Message) }
+        $inside = & $gitExecutable -C $RepoRoot rev-parse --is-inside-work-tree 2>&1
         if ($LASTEXITCODE -ne 0 -or [string]$inside -notmatch '^true') {
             return @('RepositoryRoot is not a Git worktree')
         }
 
-        $status = @(& git -C $RepoRoot status --porcelain=v1 --untracked-files=all -- $skillRelative $baselineRelative 2>&1)
+        $status = @(& $gitExecutable -C $RepoRoot status --porcelain=v1 --untracked-files=all -- $skillRelative $baselineRelative 2>&1)
         if ($LASTEXITCODE -ne 0) { return @('Unable to inspect canonical skill Git state') }
         if ($status.Count -gt 0) { $errors += "Canonical source has uncommitted files:$skillRelative,$baselineRelative" }
 
-        $trackedOutput = @(& git -C $RepoRoot ls-files -- $skillRelative $baselineRelative 2>&1)
+        $trackedOutput = @(& $gitExecutable -C $RepoRoot ls-files -- $skillRelative $baselineRelative 2>&1)
         if ($LASTEXITCODE -ne 0) { return @('Unable to enumerate tracked canonical source files') }
         $tracked = @{}
         foreach ($path in $trackedOutput) { $tracked[[string]$path] = $true }
 
-        $stagedOutput = @(& git -C $RepoRoot ls-files --stage -- $skillRelative $baselineRelative 2>&1)
+        $stagedOutput = @(& $gitExecutable -C $RepoRoot ls-files --stage -- $skillRelative $baselineRelative 2>&1)
         if ($LASTEXITCODE -ne 0) { return @('Unable to inspect canonical source index blobs') }
         $staged = @{}
         foreach ($line in $stagedOutput) {
@@ -389,7 +415,7 @@ function Test-SourceGitState {
                 continue
             }
             $absolutePath = Join-Path $RepoRoot ([string]$path).Replace('/', '\')
-            $workingBlob = [string](& git -C $RepoRoot hash-object "--path=$path" -- $absolutePath 2>&1)
+            $workingBlob = [string](& $gitExecutable -C $RepoRoot hash-object "--path=$path" -- $absolutePath 2>&1)
             if ($LASTEXITCODE -ne 0 -or $workingBlob -notmatch '^[a-f0-9]{40,64}$') {
                 $errors += "Unable to hash canonical source file:$path"
                 continue
@@ -466,6 +492,7 @@ function Get-SourceInfo {
     $baselinePath = Join-Path $RepoRoot "distribution\manifests\$SkillName.json"
     $errors = @()
     $manifest = $null
+    $commit = $null
 
     if (-not [IO.Directory]::Exists($directory)) {
         $errors += "Canonical skill directory is missing:$directory"
@@ -505,12 +532,108 @@ function Get-SourceInfo {
     }
 
     $errors += @(Test-SourceGitState -RepoRoot $RepoRoot -SkillName $SkillName)
+    if ($errors.Count -eq 0) {
+        try { $commit = Get-RepositoryCommit -RepoRoot $RepoRoot }
+        catch { $errors += $_.Exception.Message }
+    }
     return [pscustomobject][ordered]@{
         skill = $SkillName
         directory = $directory
+        commit = $commit
         manifest = $manifest
         errors = $errors
         valid = ($errors.Count -eq 0)
+    }
+}
+
+function Get-AgyAdapterInfo {
+    param(
+        [Parameter(Mandatory = $true)]$Source,
+        [Parameter(Mandatory = $true)][string]$AgyVersion
+    )
+
+    if ([string]::IsNullOrWhiteSpace([string]$Source.commit) -or [string]$Source.commit -notmatch '^[a-fA-F0-9]{40,64}$') {
+        throw "Canonical source commit is unavailable:$($Source.skill)"
+    }
+    if ([string]::IsNullOrWhiteSpace($AgyVersion)) { throw 'AGY adapter requires a verified CLI version' }
+    $metadataName = '.yohan-adapter.json'
+    if (@($Source.manifest.files | Where-Object { [string]$_.path -ieq $metadataName }).Count -gt 0) {
+        throw "Canonical source reserves the AGY adapter metadata path:$metadataName"
+    }
+
+    $metadata = [pscustomobject][ordered]@{
+        schemaVersion = 1
+        adapterKind = 'agy-cli-physical-copy'
+        skill = [string]$Source.skill
+        sourcePath = Get-NormalizedFullPath -Path ([string]$Source.directory)
+        sourceCommit = ([string]$Source.commit).ToLowerInvariant()
+        sourceDigest = ([string]$Source.manifest.digest).ToUpperInvariant()
+        agyVersion = $AgyVersion
+    }
+    $metadataText = (ConvertTo-AsciiJson -Value $metadata) + [Environment]::NewLine
+    $rows = @($Source.manifest.files | ForEach-Object {
+        [pscustomobject][ordered]@{
+            path = [string]$_.path
+            bytes = [int64]$_.bytes
+            sha256 = ([string]$_.sha256).ToUpperInvariant()
+        }
+    })
+    $rows += [pscustomobject][ordered]@{
+        path = $metadataName
+        bytes = [int64][Text.Encoding]::UTF8.GetByteCount($metadataText)
+        sha256 = Get-Sha256Text -Text $metadataText
+    }
+    $rows = @($rows | Sort-Object -Property @{ Expression = { $_.path.ToLowerInvariant() } }, @{ Expression = { $_.path } })
+    $digestInput = [string]::Join("`n", @($rows | ForEach-Object { "$($_.path)`0$($_.bytes)`0$($_.sha256)" }))
+    return [pscustomobject][ordered]@{
+        metadataName = $metadataName
+        metadata = $metadata
+        metadataText = $metadataText
+        manifest = [pscustomobject][ordered]@{
+            files = $rows
+            digest = Get-Sha256Text -Text $digestInput
+        }
+    }
+}
+
+function New-AgyAdapterDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)]$Source,
+        [Parameter(Mandatory = $true)]$Adapter,
+        [Parameter(Mandatory = $true)][string]$AllowedRoot
+    )
+
+    $destination = Get-NormalizedFullPath -Path $Path
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'AGY adapter staging directory'
+    if ((Get-PathEntryInfo -Path $destination).kind -ne 'Missing') {
+        throw "AGY adapter staging directory already exists:$destination"
+    }
+    $parent = Split-Path -Parent $destination
+    if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $parent -Label 'AGY adapter staging parent' -IncludeLeaf
+    $null = New-Item -ItemType Directory -Path $destination
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'AGY adapter staging directory' -IncludeLeaf
+
+    foreach ($row in @($Source.manifest.files)) {
+        $relative = ([string]$row.path).Replace('/', '\')
+        $sourceFile = Join-Path ([string]$Source.directory) $relative
+        $destinationFile = Join-Path $destination $relative
+        Assert-SafeFilePath -AllowedRoot ([string]$Source.directory) -Candidate $sourceFile -Label 'AGY adapter source file'
+        Assert-SafeFilePath -AllowedRoot $destination -Candidate $destinationFile -Label 'AGY adapter destination file'
+        $destinationParent = Split-Path -Parent $destinationFile
+        if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent -Force }
+        Assert-SafeDestinationPath -AllowedRoot $destination -Candidate $destinationParent -Label 'AGY adapter destination parent' -IncludeLeaf
+        [IO.File]::Copy($sourceFile, $destinationFile, $false)
+    }
+    $metadataPath = Join-Path $destination ([string]$Adapter.metadataName)
+    Assert-SafeFilePath -AllowedRoot $destination -Candidate $metadataPath -Label 'AGY adapter metadata file'
+    [IO.File]::WriteAllText($metadataPath, [string]$Adapter.metadataText, (New-Object Text.UTF8Encoding($false)))
+
+    $actual = Get-DirectoryManifest -Directory $destination
+    $comparison = Compare-DirectoryManifest -Expected $Adapter.manifest -Actual $actual
+    if (-not $comparison.equal -or -not [string]::Equals([string]$actual.digest, [string]$Adapter.manifest.digest, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Generated AGY adapter verification failed:$([string]::Join(',', @($comparison.differences)))"
     }
 }
 
@@ -658,17 +781,30 @@ function Get-TargetDefinitions {
     param(
         [Parameter(Mandatory = $true)][string]$UserHome,
         [Parameter(Mandatory = $true)][string]$SkillName,
-        [Parameter(Mandatory = $true)][bool]$FallbackEnabled
+        [Parameter(Mandatory = $true)][bool]$FallbackEnabled,
+        [ValidateSet(3, 4)][int]$ContractVersion = 4
     )
 
+    if ($ContractVersion -eq 3) {
+        return @(
+            [pscustomobject]@{ role = 'Agents'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".agents\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'Claude'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".claude\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'AgyStandard'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".gemini\config\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'CodexLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".codex\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'CursorLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".cursor\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'AgyLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".gemini\skills\$SkillName"; enabled = $true },
+            [pscustomobject]@{ role = 'AgyCliFallback'; category = 'Fallback'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".gemini\antigravity-cli\skills\$SkillName"; enabled = $FallbackEnabled }
+        )
+    }
+
     return @(
-        [pscustomobject]@{ role = 'Agents'; category = 'Deploy'; path = Join-Path $UserHome ".agents\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'Claude'; category = 'Deploy'; path = Join-Path $UserHome ".claude\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'AgyStandard'; category = 'Deploy'; path = Join-Path $UserHome ".gemini\config\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'CodexLegacy'; category = 'Migration'; path = Join-Path $UserHome ".codex\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'CursorLegacy'; category = 'Migration'; path = Join-Path $UserHome ".cursor\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'AgyLegacy'; category = 'Migration'; path = Join-Path $UserHome ".gemini\skills\$SkillName"; enabled = $true },
-        [pscustomobject]@{ role = 'AgyCliFallback'; category = 'Fallback'; path = Join-Path $UserHome ".gemini\antigravity-cli\skills\$SkillName"; enabled = $FallbackEnabled }
+        [pscustomobject]@{ role = 'Agents'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".agents\skills\$SkillName"; enabled = $true },
+        [pscustomobject]@{ role = 'Claude'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".claude\skills\$SkillName"; enabled = $true },
+        [pscustomobject]@{ role = 'AgyStandard'; category = 'Deploy'; deploymentKind = 'Junction'; path = Join-Path $UserHome ".gemini\config\skills\$SkillName"; enabled = $true },
+        [pscustomobject]@{ role = 'CodexLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".codex\skills\$SkillName"; enabled = $true },
+        [pscustomobject]@{ role = 'CursorLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".cursor\skills\$SkillName"; enabled = $true },
+        [pscustomobject]@{ role = 'AgyCliFallback'; category = 'Fallback'; deploymentKind = 'Adapter'; path = Join-Path $UserHome ".gemini\skills\$SkillName"; enabled = $FallbackEnabled },
+        [pscustomobject]@{ role = 'AgyCliFallbackLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".gemini\antigravity-cli\skills\$SkillName"; enabled = $true }
     )
 }
 
@@ -811,7 +947,12 @@ function Get-InstallPlan {
             continue
         }
 
-        $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $FallbackEnabled)
+        $adapter = $null
+        if ($FallbackEnabled -and $agyVersionReady) {
+            try { $adapter = Get-AgyAdapterInfo -Source $source -AgyVersion $verifiedAgyVersion }
+            catch { $errors += "${skillName}:$($_.Exception.Message)" }
+        }
+        $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $FallbackEnabled -ContractVersion 4)
         if ($FallbackEnabled) {
             if (-not $agyVersionReady) {
                 # The global version error above is sufficient and keeps evidence untrusted.
@@ -830,6 +971,8 @@ function Get-InstallPlan {
         foreach ($definition in $definitions) {
             Assert-SafeDestinationPath -AllowedRoot $UserHome -Candidate $definition.path -Label 'Skill target'
             $entry = Get-PathEntryInfo -Path $definition.path
+            $deploymentKind = [string]$definition.deploymentKind
+            $expectedManifest = if ($deploymentKind -eq 'Adapter' -and $null -ne $adapter) { $adapter.manifest } else { $source.manifest }
             $action = 'None'
             $reason = ''
             $conflict = $false
@@ -841,7 +984,17 @@ function Get-InstallPlan {
                 }
             }
             elseif ($entry.kind -eq 'Missing') {
-                if ($definition.category -in @('Deploy', 'Fallback')) {
+                if ($deploymentKind -eq 'Adapter') {
+                    if ($null -eq $adapter) {
+                        $conflict = $true
+                        $reason = 'AGY adapter metadata could not be derived'
+                    }
+                    else {
+                        $action = 'CreateAdapter'
+                        $reason = 'Generated AGY adapter is missing'
+                    }
+                }
+                elseif ($definition.category -in @('Deploy', 'Fallback')) {
                     $action = 'CreateJunction'
                     $reason = 'Target is missing'
                 }
@@ -860,23 +1013,58 @@ function Get-InstallPlan {
                     $action = 'RemoveLegacyJunction'
                     $reason = 'Legacy active duplicate points to the canonical source'
                 }
+                elseif ($deploymentKind -eq 'Adapter') {
+                    if ($null -eq $adapter) {
+                        $conflict = $true
+                        $reason = 'AGY adapter metadata could not be derived'
+                    }
+                    else {
+                        $action = 'ReplaceJunctionWithAdapter'
+                        $reason = 'AGY CLI requires a physical generated adapter'
+                    }
+                }
                 else {
                     $reason = 'Healthy canonical junction'
                 }
             }
             elseif ($entry.kind -eq 'Directory') {
-                $comparison = Compare-DirectoryManifest -Expected $source.manifest -Actual $entry.manifest
-                if (-not $comparison.equal) {
-                    $conflict = $true
-                    $reason = "Manifest mismatch:$([string]::Join(',', @($comparison.differences)))"
-                }
-                elseif ($definition.category -eq 'Migration') {
-                    $action = 'BackupOnly'
-                    $reason = 'Identical legacy active duplicate'
+                if ($deploymentKind -eq 'Adapter') {
+                    if ($null -eq $adapter) {
+                        $conflict = $true
+                        $reason = 'AGY adapter metadata could not be derived'
+                    }
+                    else {
+                        $adapterComparison = Compare-DirectoryManifest -Expected $adapter.manifest -Actual $entry.manifest
+                        if ($adapterComparison.equal) {
+                            $reason = 'Healthy generated AGY adapter'
+                        }
+                        else {
+                            $sourceComparison = Compare-DirectoryManifest -Expected $source.manifest -Actual $entry.manifest
+                            if ($sourceComparison.equal) {
+                                $action = 'BackupAndAdapt'
+                                $reason = 'Identical physical copy can be backed up and replaced with a generated adapter'
+                            }
+                            else {
+                                $conflict = $true
+                                $reason = "Adapter manifest mismatch:$([string]::Join(',', @($adapterComparison.differences)))"
+                            }
+                        }
+                    }
                 }
                 else {
-                    $action = 'BackupAndLink'
-                    $reason = 'Identical directory can be backed up and linked'
+                    $comparison = Compare-DirectoryManifest -Expected $source.manifest -Actual $entry.manifest
+                    if (-not $comparison.equal) {
+                        $conflict = $true
+                        $reason = "Manifest mismatch:$([string]::Join(',', @($comparison.differences)))"
+                    }
+                    elseif ($definition.category -eq 'Migration') {
+                        $action = 'BackupOnly'
+                        $reason = 'Identical legacy active duplicate'
+                    }
+                    else {
+                        $action = 'BackupAndLink'
+                        $reason = 'Identical directory can be backed up and linked'
+                    }
                 }
             }
             else {
@@ -888,6 +1076,7 @@ function Get-InstallPlan {
                 skill = $skillName
                 role = $definition.role
                 category = $definition.category
+                deploymentKind = $deploymentKind
                 path = Get-NormalizedFullPath -Path $definition.path
                 entryKind = $entry.kind
                 currentTarget = $entry.target
@@ -895,6 +1084,10 @@ function Get-InstallPlan {
                 currentDigest = if ($null -ne $entry.manifest) { $entry.manifest.digest } else { $null }
                 sourcePath = $source.directory
                 sourceDigest = $source.manifest.digest
+                sourceCommit = $source.commit
+                expectedDigest = if ($null -ne $expectedManifest) { $expectedManifest.digest } else { $null }
+                adapterDigest = if ($deploymentKind -eq 'Adapter' -and $null -ne $adapter) { $adapter.manifest.digest } else { $null }
+                adapterMetadata = if ($deploymentKind -eq 'Adapter' -and $null -ne $adapter) { $adapter.metadata } else { $null }
                 action = $action
                 conflict = $conflict
                 reason = $reason
@@ -903,10 +1096,10 @@ function Get-InstallPlan {
         }
     }
 
-    $planLines = @('schema=1', "selection=$Selection", "fallback=$FallbackEnabled", "agyVersion=$verifiedAgyVersion")
+    $planLines = @('schema=2', 'contract=4', "selection=$Selection", "fallback=$FallbackEnabled", "agyVersion=$verifiedAgyVersion")
     $planLines += @($recoveryIds | ForEach-Object { "recovery|$_" })
-    $planLines += @($sources | Sort-Object skill | ForEach-Object { "source|$($_.skill)|$($_.directory)|$(if ($null -ne $_.manifest) { $_.manifest.digest } else { 'INVALID' })" })
-    $planLines += @($targets | Sort-Object skill, role | ForEach-Object { "target|$($_.skill)|$($_.role)|$($_.path)|$($_.entryKind)|$($_.currentTarget)|$($_.currentJunctionIdentity)|$($_.currentDigest)|$($_.action)|$($_.conflict)" })
+    $planLines += @($sources | Sort-Object skill | ForEach-Object { "source|$($_.skill)|$($_.directory)|$($_.commit)|$(if ($null -ne $_.manifest) { $_.manifest.digest } else { 'INVALID' })" })
+    $planLines += @($targets | Sort-Object skill, role | ForEach-Object { "target|$($_.skill)|$($_.role)|$($_.deploymentKind)|$($_.path)|$($_.entryKind)|$($_.currentTarget)|$($_.currentJunctionIdentity)|$($_.currentDigest)|$($_.expectedDigest)|$($_.action)|$($_.conflict)" })
     $planLines += @($evidenceDigests | Sort-Object | ForEach-Object { "evidence|$_" })
     $digest = Get-Sha256Text -Text ([string]::Join("`n", $planLines))
 
@@ -918,6 +1111,7 @@ function Get-InstallPlan {
 
     return [pscustomobject][ordered]@{
         schemaVersion = 1
+        contractVersion = 4
         mode = 'Check'
         status = $status
         selection = $Selection
@@ -958,7 +1152,12 @@ function Get-TransactionInstallSeal {
         "agyVersion=$($Transaction.agyCurrentVersion)"
     )
     foreach ($item in @($Transaction.items)) {
-        $lines += "item|$($item.skill)|$($item.role)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)"
+        if ([int]$Transaction.schemaVersion -eq 3) {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.deploymentKind)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceCommit)|$($item.sourceDigest)|$($item.expectedDigest)|$($item.adapterDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)|$($item.adapterStagingPath)|$($item.adapterRemovalPath)"
+        }
     }
     return Get-Sha256Text -Text ([string]::Join("`n", $lines))
 }
@@ -968,7 +1167,12 @@ function Get-TransactionCommitSeal {
 
     $lines = @("installSeal=$($Transaction.installSeal)")
     foreach ($item in @($Transaction.items)) {
-        $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)"
+        if ([int]$Transaction.schemaVersion -eq 3) {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)|$($item.adapterPrepared)|$($item.createdAdapter)"
+        }
     }
     return Get-Sha256Text -Text ([string]::Join("`n", $lines))
 }
@@ -1039,6 +1243,41 @@ function New-CanonicalJunction {
     }
 }
 
+function Move-OwnedAdapterExact {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$SourceAllowedRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationPath,
+        [Parameter(Mandatory = $true)][string]$DestinationAllowedRoot,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $source = Get-NormalizedFullPath -Path $SourcePath
+    $destination = Get-NormalizedFullPath -Path $DestinationPath
+    Assert-SafeDestinationPath -AllowedRoot $SourceAllowedRoot -Candidate $source -Label "$Label source"
+    Assert-SafeDestinationPath -AllowedRoot $DestinationAllowedRoot -Candidate $destination -Label "$Label destination"
+    $sourceEntry = Get-PathEntryInfo -Path $source
+    $destinationEntry = Get-PathEntryInfo -Path $destination
+    if ($sourceEntry.kind -eq 'Missing' -and $destinationEntry.kind -eq 'Directory' -and
+        [string]::Equals([string]$destinationEntry.manifest.digest, $ExpectedDigest, [StringComparison]::OrdinalIgnoreCase)) {
+        return
+    }
+    if ($sourceEntry.kind -ne 'Directory' -or
+        -not [string]::Equals([string]$sourceEntry.manifest.digest, $ExpectedDigest, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "$Label source adapter ownership mismatch:$source"
+    }
+    if ($destinationEntry.kind -ne 'Missing') { throw "$Label destination is occupied:$destination" }
+    $destinationParent = Split-Path -Parent $destination
+    if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent -Force }
+    Assert-SafeDestinationPath -AllowedRoot $DestinationAllowedRoot -Candidate $destinationParent -Label "$Label destination parent" -IncludeLeaf
+    Move-DirectoryExact -SourcePath $source -SourceAllowedRoot $SourceAllowedRoot -DestinationPath $destination -DestinationAllowedRoot $DestinationAllowedRoot -Label $Label
+    $moved = Get-PathEntryInfo -Path $destination
+    if ($moved.kind -ne 'Directory' -or -not [string]::Equals([string]$moved.manifest.digest, $ExpectedDigest, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "$Label moved adapter verification failed:$destination"
+    }
+}
+
 function Invoke-TransactionRollback {
     param(
         [Parameter(Mandatory = $true)]$Transaction,
@@ -1050,7 +1289,19 @@ function Invoke-TransactionRollback {
     $items = @($Transaction.items)
     [array]::Reverse($items)
     foreach ($item in $items) {
-        if (-not [bool]$item.changed -and -not [bool]$item.junctionPrepared -and -not [bool]$item.createdJunction) { continue }
+        $adapterPrepared = $false
+        $createdAdapter = $false
+        if ([int]$Transaction.schemaVersion -ge 4) {
+            $adapterPrepared = [bool]$item.adapterPrepared
+            $createdAdapter = [bool]$item.createdAdapter
+        }
+        if (-not [bool]$item.changed -and -not [bool]$item.junctionPrepared -and -not [bool]$item.createdJunction -and -not $adapterPrepared -and -not $createdAdapter) { continue }
+        if ($createdAdapter) {
+            Move-OwnedAdapterExact -SourcePath ([string]$item.targetPath) -SourceAllowedRoot $UserHome -DestinationPath ([string]$item.adapterRemovalPath) -DestinationAllowedRoot $TransactionRoot -ExpectedDigest ([string]$item.adapterDigest) -Label 'Rollback installed AGY adapter'
+        }
+        if ($adapterPrepared) {
+            Move-OwnedAdapterExact -SourcePath ([string]$item.adapterStagingPath) -SourceAllowedRoot $TransactionRoot -DestinationPath ([string]$item.adapterRemovalPath) -DestinationAllowedRoot $TransactionRoot -ExpectedDigest ([string]$item.adapterDigest) -Label 'Rollback staged AGY adapter'
+        }
         if ([bool]$item.createdJunction) {
             Remove-OwnedJunction -Path ([string]$item.targetPath) -ExpectedTarget ([string]$item.sourcePath) -AllowedRoot $UserHome -ExpectedIdentity ([string]$item.junctionIdentity)
         }
@@ -1126,29 +1377,41 @@ function Invoke-SkillInstall {
         $relative = Get-RelativePathPortable -Root $UserHome -Path ([string]$target.path)
         $backupPath = Join-Path $itemsRoot ($relative.Replace('/', '\'))
         $stagingPath = Join-Path $stagingRoot ("$($target.skill)\$($target.role)")
+        $removalPath = Join-Path (Join-Path $transactionRoot 'removed') ("$($target.skill)\$($target.role)")
+        $junctionAction = [string]$target.action -in @('CreateJunction', 'BackupAndLink')
+        $adapterAction = [string]$target.action -in @('CreateAdapter', 'BackupAndAdapt', 'ReplaceJunctionWithAdapter')
         Assert-SafeDestinationPath -AllowedRoot $itemsRoot -Candidate $backupPath -Label 'Backup item'
-        Assert-SafeDestinationPath -AllowedRoot $transactionRoot -Candidate $stagingPath -Label 'Junction staging item'
+        Assert-SafeDestinationPath -AllowedRoot $transactionRoot -Candidate $stagingPath -Label 'Deployment staging item'
+        Assert-SafeDestinationPath -AllowedRoot $transactionRoot -Candidate $removalPath -Label 'Adapter removal item'
         $items += [pscustomobject][ordered]@{
             skill = $target.skill
             role = $target.role
+            deploymentKind = $target.deploymentKind
             action = $target.action
             targetPath = $target.path
             sourcePath = $target.sourcePath
+            sourceCommit = $target.sourceCommit
             sourceDigest = $target.sourceDigest
+            expectedDigest = $target.expectedDigest
+            adapterDigest = $target.adapterDigest
             originalKind = $target.entryKind
             originalTarget = $target.currentTarget
             originalJunctionIdentity = $target.currentJunctionIdentity
             originalDigest = $target.currentDigest
             backupPath = if ($target.entryKind -eq 'Directory') { $backupPath } else { $null }
-            junctionStagingPath = if ($target.action -in @('CreateJunction', 'BackupAndLink')) { $stagingPath } else { $null }
+            junctionStagingPath = if ($junctionAction) { $stagingPath } else { $null }
+            adapterStagingPath = if ($adapterAction) { $stagingPath } else { $null }
+            adapterRemovalPath = if ($adapterAction) { $removalPath } else { $null }
             changed = $false
             junctionPrepared = $false
             createdJunction = $false
             junctionIdentity = $null
+            adapterPrepared = $false
+            createdAdapter = $false
         }
     }
     $transaction = [pscustomobject][ordered]@{
-        schemaVersion = 3
+        schemaVersion = 4
         backupId = $newBackupId
         status = 'Executing'
         createdAt = [DateTimeOffset]::Now.ToString('o')
@@ -1186,6 +1449,19 @@ function Invoke-SkillInstall {
                 $item.junctionIdentity = New-CanonicalJunction -Path ([string]$item.junctionStagingPath) -Target ([string]$item.sourcePath) -AllowedRoot $transactionRoot
                 $item.junctionPrepared = $true
                 $item.changed = $true
+                Save-Transaction -TransactionPath $transactionPath -Transaction $transaction -AllowedRoot $transactionRoot
+            }
+            elseif ([string]$item.action -in @('CreateAdapter', 'BackupAndAdapt', 'ReplaceJunctionWithAdapter')) {
+                $source = @($Plan.sources | Where-Object { [string]$_.skill -ceq [string]$item.skill })
+                if ($source.Count -ne 1) { throw "AGY adapter source binding is invalid:$($item.skill)" }
+                $adapter = Get-AgyAdapterInfo -Source $source[0] -AgyVersion ([string]$Plan.agyCurrentVersion)
+                if (-not [string]::Equals([string]$adapter.manifest.digest, [string]$item.adapterDigest, [StringComparison]::OrdinalIgnoreCase)) {
+                    throw "AGY adapter digest changed after Check:$($item.skill)"
+                }
+                $item.changed = $true
+                Save-Transaction -TransactionPath $transactionPath -Transaction $transaction -AllowedRoot $transactionRoot
+                New-AgyAdapterDirectory -Path ([string]$item.adapterStagingPath) -Source $source[0] -Adapter $adapter -AllowedRoot $transactionRoot
+                $item.adapterPrepared = $true
                 Save-Transaction -TransactionPath $transactionPath -Transaction $transaction -AllowedRoot $transactionRoot
             }
 
@@ -1229,6 +1505,11 @@ function Invoke-SkillInstall {
                 $item.junctionPrepared = $false
                 $item.createdJunction = $true
             }
+            elseif ([string]$item.action -in @('CreateAdapter', 'BackupAndAdapt', 'ReplaceJunctionWithAdapter')) {
+                Move-OwnedAdapterExact -SourcePath ([string]$item.adapterStagingPath) -SourceAllowedRoot $transactionRoot -DestinationPath ([string]$item.targetPath) -DestinationAllowedRoot $UserHome -ExpectedDigest ([string]$item.adapterDigest) -Label 'Activate AGY adapter'
+                $item.adapterPrepared = $false
+                $item.createdAdapter = $true
+            }
             Save-Transaction -TransactionPath $transactionPath -Transaction $transaction -AllowedRoot $transactionRoot
         }
 
@@ -1271,7 +1552,8 @@ function Get-RestorePlan {
     Assert-SafeFilePath -AllowedRoot $transactionRoot -Candidate $transactionPath -Label 'Restore transaction file'
     if (-not [IO.File]::Exists($transactionPath)) { throw "Transaction does not exist:$RequestedBackupId" }
     $transaction = [string]([IO.File]::ReadAllText($transactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
-    if ([int]$transaction.schemaVersion -ne 3) { throw 'Transaction schemaVersion mismatch' }
+    $transactionSchema = [int]$transaction.schemaVersion
+    if ($transactionSchema -notin @(3, 4)) { throw 'Transaction schemaVersion mismatch' }
     if ([string]$transaction.backupId -cne $RequestedBackupId) { throw 'Transaction BackupId mismatch' }
     if (-not [string]::Equals((Get-NormalizedFullPath -Path ([string]$transaction.homeRoot)), $UserHome, [StringComparison]::OrdinalIgnoreCase)) { throw 'Transaction HomeRoot mismatch' }
     if (-not [string]::Equals((Get-NormalizedFullPath -Path ([string]$transaction.repositoryRoot)), $RepoRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Transaction RepositoryRoot mismatch' }
@@ -1318,11 +1600,13 @@ function Get-RestorePlan {
         $itemChanged = Get-StrictBooleanProperty -Object $item -Name 'changed' -Label "Transaction changed:$skillName/$role"
         $itemJunctionPrepared = Get-StrictBooleanProperty -Object $item -Name 'junctionPrepared' -Label "Transaction junctionPrepared:$skillName/$role"
         $itemCreatedJunction = Get-StrictBooleanProperty -Object $item -Name 'createdJunction' -Label "Transaction createdJunction:$skillName/$role"
+        $itemAdapterPrepared = if ($transactionSchema -ge 4) { Get-StrictBooleanProperty -Object $item -Name 'adapterPrepared' -Label "Transaction adapterPrepared:$skillName/$role" } else { $false }
+        $itemCreatedAdapter = if ($transactionSchema -ge 4) { Get-StrictBooleanProperty -Object $item -Name 'createdAdapter' -Label "Transaction createdAdapter:$skillName/$role" } else { $false }
         if ($skillName -notin @('adr-cycle', 'goal-cycle')) { $errors += "Unsupported transaction skill:$skillName"; continue }
-        $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $includeAgyCliFallback)
+        $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $includeAgyCliFallback -ContractVersion $transactionSchema)
         $definition = @($definitions | Where-Object { $_.role -ceq $role })
         if ($definition.Count -ne 1) { $errors += "Unsupported transaction role:$skillName/$role"; continue }
-        if ($role -eq 'AgyCliFallback' -and -not $includeAgyCliFallback) { $errors += "Disabled fallback role in transaction:$skillName/$role"; continue }
+        if ([string]$definition[0].category -eq 'Fallback' -and -not [bool]$definition[0].enabled) { $errors += "Disabled fallback role in transaction:$skillName/$role"; continue }
         if ([string]$transaction.selection -ne 'All' -and [string]$transaction.selection -cne $skillName) { $errors += "Transaction selection binding mismatch:$skillName"; continue }
 
         $expectedTarget = Get-NormalizedFullPath -Path ([string]$definition[0].path)
@@ -1336,14 +1620,20 @@ function Get-RestorePlan {
 
         $originalKind = [string]$item.originalKind
         if ($originalKind -notin @('Missing', 'Directory', 'Junction')) { $errors += "Unsupported original kind:$originalKind"; continue }
+        $deploymentKind = [string]$definition[0].deploymentKind
+        if ($transactionSchema -ge 4 -and [string]$item.deploymentKind -cne $deploymentKind) { $errors += "Transaction deployment binding mismatch:$skillName/$role"; continue }
         $expectedAction = if ([string]$definition[0].category -eq 'Migration') {
             if ($originalKind -eq 'Directory') { 'BackupOnly' } elseif ($originalKind -eq 'Junction') { 'RemoveLegacyJunction' } else { $null }
+        }
+        elseif ($deploymentKind -eq 'Adapter') {
+            if ($originalKind -eq 'Missing') { 'CreateAdapter' } elseif ($originalKind -eq 'Directory') { 'BackupAndAdapt' } elseif ($originalKind -eq 'Junction') { 'ReplaceJunctionWithAdapter' } else { $null }
         }
         else {
             if ($originalKind -eq 'Missing') { 'CreateJunction' } elseif ($originalKind -eq 'Directory') { 'BackupAndLink' } else { $null }
         }
         if ([string]::IsNullOrWhiteSpace([string]$expectedAction) -or [string]$item.action -cne $expectedAction) { $errors += "Transaction action binding mismatch:$skillName/$role"; continue }
         $expectedCreatedJunction = $expectedAction -in @('CreateJunction', 'BackupAndLink')
+        $expectedCreatedAdapter = $expectedAction -in @('CreateAdapter', 'BackupAndAdapt', 'ReplaceJunctionWithAdapter')
         $expectedStagingPath = $null
         if ($expectedCreatedJunction) {
             $expectedStagingPath = Join-Path (Join-Path (Join-Path $transactionRoot 'staging') $skillName) $role
@@ -1357,6 +1647,26 @@ function Get-RestorePlan {
             $errors += "Unexpected staging path:$skillName/$role"
             continue
         }
+        $expectedAdapterStagingPath = $null
+        $expectedAdapterRemovalPath = $null
+        if ($expectedCreatedAdapter) {
+            $expectedAdapterStagingPath = Join-Path (Join-Path (Join-Path $transactionRoot 'staging') $skillName) $role
+            $expectedAdapterRemovalPath = Join-Path (Join-Path (Join-Path $transactionRoot 'removed') $skillName) $role
+            if ([string]::IsNullOrWhiteSpace([string]$item.adapterStagingPath) -or
+                -not [string]::Equals((Get-NormalizedFullPath -Path ([string]$item.adapterStagingPath)), (Get-NormalizedFullPath -Path $expectedAdapterStagingPath), [StringComparison]::OrdinalIgnoreCase)) {
+                $errors += "Transaction adapter staging binding mismatch:$skillName/$role"
+                continue
+            }
+            if ([string]::IsNullOrWhiteSpace([string]$item.adapterRemovalPath) -or
+                -not [string]::Equals((Get-NormalizedFullPath -Path ([string]$item.adapterRemovalPath)), (Get-NormalizedFullPath -Path $expectedAdapterRemovalPath), [StringComparison]::OrdinalIgnoreCase)) {
+                $errors += "Transaction adapter removal binding mismatch:$skillName/$role"
+                continue
+            }
+        }
+        elseif ($transactionSchema -ge 4 -and (-not [string]::IsNullOrWhiteSpace([string]$item.adapterStagingPath) -or -not [string]::IsNullOrWhiteSpace([string]$item.adapterRemovalPath))) {
+            $errors += "Unexpected adapter transaction path:$skillName/$role"
+            continue
+        }
         $transactionJunctionIdentity = Get-OptionalStringProperty -Object $item -Name 'junctionIdentity'
         if (-not [string]::IsNullOrWhiteSpace($transactionJunctionIdentity) -and $transactionJunctionIdentity -notmatch '^[A-Fa-f0-9]{64}$') {
             $errors += "Transaction junction identity is invalid:$skillName/$role"
@@ -1368,8 +1678,24 @@ function Get-RestorePlan {
             if ($itemCreatedJunction -ne $expectedCreatedJunction) { $errors += "Transaction junction flag mismatch:$skillName/$role"; continue }
             if ($expectedCreatedJunction -and [string]::IsNullOrWhiteSpace($transactionJunctionIdentity)) { $errors += "Committed junction identity is missing:$skillName/$role"; continue }
             if (-not $expectedCreatedJunction -and -not [string]::IsNullOrWhiteSpace($transactionJunctionIdentity)) { $errors += "Unexpected committed junction identity:$skillName/$role"; continue }
+            if ($itemAdapterPrepared) { $errors += "Committed transaction retains a prepared adapter:$skillName/$role"; continue }
+            if ($itemCreatedAdapter -ne $expectedCreatedAdapter) { $errors += "Transaction adapter flag mismatch:$skillName/$role"; continue }
         }
         if ([string]$item.sourceDigest -notmatch '^[A-Fa-f0-9]{64}$') { $errors += "Transaction source digest is invalid:$skillName/$role"; continue }
+        if ($transactionSchema -ge 4) {
+            if ([string]$item.sourceCommit -notmatch '^[A-Fa-f0-9]{40,64}$') { $errors += "Transaction source commit is invalid:$skillName/$role"; continue }
+            if ([string]$item.expectedDigest -notmatch '^[A-Fa-f0-9]{64}$') { $errors += "Transaction expected digest is invalid:$skillName/$role"; continue }
+            if ($expectedCreatedAdapter) {
+                if ([string]$item.adapterDigest -notmatch '^[A-Fa-f0-9]{64}$' -or -not [string]::Equals([string]$item.expectedDigest, [string]$item.adapterDigest, [StringComparison]::OrdinalIgnoreCase)) {
+                    $errors += "Transaction adapter digest is invalid:$skillName/$role"
+                    continue
+                }
+            }
+            elseif (-not [string]::IsNullOrWhiteSpace([string]$item.adapterDigest) -or -not [string]::Equals([string]$item.expectedDigest, [string]$item.sourceDigest, [StringComparison]::OrdinalIgnoreCase)) {
+                $errors += "Unexpected adapter digest metadata:$skillName/$role"
+                continue
+            }
+        }
         $expectedBackupPath = $null
         if ($originalKind -eq 'Directory') {
             if ([string]$item.originalDigest -notmatch '^[A-Fa-f0-9]{64}$') { $errors += "Transaction original digest is invalid:$skillName/$role"; continue }
@@ -1421,6 +1747,37 @@ function Get-RestorePlan {
                 $errors += "Committed transaction staging path is not empty:$expectedStagingPath"
             }
         }
+        $adapterStagingEntry = [pscustomobject][ordered]@{ kind = 'Missing'; manifest = $null }
+        $adapterRemovalEntry = [pscustomobject][ordered]@{ kind = 'Missing'; manifest = $null }
+        if ($expectedCreatedAdapter) {
+            Assert-SafeDestinationPath -AllowedRoot $transactionRoot -Candidate $expectedAdapterStagingPath -Label 'Restore staged AGY adapter'
+            Assert-SafeDestinationPath -AllowedRoot $transactionRoot -Candidate $expectedAdapterRemovalPath -Label 'Restore removed AGY adapter'
+            $adapterStagingEntry = Get-PathEntryInfo -Path $expectedAdapterStagingPath
+            if ($adapterStagingEntry.kind -eq 'Directory') {
+                if (-not [string]::Equals([string]$adapterStagingEntry.manifest.digest, [string]$item.adapterDigest, [StringComparison]::OrdinalIgnoreCase)) {
+                    $errors += "Staged AGY adapter was modified:$expectedAdapterStagingPath"
+                }
+            }
+            elseif ($adapterStagingEntry.kind -ne 'Missing') {
+                $errors += "Staged AGY adapter is not an ordinary directory:$expectedAdapterStagingPath"
+            }
+            if ($hasCommitSeal -and $adapterStagingEntry.kind -ne 'Missing') {
+                $errors += "Committed transaction adapter staging path is not empty:$expectedAdapterStagingPath"
+            }
+
+            $adapterRemovalEntry = Get-PathEntryInfo -Path $expectedAdapterRemovalPath
+            if ($adapterRemovalEntry.kind -eq 'Directory') {
+                if (-not [string]::Equals([string]$adapterRemovalEntry.manifest.digest, [string]$item.adapterDigest, [StringComparison]::OrdinalIgnoreCase)) {
+                    $errors += "Removed AGY adapter was modified:$expectedAdapterRemovalPath"
+                }
+            }
+            elseif ($adapterRemovalEntry.kind -ne 'Missing') {
+                $errors += "Removed AGY adapter is not an ordinary directory:$expectedAdapterRemovalPath"
+            }
+            if ($adapterStagingEntry.kind -ne 'Missing' -and $adapterRemovalEntry.kind -ne 'Missing') {
+                $errors += "Staged and removed AGY adapters both exist:$expectedTarget"
+            }
+        }
 
         $entry = Get-PathEntryInfo -Path $expectedTarget
         $sourceJunction = $entry.kind -eq 'Junction' -and $null -ne $entry.target -and [string]::Equals([string]$entry.target, $expectedSource, [StringComparison]::OrdinalIgnoreCase)
@@ -1433,6 +1790,16 @@ function Get-RestorePlan {
                 $removalIdentity = $transactionJunctionIdentity
             }
             else { $errors += "Junction transaction identity mismatch:$expectedTarget" }
+        }
+        elseif ($expectedCreatedAdapter -and $entry.kind -eq 'Directory' -and
+            [string]::Equals([string]$entry.manifest.digest, [string]$item.adapterDigest, [StringComparison]::OrdinalIgnoreCase)) {
+            $canonicalInstalled = $true
+        }
+        if ($expectedCreatedAdapter -and $canonicalInstalled -and $adapterRemovalEntry.kind -ne 'Missing') {
+            $errors += "Active and removed AGY adapters both exist:$expectedTarget"
+        }
+        if ($expectedCreatedAdapter -and $canonicalInstalled -and $adapterStagingEntry.kind -ne 'Missing') {
+            $errors += "Active and staged AGY adapters both exist:$expectedTarget"
         }
         $state = 'Conflict'
         $backupDigest = ''
@@ -1463,7 +1830,7 @@ function Get-RestorePlan {
             elseif ($originalState -and $backupExists) {
                 $errors += "Original target and backup both exist:$expectedTarget"
             }
-            elseif ($expectedAction -eq 'BackupAndLink' -and $canonicalInstalled -and $backupValid) { $state = 'Installed' }
+            elseif ($expectedAction -in @('BackupAndLink', 'BackupAndAdapt') -and $canonicalInstalled -and $backupValid) { $state = 'Installed' }
             elseif ($entry.kind -eq 'Missing' -and $backupValid) { $state = 'RestorePending' }
             elseif (-not $backupExists) { $errors += "Backup directory is missing:$expectedBackupPath" }
             else { $errors += "Restore target is neither installed, pending, nor original:$expectedTarget" }
@@ -1475,7 +1842,7 @@ function Get-RestorePlan {
             elseif ($entry.kind -eq 'Junction' -and $null -ne $entry.target -and [string]::Equals([string]$entry.target, (Get-NormalizedFullPath -Path ([string]$item.originalTarget)), [StringComparison]::OrdinalIgnoreCase)) {
                 $state = 'Original'
             }
-            elseif ($entry.kind -eq 'Missing') { $state = 'Installed' }
+            elseif ($canonicalInstalled -or $entry.kind -eq 'Missing') { $state = 'Installed' }
             else { $errors += "Restore junction is neither installed nor original:$expectedTarget" }
         }
         else {
@@ -1490,8 +1857,12 @@ function Get-RestorePlan {
             removalIdentity = $removalIdentity
             stagingPath = $expectedStagingPath
             stagingRemovalIdentity = $stagingRemovalIdentity
+            adapterStagingPath = $expectedAdapterStagingPath
+            adapterRemovalPath = $expectedAdapterRemovalPath
+            adapterStagingState = $adapterStagingEntry.kind
+            adapterRemovalState = $adapterRemovalEntry.kind
         }
-        $digestLines += "item|$skillName|$role|$expectedTarget|$($entry.kind)|$($entry.target)|$($entry.junctionIdentity)|$transactionJunctionIdentity|$backupDigest|$originalKind|$($item.originalTarget)|$state|$removalIdentity|$expectedStagingPath|$($stagingEntry.kind)|$($stagingEntry.junctionIdentity)|$stagingRemovalIdentity"
+        $digestLines += "item|$skillName|$role|$expectedTarget|$($entry.kind)|$($entry.target)|$($entry.junctionIdentity)|$transactionJunctionIdentity|$backupDigest|$originalKind|$($item.originalTarget)|$state|$removalIdentity|$expectedStagingPath|$($stagingEntry.kind)|$($stagingEntry.junctionIdentity)|$stagingRemovalIdentity|$expectedAdapterStagingPath|$($adapterStagingEntry.kind)|$(if ($null -ne $adapterStagingEntry.manifest) { $adapterStagingEntry.manifest.digest } else { '' })|$expectedAdapterRemovalPath|$($adapterRemovalEntry.kind)|$(if ($null -ne $adapterRemovalEntry.manifest) { $adapterRemovalEntry.manifest.digest } else { '' })"
     }
     $digest = Get-Sha256Text -Text ([string]::Join("`n", $digestLines))
     $allOriginal = $states.Count -eq @($transaction.items).Count -and @($states | Where-Object { $_.state -ne 'Original' }).Count -eq 0
@@ -1555,6 +1926,9 @@ function Invoke-SkillRestore {
             if (-not [string]::IsNullOrWhiteSpace([string]$stateInfo.stagingRemovalIdentity)) {
                 Remove-OwnedJunction -Path ([string]$stateInfo.stagingPath) -ExpectedTarget ([string]$item.sourcePath) -AllowedRoot $transactionRoot -ExpectedIdentity ([string]$stateInfo.stagingRemovalIdentity)
             }
+            if ([string]$stateInfo.adapterStagingState -eq 'Directory') {
+                Move-OwnedAdapterExact -SourcePath ([string]$stateInfo.adapterStagingPath) -SourceAllowedRoot $transactionRoot -DestinationPath ([string]$stateInfo.adapterRemovalPath) -DestinationAllowedRoot $transactionRoot -ExpectedDigest ([string]$item.adapterDigest) -Label 'Recover staged AGY adapter'
+            }
             if ($itemState -eq 'Original') {
                 $item.restoreCompleted = $true
                 Save-Transaction -TransactionPath $transactionPath -Transaction $transaction -AllowedRoot $transactionRoot
@@ -1562,6 +1936,10 @@ function Invoke-SkillRestore {
             }
             if ([string]$item.action -in @('CreateJunction', 'BackupAndLink') -and $itemState -eq 'Installed') {
                 Remove-OwnedJunction -Path $targetPath -ExpectedTarget ([string]$item.sourcePath) -AllowedRoot $UserHome -ExpectedIdentity ([string]$stateInfo.removalIdentity)
+            }
+            elseif ([string]$item.action -in @('CreateAdapter', 'BackupAndAdapt', 'ReplaceJunctionWithAdapter') -and $itemState -eq 'Installed' -and
+                (Get-PathEntryInfo -Path $targetPath).kind -eq 'Directory') {
+                Move-OwnedAdapterExact -SourcePath $targetPath -SourceAllowedRoot $UserHome -DestinationPath ([string]$stateInfo.adapterRemovalPath) -DestinationAllowedRoot $transactionRoot -ExpectedDigest ([string]$item.adapterDigest) -Label 'Remove installed AGY adapter for Restore'
             }
             $entry = Get-PathEntryInfo -Path $targetPath
             if ([string]$item.originalKind -eq 'Directory') {

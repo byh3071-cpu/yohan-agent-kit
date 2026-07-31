@@ -73,12 +73,12 @@ skills/<name> (Git 정본)
   ├─junction─▶ ~/.agents/skills/<name>          Codex + Cursor
   ├─junction─▶ ~/.claude/skills/<name>          Claude Code
   ├─junction─▶ ~/.gemini/config/skills/<name>   Antigravity 표준
-  └─조건부───▶ ~/.gemini/antigravity-cli/skills/<name>
+  └─생성복사──▶ ~/.gemini/skills/<name>          AGY CLI 1.1.8 조건부
 ```
 
-`~/.codex/skills`, `~/.cursor/skills`, `~/.gemini/skills`의 같은 이름 사본은 활성 중복 후보로 읽기 전용 검사한다. 정본과 동일할 때만 Install이 backup transaction으로 발견 루트 밖에 이동한다. 내용이 다르면 Conflict다.
+`~/.codex/skills`, `~/.cursor/skills`의 같은 이름 사본은 활성 중복 후보로 읽기 전용 검사한다. 정본과 동일할 때만 Install이 backup transaction으로 발견 루트 밖에 이동한다. `~/.gemini/skills`는 fallback을 끈 상태에서는 승인되지 않은 활성 경로로, fallback을 켠 상태에서는 출처 메타데이터와 전체 manifest가 일치하는 물리 어댑터로 판정한다. 내용이 다르면 Conflict다.
 
-Antigravity CLI fallback은 별도 소비자 표면으로 취급한다. 표준 경로에서 새 세션 발견에 실패했다는 호스트·버전·manifest 결합 증거가 유효할 때만 표준 앱 경로와 공존할 수 있다.
+Antigravity CLI fallback은 별도 소비자 표면으로 취급한다. 표준 경로에서 새 세션 발견에 실패했다는 호스트·버전·manifest 결합 증거가 유효할 때만 표준 앱 경로와 공존할 수 있다. 실효성이 없었던 `~/.gemini/antigravity-cli/skills` junction은 schema 4 transaction의 이전 경로 이관 대상으로만 남긴다.
 
 ## 5. 상태기계
 
@@ -103,26 +103,27 @@ Check는 stdout 외에 어떤 파일도 만들지 않는다.
 Check 재계산
   → 사용자 홈 쓰기 승인 + 같은 PlanDigest
   → HomeRoot 전용 named mutex 획득
-  → schema 3 transaction=Executing + installSeal 기록
-  → transaction 내부 staging junction 생성 + NTFS file ID 선저널링
+  → schema 4 transaction=Executing + installSeal 기록
+  → junction: transaction staging 생성 + NTFS file ID 선저널링
+  → AGY adapter: 정본+provenance 파일 생성 + 전체 digest 검증
   → 동일 디렉터리 backup / legacy junction 제거
-  → staging junction을 active leaf로 원자 이동
+  → staging junction·adapter를 active leaf로 원자 이동
   → post-Check=Healthy
   → commitSeal + transaction=Committed
 ```
 
-transaction JSON은 첫 생성에 `File.Move`, 갱신에 같은 디렉터리 임시 파일과 명시적 backup 경로를 둔 `File.Replace`를 사용한다. 실패하면 변경 항목을 역순 rollback한다. backup은 이동 전·후 manifest를 검증하며, 변조된 backup은 활성 경로에 두지 않는다. rollback 실패는 `RecoveryRequired`로 기록하며 새 Install을 막는다. `Executing` 또는 commitSeal 없는 `RecoveryRequired`는 exact BackupId의 `InstallRollback` 경로로 복구한다. active·staging junction은 transaction에 미리 기록된 동일 NTFS file ID가 있을 때만 제거하며, identity가 없거나 다르면 안전하게 중단한다. Healthy 상태의 Install은 백업 없는 no-op이다.
+transaction JSON은 첫 생성에 `File.Move`, 갱신에 같은 디렉터리 임시 파일과 명시적 backup 경로를 둔 `File.Replace`를 사용한다. 실패하면 변경 항목을 역순 rollback한다. backup은 이동 전·후 manifest를 검증하며, 변조된 backup은 활성 경로에 두지 않는다. rollback 실패는 `RecoveryRequired`로 기록하며 새 Install을 막는다. `Executing` 또는 commitSeal 없는 `RecoveryRequired`는 exact BackupId의 `InstallRollback` 경로로 복구한다. active·staging junction은 transaction에 미리 기록된 동일 NTFS file ID가 있을 때만 제거한다. AGY 물리 어댑터는 봉인된 digest가 일치할 때만 transaction 내부 removal 경로로 이동하며 재귀 삭제하지 않는다. schema 3 transaction은 기존 정의와 seal로 계속 복원한다. Healthy 상태의 Install은 백업 없는 no-op이다.
 
 ### 5.3 Restore
 
 ```text
 정확한 BackupId
   → 입력에서 source·target·backup 경로 재계산
-  → installSeal + [완료 설치면] commitSeal + backup manifest + junction 객체 지문 preflight
+  → installSeal + [완료 설치면] commitSeal + backup manifest + junction 객체 지문·adapter digest preflight
   → Original | Installed | RestorePending | Conflict 판정
   → Restore PlanDigest
   → 사용자 홈 쓰기 승인
-  → 자신이 만든 junction만 제거
+  → 자신이 만든 junction·adapter만 활성 경로에서 제거
   → 원래 Absent / Directory / Junction 복원
   → 실제 원상태 확인 + recoverySeal + transaction=Restored
 ```

@@ -89,3 +89,33 @@ Accepted ADR-013·014에 따라 yohan-cc-skills를 `adr-cycle`·`goal-cycle` 범
 - 아키텍처: `docs/ARCHITECTURE.md`에 세 평면과 상태기계 반영
 - 운영: `docs/MULTIVENDOR_SKILL_DISTRIBUTION.md`에 경로·승인·복원·AGY 증거 반영
 - 패턴: PAT-006·PAT-007 생성; Notion 직접 주입은 하지 않음
+
+## 2026-07-31 — AGY CLI 실제 탐색 규약 보정
+
+### 발견과 원인
+
+- 사용자 승인으로 설치한 `~/.gemini/antigravity-cli/skills/{adr-cycle,goal-cycle}` junction은 도구 Check에서 `Healthy`였지만 AGY CLI 1.1.8 새 세션에 주입되지 않았다.
+- 격리 probe에서는 물리 `.agents/skills`가 발견됐고, 실제 전역 세션은 기존 `~/.gemini/skills`의 물리 디렉터리를 주입했다. junction은 이름 노출 뒤 target 읽기 권한 경계에 걸려 물리 생성물이 필요했다.
+- Orca 터미널의 PATH 선두 `git.cmd` wrapper를 bare `git`이 다시 호출해 `Maximum setlocal recursion level reached`가 발생했다.
+
+### 구현
+
+- 현재 transaction을 schema 4로 올려 `~/.gemini/skills/<name>`에 정본 파일과 `.yohan-adapter.json`을 담은 결정론적 물리 어댑터를 staging→active exact move로 배포한다.
+- 메타데이터는 source path·Git commit·source manifest digest·검증한 AGY version을 봉인한다. active 어댑터를 제거할 때는 재귀 삭제하지 않고 transaction의 `removed/` 경로로 이동한다.
+- 실패한 이전 `~/.gemini/antigravity-cli/skills` junction은 `AgyCliFallbackLegacy` 이관 항목으로 다룬다.
+- schema 3 경로 정의와 install/commit seal 계산을 별도로 보존해 기존 BackupId를 계속 복원할 수 있게 했다.
+- Git 정본 검사는 bare command 대신 실제 `git.exe` 절대경로를 사용한다. 범용 교훈은 `PAT-008`에 역전파했다.
+
+### 검증
+
+- PowerShell AST와 격리 HomeRoot 회귀 189 assertions PASS.
+- 생성 어댑터 Install→Healthy→의도적 drift Conflict→원문 복구→Restore, 실패한 이전 fallback junction 제거·복원, schema 3 fixture Restore를 통과했다.
+- 실제 기존 schema 3 BackupId `20260730-000550908-bcab11d6`와 `20260730-005800595-97913ff2`를 새 코드로 읽기 전용 재검사해 모두 `RestoreReady`를 확인했다.
+- 실제 사용자 홈은 새 코드로 읽기만 했고, 현재 보정 계획은 이전 fallback junction 두 개의 `RemoveLegacyJunction`이다. 물리 어댑터 생성과 이전 junction 이관은 구현 PR 머지·새 음성 증거·정확한 사용자 승인 전 실행하지 않는다.
+
+### 남은 게이트
+
+- 시크릿 검사·변경 파일 적대 리뷰·Draft PR·사람 머지 판정
+- 머지 뒤 새 AGY 증거와 전역 변경 재승인, 물리 어댑터 설치 후 새 세션 명시·자동·부정 호출
+- Claude Code 한도 리셋 뒤 명시·자동·부정 호출
+- 기존 Notion Dev Log 행 갱신과 Public/dev bootstrap 역전파
