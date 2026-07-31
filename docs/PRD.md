@@ -23,8 +23,8 @@ yohan-cc-skills는 두 배포 표면을 한 Git 이력에서 관리한다.
 
 1. 범용 스킬을 Git에서 리뷰하고 전체 디렉터리 manifest로 drift를 검출한다.
 2. Check를 완전 읽기 전용으로 제공한다.
-3. 사용자 홈 쓰기 승인과 최신 PlanDigest가 있을 때만 동일본을 백업·junction으로 전환한다.
-4. 정확한 BackupId와 경로·transaction·junction 소유권 검증으로 설치 전 상태를 복원하고, 커밋 전 Install과 중단된 Restore를 재개한다.
+3. 사용자 홈 쓰기 승인과 최신 PlanDigest가 있을 때만 동일본을 백업·junction 또는 출처가 봉인된 생성 어댑터로 전환한다.
+4. 정확한 BackupId와 경로·transaction·junction·adapter 소유권 검증으로 설치 전 상태를 복원하고, 커밋 전 Install과 중단된 Restore를 재개한다.
 5. 자동·명시·부정 호출 계약과 사람 승인 게이트를 스킬 원문에 고정한다.
 6. 기존 Claude Code 플러그인 마켓플레이스 구조와 이력을 보존한다.
 
@@ -38,7 +38,7 @@ yohan-cc-skills는 두 배포 표면을 한 Git 이력에서 관리한다.
 - 전체 파일 manifest baseline
 - PowerShell 5.1 Check·Install·Restore
 - Codex·Cursor 공용, Claude Code, Antigravity 표준 발견 경로
-- 실측 실패 증거가 있을 때만 허용하는 Antigravity CLI fallback
+- 실측 실패 증거가 있을 때만 `~/.gemini/skills`에 배포하는 Antigravity CLI 물리 생성 어댑터
 - 기존 Claude Code 플러그인·마켓플레이스
 
 ### 제외
@@ -70,7 +70,7 @@ Git 정본 + baseline manifest
   → Check(읽기 전용)
   → Healthy | Installable | Conflict | SourceInvalid | RecoveryRequired
   → 사람 홈 쓰기 승인 + PlanDigest
-  → backup transaction → junction → post-Check
+  → backup transaction → junction·조건부 adapter → post-Check
   → 필요 시 BackupId preflight → 사람 승인 → Restore
 ```
 
@@ -79,10 +79,10 @@ Git 정본 + baseline manifest
 - 두 스킬의 frontmatter·참조·UI 메타데이터가 구조 검증을 통과한다.
 - `skills/**`가 OS와 무관하게 LF 바이트를 유지하고 baseline manifest와 일치한다.
 - 테스트 HomeRoot에서 Check→Install→Check→Restore가 결정론적으로 통과한다.
-- 내용 drift, ignored 파일, 동일 stat의 tracked 파일 변조, stale PlanDigest, 승인 누락, 활성 중복, 부모·목적지 reparse 탈출, transaction·backup 변조, junction 교체, 근거 없거나 만료된 AGY fallback이 무변경 실패한다.
+- 내용 drift, ignored 파일, 동일 stat의 tracked 파일 변조, stale PlanDigest, 승인 누락, 활성 중복, 부모·목적지 reparse 탈출, transaction·backup 변조, junction 교체, adapter 변조, 근거 없거나 만료된 AGY fallback이 무변경 실패한다.
 - Check 전후 Git index 바이트와 수정 시각이 같고, 커밋 전 Install과 `RestorePending`을 포함한 부분 Restore가 exact BackupId로 재개된다.
 - `Restored`는 recoverySeal과 실제 원상태가 모두 맞을 때만 no-op이며, junction 소유 지문은 NTFS file ID를 포함한다.
-- schema 3 transaction은 junction을 staging에서 만들고 identity를 선저널링한 뒤 active leaf로 원자 이동하며, identity가 없거나 다른 junction은 `InstallRollback`에서도 제거하지 않는다.
+- schema 4 transaction은 junction을 staging에서 만들고 identity를 선저널링한 뒤 active leaf로 원자 이동한다. AGY adapter는 source path·commit·digest·CLI version을 기록하고 전체 digest를 봉인하며, 제거 대신 transaction 내부로 이동한다. schema 3 transaction은 기존 경로 계약과 seal로 계속 복원한다.
 - 같은 HomeRoot의 Install·Restore는 named mutex로 직렬화하고 transaction JSON 갱신은 non-null backup을 둔 `File.Replace`로 원자 교체한다.
 - Install 두 번째 실행과 Restore 두 번째 실행은 추가 백업 없는 no-op이다.
 - PR 전 시크릿 검사와 변경 파일 검토를 통과한다.
@@ -93,7 +93,7 @@ Git 정본 + baseline manifest
 - 자동 호출은 모델 판단이며 사람 게이트를 대체하지 않는다.
 - 새 ADR은 `Proposed`로 시작하고 승인 전 결정 의존 구현을 금지한다.
 - 내용이 다른 기존 사본은 승인 플래그가 있어도 덮어쓰지 않는다.
-- AGY fallback은 24시간 안의 새 세션에서 표준 경로 발견 실패를 실측하고, 도구가 직접 읽은 현재 `agy --version`과 JSON boolean·round-trip timestamp가 모두 유효할 때만 허용한다.
+- AGY fallback은 24시간 안의 새 세션에서 표준 경로 발견 실패를 실측하고, 도구가 직접 읽은 현재 `agy --version`과 JSON boolean·round-trip timestamp가 모두 유효할 때만 `~/.gemini/skills` 물리 어댑터를 허용한다. 실패한 이전 `~/.gemini/antigravity-cli/skills` junction은 같은 승인 transaction에서 이관한다.
 - 플러그인 manifest 변경 시 marketplace mirror 정합을 유지한다.
 
 ## 8. 검증 명령

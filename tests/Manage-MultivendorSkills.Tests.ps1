@@ -8,6 +8,8 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $toolPath = Join-Path $repoRoot 'scripts\Manage-MultivendorSkills.ps1'
+$gitExecutable = [string](@(Get-Command git.exe -CommandType Application -All -ErrorAction Stop | Where-Object { [IO.File]::Exists([string]$_.Source) })[0].Source)
+if ([string]::IsNullOrWhiteSpace($gitExecutable)) { throw 'git.exe test dependency is unavailable' }
 $fixtureRoot = Join-Path $PSScriptRoot ".work\run-$(Get-Date -Format 'yyyyMMdd-HHmmssfff')-$PID"
 $null = New-Item -ItemType Directory -Path $fixtureRoot -Force
 $script:assertionCount = 0
@@ -103,7 +105,12 @@ function Get-TestTransactionInstallSeal {
         "agyVersion=$($Transaction.agyCurrentVersion)"
     )
     foreach ($item in @($Transaction.items)) {
-        $lines += "item|$($item.skill)|$($item.role)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)"
+        if ([int]$Transaction.schemaVersion -eq 3) {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.deploymentKind)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceCommit)|$($item.sourceDigest)|$($item.expectedDigest)|$($item.adapterDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)|$($item.adapterStagingPath)|$($item.adapterRemovalPath)"
+        }
     }
     return Get-TestSha256Text -Text ([string]::Join("`n", $lines))
 }
@@ -113,7 +120,12 @@ function Get-TestTransactionCommitSeal {
 
     $lines = @("installSeal=$($Transaction.installSeal)")
     foreach ($item in @($Transaction.items)) {
-        $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)"
+        if ([int]$Transaction.schemaVersion -eq 3) {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)|$($item.adapterPrepared)|$($item.createdAdapter)"
+        }
     }
     return Get-TestSha256Text -Text ([string]::Join("`n", $lines))
 }
@@ -217,10 +229,81 @@ try {
         standardDiscovered = $false
     }
     Write-Utf8NoBom -Path (Join-Path $evidenceDirectory 'goal-cycle.json') -Text ([string]($evidence | ConvertTo-Json -Depth 4))
+    $legacyFallbackPath = Join-Path $fallbackHome '.gemini\antigravity-cli\skills\goal-cycle'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $legacyFallbackPath) -Force
+    $null = New-Item -ItemType Junction -Path $legacyFallbackPath -Target (Join-Path $repoRoot 'skills\goal-cycle')
+    $legacyFallbackWithoutEvidence = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome)
+    Assert-Equal -Expected 3 -Actual $legacyFallbackWithoutEvidence.ExitCode -Message 'Obsolete fallback migration still requires current negative evidence'
+    Assert-Equal -Expected 'Conflict' -Actual $legacyFallbackWithoutEvidence.Data.status -Message 'Obsolete fallback without evidence status'
+    Assert-True -Condition (@($legacyFallbackWithoutEvidence.Data.errors | Where-Object { $_ -match 'fallback exists without current negative-discovery evidence' }).Count -gt 0) -Message 'Obsolete fallback without evidence reason'
+    $legacyFallbackBlockedInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-PlanDigest', [string]$legacyFallbackWithoutEvidence.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 3 -Actual $legacyFallbackBlockedInstall.ExitCode -Message 'Obsolete fallback cannot be migrated without current negative evidence'
+    Assert-Equal -Expected 'Junction' -Actual ([string](Get-Item -LiteralPath $legacyFallbackPath -Force).LinkType) -Message 'Blocked fallback migration preserves the existing junction'
     $validFallback = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $evidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion)
     Assert-Equal -Expected 2 -Actual $validFallback.ExitCode -Message 'Valid negative evidence permits fallback plan'
     Assert-Equal -Expected 'Installable' -Actual $validFallback.Data.status -Message 'Valid fallback status'
-    Assert-Equal -Expected 'CreateJunction' -Actual (@($validFallback.Data.targets | Where-Object { $_.role -eq 'AgyCliFallback' })[0].action) -Message 'Fallback action with valid evidence'
+    Assert-Equal -Expected 'CreateAdapter' -Actual (@($validFallback.Data.targets | Where-Object { $_.role -eq 'AgyCliFallback' })[0].action) -Message 'Fallback action with valid evidence'
+    Assert-Equal -Expected (Join-Path $fallbackHome '.gemini\skills\goal-cycle') -Actual (@($validFallback.Data.targets | Where-Object { $_.role -eq 'AgyCliFallback' })[0].path) -Message 'Fallback uses the AGY CLI runtime discovery path'
+    Assert-Equal -Expected 'RemoveLegacyJunction' -Actual (@($validFallback.Data.targets | Where-Object { $_.role -eq 'AgyCliFallbackLegacy' })[0].action) -Message 'Obsolete fallback junction is migrated'
+
+    $fallbackInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $evidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion, '-PlanDigest', [string]$validFallback.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $fallbackInstall.ExitCode -Message 'Generated AGY adapter install'
+    $fallbackAdapterPath = Join-Path $fallbackHome '.gemini\skills\goal-cycle'
+    Assert-Equal -Expected '' -Actual ([string](Get-Item -LiteralPath $fallbackAdapterPath -Force).LinkType) -Message 'AGY adapter must be a physical directory'
+    $fallbackMetadataPath = Join-Path $fallbackAdapterPath '.yohan-adapter.json'
+    Assert-True -Condition ([IO.File]::Exists($fallbackMetadataPath)) -Message 'AGY adapter provenance metadata'
+    $fallbackMetadata = [string]([IO.File]::ReadAllText($fallbackMetadataPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal -Expected 'agy-cli-physical-copy' -Actual $fallbackMetadata.adapterKind -Message 'AGY adapter kind'
+    Assert-Equal -Expected $fakeAgyVersion -Actual $fallbackMetadata.agyVersion -Message 'AGY adapter version provenance'
+    Assert-Equal -Expected ([string]$goalSource.manifest.digest) -Actual ([string]$fallbackMetadata.sourceDigest) -Message 'AGY adapter source digest provenance'
+    Assert-True -Condition ([string]$fallbackMetadata.sourceCommit -match '^[a-f0-9]{40,64}$') -Message 'AGY adapter commit provenance'
+    Assert-True -Condition (-not [IO.Directory]::Exists($legacyFallbackPath)) -Message 'Obsolete fallback junction leaves the discovery roots'
+    $fallbackHealthy = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $evidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion)
+    Assert-Equal -Expected 'Healthy' -Actual $fallbackHealthy.Data.status -Message 'Generated AGY adapter post-install Check'
+    $fallbackSkillPath = Join-Path $fallbackAdapterPath 'SKILL.md'
+    $fallbackSkillBytes = [IO.File]::ReadAllBytes($fallbackSkillPath)
+    [IO.File]::AppendAllText($fallbackSkillPath, "`n# adapter drift fixture`n", (New-Object Text.UTF8Encoding($false)))
+    $fallbackDrift = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $evidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion)
+    Assert-Equal -Expected 'Conflict' -Actual $fallbackDrift.Data.status -Message 'Generated AGY adapter drift fails closed'
+    Assert-True -Condition (@($fallbackDrift.Data.errors | Where-Object { $_ -match 'Adapter manifest mismatch' }).Count -gt 0) -Message 'Generated AGY adapter drift reason'
+    [IO.File]::WriteAllBytes($fallbackSkillPath, $fallbackSkillBytes)
+    $fallbackRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $fallbackHome, '-BackupId', [string]$fallbackInstall.Data.backupId)
+    Assert-Equal -Expected 'RestoreReady' -Actual $fallbackRestoreCheck.Data.status -Message 'Generated AGY adapter Restore preflight'
+    $fallbackRestore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $fallbackHome, '-BackupId', [string]$fallbackInstall.Data.backupId, '-PlanDigest', [string]$fallbackRestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $fallbackRestore.Data.status -Message 'Generated AGY adapter Restore'
+    Assert-True -Condition (-not [IO.Directory]::Exists($fallbackAdapterPath)) -Message 'Restore removes the generated adapter from the active discovery root'
+    Assert-Equal -Expected 'Junction' -Actual ([string](Get-Item -LiteralPath $legacyFallbackPath -Force).LinkType) -Message 'Restore reinstates the obsolete fallback junction exactly as a junction'
+
+    $copyFallbackHome = Join-Path $fixtureRoot 'copy-fallback-home'
+    $copyFallbackPath = Join-Path $copyFallbackHome '.gemini\skills\goal-cycle'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $copyFallbackPath) -Force
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'skills\goal-cycle') -Destination $copyFallbackPath -Recurse
+    $copyFallbackOriginalSignature = Get-TreeSignature -Directory $copyFallbackPath
+    $copyEvidenceDirectory = Join-Path $fixtureRoot 'copy-agy-evidence'
+    $null = New-Item -ItemType Directory -Path $copyEvidenceDirectory -Force
+    $copyEvidence = [pscustomobject][ordered]@{
+        schemaVersion = 1
+        host = [string]$env:COMPUTERNAME
+        agyVersion = $fakeAgyVersion
+        skill = 'goal-cycle'
+        sourceDigest = [string]$goalSource.manifest.digest
+        standardPath = Join-Path $copyFallbackHome '.gemini\config\skills\goal-cycle'
+        testedAt = [DateTimeOffset]::Now.ToString('o')
+        newSession = $true
+        standardDiscovered = $false
+    }
+    Write-Utf8NoBom -Path (Join-Path $copyEvidenceDirectory 'goal-cycle.json') -Text ([string]($copyEvidence | ConvertTo-Json -Depth 4))
+    $copyFallbackCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $copyFallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $copyEvidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion)
+    Assert-Equal -Expected 'BackupAndAdapt' -Actual (@($copyFallbackCheck.Data.targets | Where-Object { $_.role -eq 'AgyCliFallback' })[0].action) -Message 'Identical AGY physical copy is safely migratable'
+    $copyFallbackInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'goal-cycle', '-HomeRoot', $copyFallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $copyEvidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion, '-PlanDigest', [string]$copyFallbackCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Committed' -Actual $copyFallbackInstall.Data.status -Message 'Identical AGY physical copy migration'
+    Assert-True -Condition ([IO.File]::Exists((Join-Path $copyFallbackPath '.yohan-adapter.json'))) -Message 'Physical copy becomes a provenance adapter'
+    $copyFallbackRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $copyFallbackHome, '-BackupId', [string]$copyFallbackInstall.Data.backupId)
+    Assert-Equal -Expected 'RestoreReady' -Actual $copyFallbackRestoreCheck.Data.status -Message 'Physical copy adapter Restore preflight'
+    $copyFallbackRestore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $copyFallbackHome, '-BackupId', [string]$copyFallbackInstall.Data.backupId, '-PlanDigest', [string]$copyFallbackRestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $copyFallbackRestore.Data.status -Message 'Physical copy adapter Restore'
+    Assert-Equal -Expected $copyFallbackOriginalSignature -Actual (Get-TreeSignature -Directory $copyFallbackPath) -Message 'Original physical copy is restored byte-for-byte'
+    Assert-True -Condition (-not [IO.File]::Exists((Join-Path $copyFallbackPath '.yohan-adapter.json'))) -Message 'Restore removes generated metadata from the original physical copy'
 
     $evidence.testedAt = [DateTimeOffset]::Now.AddHours(-25).ToString('o')
     Write-Utf8NoBom -Path (Join-Path $evidenceDirectory 'goal-cycle.json') -Text ([string]($evidence | ConvertTo-Json -Depth 4))
@@ -296,7 +379,7 @@ try {
     Assert-True -Condition ([string]$backupReparseCheck.Data.error -match 'reparse point') -Message 'Reparse backup root reason'
     Assert-Equal -Expected $backupOutsideSignature -Actual (Get-TreeSignature -Directory $backupOutside) -Message 'Backup reparse must not touch outside tree'
 
-    $indexPathText = [string](& git -C $repoRoot rev-parse --git-path index)
+    $indexPathText = [string](& $gitExecutable -C $repoRoot rev-parse --git-path index)
     Assert-Equal -Expected 0 -Actual $LASTEXITCODE -Message 'Git index path lookup'
     $indexPath = if ([IO.Path]::IsPathRooted($indexPathText)) { [IO.Path]::GetFullPath($indexPathText) } else { [IO.Path]::GetFullPath((Join-Path $repoRoot $indexPathText)) }
     $indexHashBefore = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash
@@ -306,6 +389,16 @@ try {
     Assert-Equal -Expected $indexHashBefore -Actual (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash -Message 'Check must not rewrite Git index bytes'
     Assert-Equal -Expected $indexTicksBefore -Actual (Get-Item -LiteralPath $indexPath -Force).LastWriteTimeUtc.Ticks -Message 'Check must not refresh Git index timestamp'
 
+    $recursiveGitBin = Join-Path $fixtureRoot 'recursive-git-wrapper-bin'
+    $null = New-Item -ItemType Directory -Path $recursiveGitBin -Force
+    Write-Utf8NoBom -Path (Join-Path $recursiveGitBin 'git.cmd') -Text "@echo off`r`necho recursive wrapper must not run 1>&2`r`nexit /b 87`r`n"
+    $gitWrapperOriginalPath = $env:PATH
+    $env:PATH = "$recursiveGitBin;$gitWrapperOriginalPath"
+    $gitWrapperCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'adr-cycle', '-HomeRoot', (Join-Path $fixtureRoot 'git-wrapper-home'))
+    $env:PATH = $gitWrapperOriginalPath
+    Assert-Equal -Expected 2 -Actual $gitWrapperCheck.ExitCode -Message 'Manager bypasses a recursive git.cmd wrapper and resolves git.exe'
+    Assert-Equal -Expected 'Installable' -Actual $gitWrapperCheck.Data.status -Message 'Direct git.exe source verification status'
+
     $miniRepo = Join-Path $fixtureRoot 'ignored-source-repo'
     $miniSkillParent = Join-Path $miniRepo 'skills'
     $miniManifestParent = Join-Path $miniRepo 'distribution\manifests'
@@ -314,11 +407,11 @@ try {
     Copy-Item -LiteralPath (Join-Path $repoRoot 'skills\adr-cycle') -Destination (Join-Path $miniSkillParent 'adr-cycle') -Recurse
     Copy-Item -LiteralPath (Join-Path $repoRoot 'distribution\manifests\adr-cycle.json') -Destination (Join-Path $miniManifestParent 'adr-cycle.json')
     Write-Utf8NoBom -Path (Join-Path $miniRepo '.gitignore') -Text "skills/adr-cycle/*.ignored`n"
-    $null = & git -C $miniRepo init --quiet 2>&1
+    $null = & $gitExecutable -C $miniRepo init --quiet 2>&1
     Assert-Equal -Expected 0 -Actual $LASTEXITCODE -Message 'Mini source Git init'
-    $null = & git -C $miniRepo -c core.autocrlf=false add . 2>&1
+    $null = & $gitExecutable -C $miniRepo -c core.autocrlf=false add . 2>&1
     Assert-Equal -Expected 0 -Actual $LASTEXITCODE -Message 'Mini source Git add'
-    $null = & git -C $miniRepo -c core.autocrlf=false -c user.name=fixture -c user.email=fixture@example.invalid commit --quiet -m baseline 2>&1
+    $null = & $gitExecutable -C $miniRepo -c core.autocrlf=false -c user.name=fixture -c user.email=fixture@example.invalid commit --quiet -m baseline 2>&1
     Assert-Equal -Expected 0 -Actual $LASTEXITCODE -Message 'Mini source Git commit'
     Write-Utf8NoBom -Path (Join-Path $miniRepo 'skills\adr-cycle\hidden.ignored') -Text 'ignored-but-loaded'
     $ignoredSourceCheck = Invoke-Manager -ManagerRepositoryRoot $miniRepo -Arguments @('-Mode', 'Check', '-Skill', 'adr-cycle', '-HomeRoot', (Join-Path $fixtureRoot 'ignored-source-home'))
@@ -628,6 +721,60 @@ try {
     foreach ($functionAst in $topLevelFunctions) {
         . ([scriptblock]::Create([string]$functionAst.Extent.Text))
     }
+
+    $schema3Home = Join-Path $fixtureRoot 'schema3-restore-home'
+    $schema3BackupId = '20260730-010203004-a1b2c3d4'
+    $schema3TransactionRoot = Join-Path $schema3Home ".yohan-skill-backups\$schema3BackupId"
+    $schema3TransactionPath = Join-Path $schema3TransactionRoot 'transaction.json'
+    $schema3Source = Join-Path $repoRoot 'skills\adr-cycle'
+    $schema3Target = Join-Path $schema3Home '.agents\skills\adr-cycle'
+    $null = New-Item -ItemType Directory -Path $schema3TransactionRoot -Force
+    $schema3Identity = New-CanonicalJunction -Path $schema3Target -Target $schema3Source -AllowedRoot $schema3Home
+    $schema3SourceManifest = Get-DirectoryManifest -Directory $schema3Source
+    $schema3Item = [pscustomobject][ordered]@{
+        skill = 'adr-cycle'
+        role = 'Agents'
+        action = 'CreateJunction'
+        targetPath = $schema3Target
+        sourcePath = $schema3Source
+        sourceDigest = $schema3SourceManifest.digest
+        originalKind = 'Missing'
+        originalTarget = $null
+        originalJunctionIdentity = $null
+        originalDigest = $null
+        backupPath = $null
+        junctionStagingPath = Join-Path $schema3TransactionRoot 'staging\adr-cycle\Agents'
+        changed = $true
+        junctionPrepared = $false
+        createdJunction = $true
+        junctionIdentity = $schema3Identity
+    }
+    $schema3Transaction = [pscustomobject][ordered]@{
+        schemaVersion = 3
+        backupId = $schema3BackupId
+        status = 'Committed'
+        createdAt = [DateTimeOffset]::Now.ToString('o')
+        planDigest = ('A' * 64)
+        homeRoot = $schema3Home
+        repositoryRoot = $repoRoot
+        selection = 'adr-cycle'
+        includeAgyCliFallback = $false
+        agyCurrentVersion = $null
+        items = @($schema3Item)
+        installSeal = $null
+        commitSeal = $null
+        recoverySeal = $null
+        error = $null
+    }
+    $schema3Transaction.installSeal = Get-TestTransactionInstallSeal -Transaction $schema3Transaction
+    $schema3Transaction.commitSeal = Get-TestTransactionCommitSeal -Transaction $schema3Transaction
+    Write-Utf8NoBom -Path $schema3TransactionPath -Text ([string]($schema3Transaction | ConvertTo-Json -Depth 16))
+    $schema3RestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $schema3Home, '-BackupId', $schema3BackupId)
+    Assert-Equal -Expected 'RestoreReady' -Actual $schema3RestoreCheck.Data.status -Message 'Schema 3 transaction remains restorable'
+    $schema3Restore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $schema3Home, '-BackupId', $schema3BackupId, '-PlanDigest', [string]$schema3RestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $schema3Restore.Data.status -Message 'Schema 3 Restore compatibility'
+    Assert-True -Condition (-not [IO.Directory]::Exists($schema3Target)) -Message 'Schema 3 Restore returns the original missing state'
+
     $moveFunctionAst = @($topLevelFunctions | Where-Object { $_.Name -eq 'Move-DirectoryExact' })[0]
     Assert-True -Condition ([string]$moveFunctionAst.Extent.Text -match '\[IO\.Directory\]::Move') -Message 'Exact directory move uses Directory.Move'
     Assert-True -Condition ([string]$moveFunctionAst.Extent.Text -notmatch 'Move-Item') -Message 'Exact directory move never uses container-style Move-Item'
