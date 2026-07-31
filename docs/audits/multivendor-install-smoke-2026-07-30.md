@@ -86,7 +86,7 @@ AGY 1.1.8 새 세션에서 표준 `~/.gemini/config/skills` 발견 실패를 확
 
 따라서 새 fallback은 `~/.gemini/skills/{adr-cycle,goal-cycle}`의 물리 생성 어댑터로 보정한다. 어댑터는 정본 파일과 `.yohan-adapter.json`을 포함하고 source path·Git commit·manifest digest·AGY version을 결정론적으로 봉인한다. 기존 `~/.gemini/antigravity-cli/skills` junction은 같은 향후 승인 transaction에서 이전 경로로 이관하며, 기존 schema 3 BackupId의 Restore 호환성은 유지한다.
 
-보정 코드의 격리 회귀는 189 assertions를 통과했다. 실제 기존 schema 3 BackupId `20260730-000550908-bcab11d6`와 `20260730-005800595-97913ff2`도 보정 코드로 읽기 전용 재검사해 각각 `RestoreReady`를 확인했다. 새 물리 어댑터는 아직 실제 사용자 홈에 설치하지 않았다.
+보정 코드의 격리 회귀는 자체 적대 리뷰에서 발견한 “이전 fallback junction의 무증거 이관” 차단까지 포함해 201 assertions를 통과했다. 실제 기존 schema 3 BackupId `20260730-000550908-bcab11d6`와 `20260730-005800595-97913ff2`도 보정 코드로 읽기 전용 재검사해 각각 `RestoreReady`를 확인했다. 새 물리 어댑터는 아직 실제 사용자 홈에 설치하지 않았다.
 
 ## 보존 대상 확인
 

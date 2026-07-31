@@ -804,7 +804,7 @@ function Get-TargetDefinitions {
         [pscustomobject]@{ role = 'CodexLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".codex\skills\$SkillName"; enabled = $true },
         [pscustomobject]@{ role = 'CursorLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".cursor\skills\$SkillName"; enabled = $true },
         [pscustomobject]@{ role = 'AgyCliFallback'; category = 'Fallback'; deploymentKind = 'Adapter'; path = Join-Path $UserHome ".gemini\skills\$SkillName"; enabled = $FallbackEnabled },
-        [pscustomobject]@{ role = 'AgyCliFallbackLegacy'; category = 'Migration'; deploymentKind = 'None'; path = Join-Path $UserHome ".gemini\antigravity-cli\skills\$SkillName"; enabled = $true }
+        [pscustomobject]@{ role = 'AgyCliFallbackLegacy'; category = 'FallbackMigration'; deploymentKind = 'None'; path = Join-Path $UserHome ".gemini\antigravity-cli\skills\$SkillName"; enabled = $FallbackEnabled }
     )
 }
 
@@ -977,7 +977,7 @@ function Get-InstallPlan {
             $reason = ''
             $conflict = $false
 
-            if ($definition.category -eq 'Fallback' -and -not $definition.enabled) {
+            if ($definition.category -in @('Fallback', 'FallbackMigration') -and -not $definition.enabled) {
                 if ($entry.kind -ne 'Missing') {
                     $conflict = $true
                     $reason = 'AGY fallback exists without current negative-discovery evidence'
@@ -1009,7 +1009,7 @@ function Get-InstallPlan {
                     $conflict = $true
                     $reason = 'Existing reparse point does not match the canonical source junction'
                 }
-                elseif ($definition.category -eq 'Migration') {
+                elseif ($definition.category -in @('Migration', 'FallbackMigration')) {
                     $action = 'RemoveLegacyJunction'
                     $reason = 'Legacy active duplicate points to the canonical source'
                 }
@@ -1057,7 +1057,7 @@ function Get-InstallPlan {
                         $conflict = $true
                         $reason = "Manifest mismatch:$([string]::Join(',', @($comparison.differences)))"
                     }
-                    elseif ($definition.category -eq 'Migration') {
+                    elseif ($definition.category -in @('Migration', 'FallbackMigration')) {
                         $action = 'BackupOnly'
                         $reason = 'Identical legacy active duplicate'
                     }
@@ -1606,7 +1606,7 @@ function Get-RestorePlan {
         $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $includeAgyCliFallback -ContractVersion $transactionSchema)
         $definition = @($definitions | Where-Object { $_.role -ceq $role })
         if ($definition.Count -ne 1) { $errors += "Unsupported transaction role:$skillName/$role"; continue }
-        if ([string]$definition[0].category -eq 'Fallback' -and -not [bool]$definition[0].enabled) { $errors += "Disabled fallback role in transaction:$skillName/$role"; continue }
+        if ([string]$definition[0].category -in @('Fallback', 'FallbackMigration') -and -not [bool]$definition[0].enabled) { $errors += "Disabled fallback role in transaction:$skillName/$role"; continue }
         if ([string]$transaction.selection -ne 'All' -and [string]$transaction.selection -cne $skillName) { $errors += "Transaction selection binding mismatch:$skillName"; continue }
 
         $expectedTarget = Get-NormalizedFullPath -Path ([string]$definition[0].path)
@@ -1622,7 +1622,7 @@ function Get-RestorePlan {
         if ($originalKind -notin @('Missing', 'Directory', 'Junction')) { $errors += "Unsupported original kind:$originalKind"; continue }
         $deploymentKind = [string]$definition[0].deploymentKind
         if ($transactionSchema -ge 4 -and [string]$item.deploymentKind -cne $deploymentKind) { $errors += "Transaction deployment binding mismatch:$skillName/$role"; continue }
-        $expectedAction = if ([string]$definition[0].category -eq 'Migration') {
+        $expectedAction = if ([string]$definition[0].category -in @('Migration', 'FallbackMigration')) {
             if ($originalKind -eq 'Directory') { 'BackupOnly' } elseif ($originalKind -eq 'Junction') { 'RemoveLegacyJunction' } else { $null }
         }
         elseif ($deploymentKind -eq 'Adapter') {

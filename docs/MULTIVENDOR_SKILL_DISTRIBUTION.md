@@ -93,7 +93,7 @@ Restore는 transaction의 HomeRoot·RepositoryRoot·skill·role·source·target�
 
 ## Antigravity CLI fallback
 
-기본 Install은 표준 `~/.gemini/config/skills` junction만 사용한다. 새 AGY 세션에서 표준 경로 발견이 실패한 경우에만 별도 Check·승인으로 `~/.gemini/skills/<name>` 물리 생성 어댑터를 켠다. AGY CLI 1.1.8에서 실효성이 없었던 `~/.gemini/antigravity-cli/skills/<name>` junction은 같은 승인 transaction에서 백업 가능한 이전 경로로 이관한다.
+기본 Install은 표준 `~/.gemini/config/skills` junction만 사용한다. 새 AGY 세션에서 표준 경로 발견이 실패한 경우에만 별도 Check·승인으로 `~/.gemini/skills/<name>` 물리 생성 어댑터를 켠다. AGY CLI 1.1.8에서 실효성이 없었던 `~/.gemini/antigravity-cli/skills/<name>` junction은 현재 음성 발견 증거가 결합된 같은 승인 transaction에서만 백업 가능한 이전 경로로 이관한다. fallback 옵션과 증거가 없는 일반 Check·Install은 이 junction을 자동 제거하지 않고 Conflict로 중단한다.
 
 ```powershell
 powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
@@ -121,7 +121,7 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 `-AgyCurrentVersion`에는 실행 직전 읽은 현재 CLI 버전을 전달한다. 도구도 `agy --version`을 직접 실행해 전달값과 설치된 CLI를 대조한다. 증거의 호스트·버전·정본 digest·표준 경로가 바뀌거나 `newSession`·`standardDiscovered`가 JSON boolean이 아니면 무효다. `testedAt`은 ISO-8601 round-trip 형식이어야 하며 미래 5분을 넘거나 24시간보다 오래되어도 무효다. 표준 경로에서 발견에 성공했다면 fallback 생성은 금지한다.
 
-생성된 `.yohan-adapter.json`에는 schema·adapter kind·skill·정본 절대경로·Git commit·정본 manifest digest·검증한 AGY CLI 버전을 기록한다. 생성 시각은 넣지 않아 같은 입력의 어댑터가 결정론적 해시를 갖게 한다. 메타데이터나 복사된 스킬 파일에 drift가 생기면 Check는 자동 갱신하지 않고 Conflict로 중단한다.
+생성된 `.yohan-adapter.json`에는 schema·adapter kind·skill·정본 절대경로·Git commit·정본 manifest digest·검증한 AGY CLI 버전을 기록한다. 생성 시각은 넣지 않아 같은 입력의 어댑터가 결정론적 해시를 갖게 한다. 메타데이터나 복사된 스킬 파일에 drift가 생기거나 정본 commit이 바뀌어 예상 어댑터 digest가 달라지면 Check는 자동 갱신하지 않고 Conflict로 중단한다. Accepted ADR-014의 불일치 덮어쓰기 금지를 지키므로, 정본 변경 시에는 기존 설치 BackupId로 먼저 Restore한 뒤 새 음성 발견 증거·Check·승인을 거쳐 다시 Install한다.
 
 ## 정본 변경과 테스트
 
@@ -132,7 +132,7 @@ powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass `
   -File tests\Manage-MultivendorSkills.Tests.ps1
 ```
 
-테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다. 정상 상태 전이뿐 아니라 부모·목적지 junction 탈출, transaction·backup 변조, 커밋 전 Install 중단 복구, identity 없는 InstallRollback 거부, staging→active 원자 이동의 file ID 보존, HomeRoot 동시 mutation 차단, transaction JSON 원자 교체, `RestorePending` 재개, schema 3 복원 호환성, NTFS file ID 교체, 생성 어댑터 설치·drift·복원, 실패한 이전 fallback 이관, 재귀 `git.cmd` wrapper 우회, ignored 파일과 동일 stat의 tracked 파일 주입, Git index 무변경, AGY 실제 CLI·타입·만료·버전 불일치를 실패 고정한다.
+테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다. 정상 상태 전이뿐 아니라 부모·목적지 junction 탈출, transaction·backup 변조, 커밋 전 Install 중단 복구, identity 없는 InstallRollback 거부, staging→active 원자 이동의 file ID 보존, HomeRoot 동시 mutation 차단, transaction JSON 원자 교체, `RestorePending` 재개, schema 3 복원 호환성, NTFS file ID 교체, 생성 어댑터 설치·drift·복원, 실패한 이전 fallback 이관과 무증거 이관 거부, 재귀 `git.cmd` wrapper 우회, ignored 파일과 동일 stat의 tracked 파일 주입, Git index 무변경, AGY 실제 CLI·타입·만료·버전 불일치를 실패 고정한다.
 
 ## 운영 한계
 

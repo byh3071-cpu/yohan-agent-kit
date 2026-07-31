@@ -232,6 +232,13 @@ try {
     $legacyFallbackPath = Join-Path $fallbackHome '.gemini\antigravity-cli\skills\goal-cycle'
     $null = New-Item -ItemType Directory -Path (Split-Path -Parent $legacyFallbackPath) -Force
     $null = New-Item -ItemType Junction -Path $legacyFallbackPath -Target (Join-Path $repoRoot 'skills\goal-cycle')
+    $legacyFallbackWithoutEvidence = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome)
+    Assert-Equal -Expected 3 -Actual $legacyFallbackWithoutEvidence.ExitCode -Message 'Obsolete fallback migration still requires current negative evidence'
+    Assert-Equal -Expected 'Conflict' -Actual $legacyFallbackWithoutEvidence.Data.status -Message 'Obsolete fallback without evidence status'
+    Assert-True -Condition (@($legacyFallbackWithoutEvidence.Data.errors | Where-Object { $_ -match 'fallback exists without current negative-discovery evidence' }).Count -gt 0) -Message 'Obsolete fallback without evidence reason'
+    $legacyFallbackBlockedInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-PlanDigest', [string]$legacyFallbackWithoutEvidence.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 3 -Actual $legacyFallbackBlockedInstall.ExitCode -Message 'Obsolete fallback cannot be migrated without current negative evidence'
+    Assert-Equal -Expected 'Junction' -Actual ([string](Get-Item -LiteralPath $legacyFallbackPath -Force).LinkType) -Message 'Blocked fallback migration preserves the existing junction'
     $validFallback = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $fallbackHome, '-IncludeAgyCliFallback', '-AgyEvidenceDirectory', $evidenceDirectory, '-AgyCurrentVersion', $fakeAgyVersion)
     Assert-Equal -Expected 2 -Actual $validFallback.ExitCode -Message 'Valid negative evidence permits fallback plan'
     Assert-Equal -Expected 'Installable' -Actual $validFallback.Data.status -Message 'Valid fallback status'

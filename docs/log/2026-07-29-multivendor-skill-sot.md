@@ -108,7 +108,7 @@ Accepted ADR-013·014에 따라 yohan-cc-skills를 `adr-cycle`·`goal-cycle` 범
 
 ### 검증
 
-- PowerShell AST와 격리 HomeRoot 회귀 189 assertions PASS.
+- PowerShell AST와 격리 HomeRoot 회귀 201 assertions PASS. 이전 fallback junction도 현재 음성 발견 증거 없이는 이관하지 않는 게이트를 포함한다.
 - 생성 어댑터 Install→Healthy→의도적 drift Conflict→원문 복구→Restore, 실패한 이전 fallback junction 제거·복원, schema 3 fixture Restore를 통과했다.
 - 실제 기존 schema 3 BackupId `20260730-000550908-bcab11d6`와 `20260730-005800595-97913ff2`를 새 코드로 읽기 전용 재검사해 모두 `RestoreReady`를 확인했다.
 - 실제 사용자 홈은 새 코드로 읽기만 했고, 현재 보정 계획은 이전 fallback junction 두 개의 `RemoveLegacyJunction`이다. 물리 어댑터 생성과 이전 junction 이관은 구현 PR 머지·새 음성 증거·정확한 사용자 승인 전 실행하지 않는다.
