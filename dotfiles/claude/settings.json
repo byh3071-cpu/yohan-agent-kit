@@ -16,38 +16,10 @@
     "type": "command",
     "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\user\\.claude\\statusline.ps1\""
   },
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Users\\user\\.claude\\hooks\\caveman-activate.js\"",
-            "timeout": 5,
-            "statusMessage": "Loading caveman mode..."
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"C:\\Program Files\\nodejs\\node.exe\" \"C:\\Users\\user\\.claude\\hooks\\caveman-mode-tracker.js\"",
-            "timeout": 5,
-            "statusMessage": "Tracking caveman mode..."
-          }
-        ]
-      }
-    ]
-  },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
     "codex@openai-codex": true,
     "lazyweb@lazyweb": true,
-    "caveman@caveman": true,
     "workflow@yohan-cc-skills": true,
     "statusline@yohan-cc-skills": true,
     "claude-code-setup@claude-plugins-official": true,
@@ -55,16 +27,22 @@
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
-      "source": { "source": "git", "url": "https://github.com/openai/codex-plugin-cc.git" }
+      "source": {
+        "source": "git",
+        "url": "https://github.com/openai/codex-plugin-cc.git"
+      }
     },
     "lazyweb": {
-      "source": { "source": "git", "url": "https://github.com/aboul3ata/lazyweb-skill.git" }
-    },
-    "caveman": {
-      "source": { "source": "github", "repo": "JuliusBrussee/caveman" }
+      "source": {
+        "source": "git",
+        "url": "https://github.com/aboul3ata/lazyweb-skill.git"
+      }
     },
     "yohan-cc-skills": {
-      "source": { "source": "github", "repo": "byh3071-cpu/yohan-cc-skills" }
+      "source": {
+        "source": "github",
+        "repo": "byh3071-cpu/yohan-cc-skills"
+      }
     }
   },
   "permissions": {
