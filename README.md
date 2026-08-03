@@ -30,6 +30,19 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 -Mode Check -Sk
 
 Check는 사용자 홈과 Git index를 바꾸지 않는다. `Installable`이면 exit code 2와 `PlanDigest`를, 충돌이면 exit code 3과 다른 상대 경로를 반환한다. 중단된 Install은 반환된 exact `BackupId`로 복구 계획을 다시 만들 수 있다. 실제 Install·Restore는 사용자 홈 쓰기이므로 실행 직전 별도 사람 승인이 필요하다.
 
+SessionEnd 훅의 timeout 상한은 다음 읽기 전용 검사로 확인한다. 인자를 생략하면 yohan-core의 hooks.json을 검사하며, 명시 파일은 **-Path**, 여러 플러그인을 찾을 루트는 **-RecursePath**에 전달한다. 재귀 검사는 reparse point를 따라가지 않고 이름이 hooks.json인 파일만 읽는다.
+
+```powershell
+powershell -NoProfile -NonInteractive -File scripts\Test-SessionEndTimeout.ps1
+powershell -NoProfile -NonInteractive -File scripts\Test-SessionEndTimeout.ps1 `
+  -Path plugins\yohan-core\hooks\hooks.json
+powershell -NoProfile -NonInteractive -File scripts\Test-SessionEndTimeout.ps1 `
+  -RecursePath plugins
+powershell -NoProfile -NonInteractive -File tests\Test-SessionEndTimeout.Tests.ps1
+```
+
+모든 SessionEnd timeout은 0초보다 크고 3초 이하여야 한다. JSON 파싱 실패, 잘못된 timeout, 검사 대상 부재는 exit code 1이며 JSON 원문·command·파서 예외 내용은 출력하지 않는다.
+
 ```powershell
 # 승인 뒤에만 직전 Check의 PlanDigest를 사용한다.
 powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
