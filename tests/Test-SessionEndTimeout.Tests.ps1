@@ -96,6 +96,18 @@ try {
     Assert-Equal -Expected 0 -Actual $recursive.ExitCode -Message 'Recursive search must inspect only hooks.json files'
     Assert-Match -Text $recursive.Output -Pattern '1 compliant SessionEnd hook' -Message 'Recursive search finds a nested hooks.json file'
 
+    $junctionTarget = Join-Path $fixtureRoot 'junction-target'
+    $junctionNested = Join-Path $junctionTarget 'nested'
+    $junctionPath = Join-Path $fixtureRoot 'junction-root'
+    $null = New-Item -ItemType Directory -Path $junctionNested -Force
+    Write-Utf8NoBom -LiteralPath (Join-Path $junctionNested 'hooks.json') -Text '{"hooks":{"SessionEnd":[]}}'
+    $null = New-Item -ItemType Junction -Path $junctionPath -Target $junctionTarget -Force
+    $junctionChild = Join-Path $junctionPath 'nested'
+    $junction = Invoke-Checker -Arguments @('-RecursePath', $junctionChild)
+    Assert-Equal -Expected 1 -Actual $junction.ExitCode -Message 'A normal child below a reparse ancestor must be rejected'
+    Assert-Match -Text $junction.Output -Pattern 'not a safe regular directory' -Message 'Reparse ancestor rejection is explicit'
+    (Get-Item -LiteralPath $junctionPath -Force).Delete()
+
     $secretMarker = 'SECRET_VALUE_MUST_NOT_LEAK_7f1a'
     $exceededPath = Join-Path $fixtureRoot 'exceeded.json'
     Write-Utf8NoBom -LiteralPath $exceededPath -Text ("{`"hooks`":{`"SessionEnd`":[{`"hooks`":[{`"command`":`"$secretMarker`",`"timeout`":4}]}]}}")
@@ -117,8 +129,28 @@ try {
     Assert-Equal -Expected 0 -Actual $missing.ExitCode -Message 'A document without SessionEnd hooks has no timeout violation'
     Assert-Match -Text $missing.Output -Pattern 'has no SessionEnd hooks' -Message 'Missing SessionEnd is reported clearly'
 
-    Write-Output "PASS: $script:assertionCount assertions"
-    Write-Output "Fixture retained: $fixtureRoot"
+    foreach ($malformedJson in @(
+        '{"hooks":{"SessionEnd":[null]}}',
+        '{"hooks":{"SessionEnd":[{}]}}',
+        '{"hooks":{"SessionEnd":[{"hooks":null}]}}',
+        '{"hooks":{"SessionEnd":"not-an-array"}}',
+        '{"hooks":"not-an-object"}',
+        '[]'
+    )) {
+        $malformedPath = Join-Path $fixtureRoot "malformed-$script:assertionCount.json"
+        Write-Utf8NoBom -LiteralPath $malformedPath -Text $malformedJson
+        $malformed = Invoke-Checker -Arguments @('-Path', $malformedPath)
+        Assert-Equal -Expected 1 -Actual $malformed.ExitCode -Message 'Malformed SessionEnd structure must fail closed'
+    }
+
+    $syncScriptText = [IO.File]::ReadAllText((Join-Path $repoRoot 'plugins\yohan-core\hooks\sync-marketplace.ps1'))
+    $routingScriptText = [IO.File]::ReadAllText((Join-Path $repoRoot 'plugins\yohan-core\hooks\detect-routing-miss.ps1'))
+    Assert-NotMatch -Text $syncScriptText -Pattern '(?im)\bgit\s+fetch\b|Start-Process|Start-Job' -Message 'SessionEnd marketplace check must not use network or background jobs'
+    Assert-NotMatch -Text $routingScriptText -Pattern '(?im)Start-Process|Start-Job' -Message 'Routing analysis must not start background jobs'
+    Assert-Match -Text $routingScriptText -Pattern '(?im)Get-Content[^\r\n]+-Tail\s+2000' -Message 'Routing analysis must bound transcript reads'
+
+    Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
+    Write-Output "PASS: $script:assertionCount assertions; fixture cleaned"
     exit 0
 }
 catch {

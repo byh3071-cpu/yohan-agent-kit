@@ -13,17 +13,30 @@ $maximumTimeoutSeconds = 3.0
 $targets = New-Object 'System.Collections.Generic.List[string]'
 $inputErrors = New-Object 'System.Collections.Generic.List[string]'
 
+function Test-HasReparseAncestor {
+    param([Parameter(Mandatory = $true)][System.IO.FileSystemInfo]$Entry)
+
+    $current = $Entry
+    while ($null -ne $current) {
+        if (($current.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { return $true }
+        $current = if ($current -is [System.IO.FileInfo]) { $current.Directory } else { $current.Parent }
+    }
+    return $false
+}
+
 function Add-Target {
     param([Parameter(Mandatory = $true)][string]$LiteralPath)
 
     try {
         $entry = Get-Item -LiteralPath $LiteralPath -Force -ErrorAction Stop
-        if (-not $entry.PSIsContainer -and (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0)) {
+        if (-not $entry.PSIsContainer -and -not (Test-HasReparseAncestor -Entry $entry)) {
             $targets.Add($entry.FullName)
             return
         }
     }
-    catch { }
+    catch {
+        # 입력별 세부 경로나 예외 메시지를 노출하지 않고 아래의 일반 오류로 통일한다.
+    }
 
     $inputErrors.Add('An explicit path is not a readable regular file.')
 }
@@ -33,7 +46,7 @@ function Add-TargetsRecursively {
 
     try {
         $root = Get-Item -LiteralPath $LiteralPath -Force -ErrorAction Stop
-        if (-not $root.PSIsContainer -or (($root.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)) {
+        if (-not $root.PSIsContainer -or (Test-HasReparseAncestor -Entry $root)) {
             $inputErrors.Add('A recursive path is not a safe regular directory.')
             return
         }
@@ -69,6 +82,12 @@ function Get-PropertyValue {
     $property = $InputObject.PSObject.Properties[$Name]
     if ($null -eq $property) { return $null }
     return $property.Value
+}
+
+function Test-JsonObject {
+    param([AllowNull()]$Value)
+
+    return ($null -ne $Value -and $Value.GetType() -eq [System.Management.Automation.PSCustomObject])
 }
 
 function Test-NumericTimeout {
@@ -140,18 +159,56 @@ foreach ($target in $uniqueTargets) {
         continue
     }
 
-    $hooks = Get-PropertyValue -InputObject $document -Name 'hooks'
-    $sessionEnd = Get-PropertyValue -InputObject $hooks -Name 'SessionEnd'
-    if ($null -eq $sessionEnd) {
+    if (-not (Test-JsonObject -Value $document)) {
+        [Console]::Error.WriteLine("ERROR: target[$targetNumber] has an invalid document structure.")
+        $hasFailure = $true
+        continue
+    }
+
+    $hooksProperty = $document.PSObject.Properties['hooks']
+    $hooks = $null
+    if ($null -ne $hooksProperty) { $hooks = $hooksProperty.Value }
+    $sessionEndProperty = if (Test-JsonObject -Value $hooks) { $hooks.PSObject.Properties['SessionEnd'] } else { $null }
+    if ($null -eq $sessionEndProperty) {
+        if ($null -ne $hooksProperty -and -not (Test-JsonObject -Value $hooks)) {
+            [Console]::Error.WriteLine("ERROR: target[$targetNumber] has an invalid hooks structure.")
+            $hasFailure = $true
+            continue
+        }
         Write-Output "PASS: target[$targetNumber] has no SessionEnd hooks."
+        continue
+    }
+
+    $sessionEnd = $sessionEndProperty.Value
+
+    if (-not (Test-JsonObject -Value $hooks) -or $sessionEnd -isnot [object[]]) {
+        [Console]::Error.WriteLine("ERROR: target[$targetNumber] has an invalid SessionEnd structure.")
+        $hasFailure = $true
         continue
     }
 
     $hookCount = 0
     $violationCount = 0
     foreach ($group in @($sessionEnd)) {
-        foreach ($hook in @(Get-PropertyValue -InputObject $group -Name 'hooks')) {
-            if ($null -eq $hook) { continue }
+        if (-not (Test-JsonObject -Value $group)) {
+            $violationCount++
+            continue
+        }
+        $groupHooksProperty = $group.PSObject.Properties['hooks']
+        if ($null -eq $groupHooksProperty) {
+            $violationCount++
+            continue
+        }
+        $groupHooks = $groupHooksProperty.Value
+        if ($groupHooks -isnot [object[]]) {
+            $violationCount++
+            continue
+        }
+        foreach ($hook in @($groupHooks)) {
+            if (-not (Test-JsonObject -Value $hook)) {
+                $violationCount++
+                continue
+            }
             $hookCount++
             $timeout = Get-PropertyValue -InputObject $hook -Name 'timeout'
             if (-not (Test-NumericTimeout -Value $timeout)) {
