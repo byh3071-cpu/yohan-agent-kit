@@ -72,18 +72,6 @@ function Add-TargetsRecursively {
     }
 }
 
-function Get-PropertyValue {
-    param(
-        [AllowNull()]$InputObject,
-        [Parameter(Mandatory = $true)][string]$Name
-    )
-
-    if ($null -eq $InputObject) { return $null }
-    $property = $InputObject.PSObject.Properties[$Name]
-    if ($null -eq $property) { return $null }
-    return $property.Value
-}
-
 function Test-JsonObject {
     param([AllowNull()]$Value)
 
@@ -210,7 +198,13 @@ foreach ($target in $uniqueTargets) {
                 continue
             }
             $hookCount++
-            $timeout = Get-PropertyValue -InputObject $hook -Name 'timeout'
+            $timeoutProperty = $hook.PSObject.Properties['timeout']
+            if ($null -eq $timeoutProperty) {
+                $violationCount++
+                continue
+            }
+            # PSPropertyInfo.Value를 함수에서 반환하면 PS 5.1이 1원소 배열을 스칼라로 풀 수 있으므로 직접 대입한다.
+            $timeout = $timeoutProperty.Value
             if (-not (Test-NumericTimeout -Value $timeout)) {
                 $violationCount++
                 continue

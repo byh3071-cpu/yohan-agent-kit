@@ -21,8 +21,8 @@ Remove-Item -LiteralPath $startFile -Force -ErrorAction SilentlyContinue
 # --- 실측: 세션 시작 sha 대비 변경 파일수 (커밋분 ∪ uncommitted) ---
 $changed = @{}
 try {
-  (& git -C "$cwd" diff --name-only "$start" HEAD 2>$null) | ForEach-Object { if ($_) { $changed[$_] = 1 } }
-  (& git -C "$cwd" status --porcelain 2>$null) | ForEach-Object { if ($_.Length -gt 3) { $changed[$_.Substring(3)] = 1 } }
+  (& git -c core.fsmonitor=false -C "$cwd" diff --name-only "$start" HEAD 2>$null) | ForEach-Object { if ($_) { $changed[$_] = 1 } }
+  (& git -c core.fsmonitor=false -C "$cwd" status --porcelain 2>$null) | ForEach-Object { if ($_.Length -gt 3) { $changed[$_.Substring(3)] = 1 } }
 } catch {}
 $fileCount = $changed.Count
 if ($fileCount -eq 0) { exit 0 }

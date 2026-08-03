@@ -133,6 +133,7 @@ try {
         '{"hooks":{"SessionEnd":[null]}}',
         '{"hooks":{"SessionEnd":[{}]}}',
         '{"hooks":{"SessionEnd":[{"hooks":null}]}}',
+        '{"hooks":{"SessionEnd":[{"hooks":[{"timeout":[3]}]}]}}',
         '{"hooks":{"SessionEnd":"not-an-array"}}',
         '{"hooks":"not-an-object"}',
         '[]'
@@ -147,6 +148,8 @@ try {
     $routingScriptText = [IO.File]::ReadAllText((Join-Path $repoRoot 'plugins\yohan-core\hooks\detect-routing-miss.ps1'))
     Assert-NotMatch -Text $syncScriptText -Pattern '(?im)\bgit\s+fetch\b|Start-Process|Start-Job' -Message 'SessionEnd marketplace check must not use network or background jobs'
     Assert-NotMatch -Text $routingScriptText -Pattern '(?im)Start-Process|Start-Job' -Message 'Routing analysis must not start background jobs'
+    Assert-Equal -Expected 2 -Actual ([regex]::Matches($routingScriptText, '(?im)&\s+git\s+-c\s+core\.fsmonitor=false\s+-C').Count) -Message 'Every routing Git worktree query must disable fsmonitor hooks and daemons'
+    Assert-NotMatch -Text $routingScriptText -Pattern '(?m)(?-i:&\s+git\s+-C)' -Message 'Routing analysis cannot inherit repository fsmonitor configuration'
     Assert-Match -Text $routingScriptText -Pattern '(?im)Get-Content[^\r\n]+-Tail\s+2000' -Message 'Routing analysis must bound transcript reads'
 
     Remove-Item -LiteralPath $fixtureRoot -Recurse -Force
