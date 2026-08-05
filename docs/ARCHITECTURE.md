@@ -138,10 +138,10 @@ Restore는 항목별 완료를 기록한다. 중단된 `Restoring`·`RecoveryReq
   → Proposed ──사람 승인──▶ Accepted
   → {ADR 경로, 결정, 제약, 후속 작업, 미해결 위험, 남은 사람 게이트}
   → goal-cycle
-  → S 직접 | M 서브에이전트 | L Orca
+  → S 직접 | M 서브에이전트 | L + execution_provider
 ```
 
-Proposed를 근거로 조사·계획할 수 있지만 결정 의존 구현은 금지한다. Orca와 `/goal`, `worker_done`, failover는 L 작업에서 현재 환경 계약이 제공할 때만 사용한다.
+Proposed를 근거로 조사·계획할 수 있지만 결정 의존 구현은 금지한다. L은 작업 등급이고 실행 공급자는 `orca-ready`·`native-approved`·`plan-only`·`blocked` 중 별도로 고른다. Orca Run·Task·Dispatch와 완료 수명주기는 `orca-ready`이고 현재 환경 계약이 제공할 때만 사용하며 다른 CLI나 네이티브 실행으로 자동 폴백하지 않는다.
 
 ## 7. Claude Code 플러그인 평면
 

@@ -58,10 +58,12 @@ yohan-cc-skills는 두 배포 표면을 한 Git 이력에서 관리한다.
   → 되돌리기 비용 분류
   → [필요 시] adr-cycle: Proposed → 사람 승인 → Accepted
   → goal-cycle: 조사→스펙→설계→티켓→승인
-  → S 직접 | M 서브에이전트 | L Orca
+  → S 직접 | M 서브에이전트 | L + 실행 공급자 상태
   → 만들기→검증→검수→품질확인→PR
   → 사람 머지판정→지켜보기→다듬기
 ```
+
+L 실행 공급자는 안정 배포 정책과 현재 관측값으로 `orca-ready`·`native-approved`·`plan-only`·`blocked` 중 하나를 고른다. Orca 선택 실패는 네이티브 실행 승인이 아니며 자동 폴백하지 않는다.
 
 ### 5.2 로컬 배포
 

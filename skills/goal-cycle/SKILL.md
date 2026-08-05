@@ -57,9 +57,20 @@ ADR에서 목표로 넘길 때는 경로·확정 결정·제약·후속 작업�
 |---|---|
 | S | 주 에이전트가 직접 수행하고 필요한 검증을 붙인다. |
 | M | 탐색·구현·검수 역할을 프로젝트의 서브에이전트 규칙에 맞춰 나눈다. |
-| L | Plan 승인 뒤 활성 goal과 Orca worktree·멀티에이전트 실행 계약을 사용한다. |
+| L | Plan 승인 뒤에도 작업 등급은 L로 유지하고, 활성 정책에서 실행 공급자 상태를 별도로 고른다. |
 
-애매하면 작은 쪽으로 시작하고 범위나 위험이 늘면 재선언한다. Orca와 `/goal`은 L 작업에서 해당 환경이 제공할 때만 사용한다.
+애매하면 작은 쪽으로 시작하고 범위나 위험이 늘면 재선언한다. 작업 등급과 실행 공급자는 서로 다른 축이다. L이라고 Orca 준비 상태를 추정하거나, Orca가 불가하다는 이유로 작업을 M으로 낮추지 않는다.
+
+L 작업의 `execution_provider`는 검증된 안정 정책과 현재 관측값으로 다음 중 하나를 명시한다.
+
+| 상태 | 의미 |
+|---|---|
+| `orca-ready` | 공식 selector로 고른 단일 CLI의 bootstrap과 runtime readiness가 모두 확인됨 |
+| `native-approved` | 가까운 프로젝트 규칙이나 사람이 현재 IDE·CLI의 네이티브 실행을 명시 승인함 |
+| `plan-only` | 조사·계획·정적 검증까지만 허용되고 실행 공급자는 아직 승인 또는 준비되지 않음 |
+| `blocked` | 필수 승인·권한·외부 상태가 없어 승인 범위 안의 의미 있는 진행도 불가함 |
+
+`native-approved`는 Orca 실패 뒤의 자동 폴백이 아니다. 승인된 범위·격리·검수·사람 게이트를 Orca 경로와 같은 수준으로 보존해야 한다. `automatic_fallback=false`를 기본 계약으로 유지한다.
 
 프로젝트에 라우팅 규칙이 없을 때도 다레포 변경, 스키마 마이그레이션, 인증·결제·보안 변경, 릴리즈는 **최소 L**로 판정한다. 이 하한은 파일 수가 적어도 낮추지 않는다. 그 밖의 작업은 실제 범위·의존성·복구 비용으로 S/M/L을 정하고, 임의의 범용 파일 수 기준을 새 규칙처럼 만들지 않는다.
 
@@ -84,8 +95,11 @@ Plan 범위는 기본적으로 1~4단계다.
 
 - 모델·CLI 순서와 AGY 역할은 활성 `agent-roster` 또는 가장 가까운 지침에서 읽는다. 하드코딩한 우회 순서를 만들지 않는다.
 - AGY가 보조 전용이면 그 산출물을 규정된 상위 티어가 검증해야 한다.
-- `worker_done`, `wait-failover`, quota 전환은 현재 Orca 계약이 제공하는 L 실행에서만 적용한다.
-- 외부 도구가 없거나 인증되지 않았으면 그 사실을 보고하고, 승인 게이트를 유지한 채 가능한 로컬 검증으로 진행한다.
+- Orca를 선택할 때는 현재 세션에 대해 `ORCA_CLI_COMMAND` → `ORCA_DEV_REPO_ROOT`가 있는 세션의 `orca-dev` → Linux 비관리 터미널의 `orca-ide` → 그 밖의 `orca` 순서를 한 번만 적용한다. 선택한 명령이 실패해도 다른 후보를 실행하지 않는다.
+- 가이드와 orchestration schema는 선택한 동일 CLI의 `skills get orca-cli`와 `skills get orchestration`에서 읽는다. CLI bootstrap 성공과 runtime readiness는 별도 관측값으로 기록한다.
+- runtime이 준비되기 전에는 Run·Task·Dispatch 같은 orchestration RPC를 실행하지 않는다. 이 경우 안정 정책과 승인 상태에 따라 `plan-only` 또는 `blocked`로 남기며, 자동으로 `native-approved`로 바꾸지 않는다.
+- `worker_done`, `wait-failover`, `check`, `worker-release`, quota 전환은 `orca-ready`이고 현재 version-matched 계약이 제공할 때만 적용한다.
+- 외부 도구가 없거나 인증되지 않았으면 그 사실과 `execution_provider`를 보고하고, 승인 게이트를 유지한 채 해당 상태가 허용하는 정적·로컬 검증만 진행한다.
 
 ## 상태를 짧게 보고한다
 
