@@ -65,6 +65,16 @@ function Get-PolicyRoot {
     if ([string]::IsNullOrWhiteSpace($devRoot) -and -not [string]::IsNullOrWhiteSpace($env:PUBLIC)) {
         $devRoot = Join-Path $env:PUBLIC 'dev'
     }
+    if ([string]::IsNullOrWhiteSpace($devRoot)) {
+        # Sandboxed desktop hosts can omit PUBLIC from the child environment.
+        $commonDocuments = [Environment]::GetFolderPath([Environment+SpecialFolder]::CommonDocuments)
+        if (-not [string]::IsNullOrWhiteSpace($commonDocuments)) {
+            $publicRoot = Split-Path -Parent $commonDocuments
+            if (-not [string]::IsNullOrWhiteSpace($publicRoot)) {
+                $devRoot = Join-Path $publicRoot 'dev'
+            }
+        }
+    }
     if ([string]::IsNullOrWhiteSpace($devRoot)) { return $null }
     return (Join-Path ([IO.Path]::GetFullPath($devRoot)) '.agents\runtime\orca-routing-policy')
 }
