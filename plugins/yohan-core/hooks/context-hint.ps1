@@ -8,6 +8,23 @@ param(
 # SessionStart hook. The executable source stays ASCII so Windows PowerShell 5.1
 # parses it consistently regardless of the host's legacy code page.
 $ErrorActionPreference = 'Continue'
+$script:SupportedPolicyVersionPattern = '^0\.5\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$'
+
+function Get-RoutingPolicyFailureCode {
+    param([Parameter(Mandatory = $true)][Exception]$Exception)
+
+    switch -Regex ([string]$Exception.Message) {
+        '^Stable routing policy is unavailable$|^Required policy file is missing$' { return 'unavailable' }
+        '^Routing policy version is unsupported or inconsistent$' { return 'unsupported-version' }
+        '^Routing policy deployment version does not match the manifest$' { return 'version-mismatch' }
+        '^Routing policy deployment provenance is not trusted$' { return 'untrusted-provenance' }
+        'fingerprint' { return 'integrity-failed' }
+        'schema' { return 'invalid-schema' }
+        'inactive|hash contract' { return 'inactive-policy' }
+        'card path|missing required contract token' { return 'invalid-card' }
+        default { return 'invalid-policy' }
+    }
+}
 
 function ConvertTo-NormalizedText {
     param([Parameter(Mandatory = $true)][string]$Text)
@@ -74,7 +91,7 @@ function Get-VerifiedRoutingPolicy {
     if ([string]::IsNullOrWhiteSpace([string]$manifest.policy_version)) {
         throw 'Routing policy version is missing'
     }
-    if ([string]$manifest.policy_version -notmatch '^0\.5\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$' -or
+    if ([string]$manifest.policy_version -notmatch $script:SupportedPolicyVersionPattern -or
         [string]$manifest.source_roster_version -cne [string]$manifest.policy_version) {
         throw 'Routing policy version is unsupported or inconsistent'
     }
@@ -131,7 +148,8 @@ try {
 }
 catch {
     # Deliberately do not read a feature checkout or an unverified routing card.
-    $ctx += "`n`n[yohan-core routing-policy] policy_status=safe-fallback`nClassify every task as S, M, or L and state the route. L is a task class, not proof that Orca is ready. Use only an explicitly approved execution provider: orca-ready, native-approved, plan-only, or blocked. Preserve ADR, Plan, global-write, deploy, and merge gates. automatic_fallback=false"
+    $policyReason = Get-RoutingPolicyFailureCode -Exception $_.Exception
+    $ctx += "`n`n[yohan-core routing-policy] policy_status=safe-fallback policy_reason=$policyReason`nClassify every task as S, M, or L and state the route. L is a task class, not proof that Orca is ready. Use only an explicitly approved execution provider: orca-ready, native-approved, plan-only, or blocked. Preserve ADR, Plan, global-write, deploy, and merge gates. automatic_fallback=false"
 }
 
 $out = @{ hookSpecificOutput = @{ hookEventName = 'SessionStart'; additionalContext = $ctx } } | ConvertTo-Json -Depth 5 -Compress

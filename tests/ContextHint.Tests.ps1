@@ -90,9 +90,9 @@ function Invoke-ContextHint {
         [AllowEmptyString()][string]$Payload = '{"session_id":"route-canary"}'
     )
 
-    $args = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hookPath)
-    if ($RouteOnly) { $args += '-RouteOnly' }
-    $raw = $Payload | & $powershellExe @args
+    $psArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $hookPath)
+    if ($RouteOnly) { $psArgs += '-RouteOnly' }
+    $raw = $Payload | & $powershellExe @psArgs
     if ($LASTEXITCODE -ne 0) { throw "context-hint exited with $LASTEXITCODE" }
     return ($raw | ConvertFrom-Json).hookSpecificOutput.additionalContext
 }
@@ -124,17 +124,21 @@ try {
     Write-Utf8NoBom (Join-Path $policyRoot 'card.md') "tampered orca-ready native-approved plan-only blocked automatic_fallback=false`n"
     $tampered = Invoke-ContextHint -RouteOnly
     Assert-True ($tampered.Contains('policy_status=safe-fallback')) 'tampered card is rejected'
+    Assert-True ($tampered.Contains('policy_reason=integrity-failed')) 'tampered card reports a bounded integrity reason'
     Assert-True (-not $tampered.Contains('tampered')) 'tampered card content is not injected'
     Assert-True (-not $tampered.Contains('UNTRUSTED_FEATURE_CARD')) 'legacy feature fallback remains disabled after rejection'
 
     New-TestPolicy -SourceRef 'feature/unreviewed'
     $untrustedRef = Invoke-ContextHint -RouteOnly
     Assert-True ($untrustedRef.Contains('policy_status=safe-fallback')) 'non-stable source ref is rejected'
+    Assert-True ($untrustedRef.Contains('policy_reason=untrusted-provenance')) 'non-stable source reports a bounded provenance reason'
     Assert-True (-not $untrustedRef.Contains('TEST_STABLE_CARD')) 'card from non-stable source ref is not injected'
 
     $env:YOHAN_ORCA_ROUTING_POLICY_ROOT = Join-Path $testRoot 'missing-policy'
     $missing = Invoke-ContextHint -RouteOnly
     Assert-True ($missing.Contains('policy_status=safe-fallback')) 'missing stable policy uses bounded safe fallback'
+    Assert-True ($missing.Contains('policy_reason=unavailable')) 'missing stable policy reports a bounded availability reason'
+    Assert-True (-not $missing.Contains($testRoot)) 'safe fallback does not expose the local policy path'
     Assert-True ($missing.Contains('automatic_fallback=false')) 'safe fallback preserves no-fallback contract'
 
     New-TestPolicy
@@ -149,6 +153,7 @@ try {
     Write-Utf8NoBom $manifestPath $unsupportedManifest
     $unsupported = Invoke-ContextHint -RouteOnly
     Assert-True ($unsupported.Contains('policy_status=safe-fallback')) 'unsupported policy version is rejected'
+    Assert-True ($unsupported.Contains('policy_reason=unsupported-version')) 'unsupported policy reports a bounded version reason'
 
     New-TestPolicy
     $env:YOHAN_ORCA_ROUTING_POLICY_ROOT = $policyRoot
