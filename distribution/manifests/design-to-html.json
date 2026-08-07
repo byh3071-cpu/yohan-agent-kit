@@ -1,0 +1,27 @@
+{
+    "schemaVersion":  1,
+    "skill":  "design-to-html",
+    "files":  [
+                  {
+                      "path":  "agents/openai.yaml",
+                      "bytes":  259,
+                      "sha256":  "53BACD86E456007D2AE029B74095BA29963BDE58F82D987682657EFE3D149415"
+                  },
+                  {
+                      "path":  "references/context-contract.md",
+                      "bytes":  1714,
+                      "sha256":  "3F881B553AF61B38DE44388E4D58664A15DB3660403A74940A61D69FE3A98C20"
+                  },
+                  {
+                      "path":  "references/quality-gate.md",
+                      "bytes":  1545,
+                      "sha256":  "4C160FE266105C95A2ED03FD88E9802B7AF443AB15AB513E58A1E43DEE12CCA9"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  1659,
+                      "sha256":  "19DDE776B47BC2DA5D88B3AFC6655BA5468C42A9ED0612A9C48F778DAC37C05B"
+                  }
+              ],
+    "digest":  "7A567FA2FB6B921041B0CC6BB598376AE99B81ABF8738A764CBD748FEE7C6F2D"
+}
