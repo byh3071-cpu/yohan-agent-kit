@@ -175,7 +175,6 @@ try {
 
     $missingBrain = New-BrainFixture -Name 'missing-brain'
     $emptyHome = Join-Path $fixtureRoot 'empty-home'
-    $null = New-Item -ItemType Directory -Path $emptyHome -Force
     $beforeMissing = Get-TreeSignature -Root $fixtureRoot
     $missing = Invoke-Checker -BrainRoot $missingBrain -HomeRoot $emptyHome
     $afterMissing = Get-TreeSignature -Root $fixtureRoot
@@ -185,6 +184,7 @@ try {
     Assert-Equal -Expected '7A567FA2FB6B921041B0CC6BB598376AE99B81ABF8738A764CBD748FEE7C6F2D' -Actual $missing.Data.skill.sourceDigest -Message 'canonical source digest is reported'
     Assert-True -Condition (@($missing.Data.missing).Count -ge 3) -Message 'missing evidence includes brain files and required skill'
     Assert-Equal -Expected $beforeMissing -Actual $afterMissing -Message 'missing Check leaves the entire fixture tree unchanged'
+    Assert-True -Condition (-not [IO.Directory]::Exists($emptyHome)) -Message 'missing HomeRoot is not created or overblocked'
 
     $healthyBrain = New-BrainFixture -Name 'healthy-brain' -Complete
     $healthyHome = Join-Path $fixtureRoot 'healthy-home'
@@ -216,6 +216,23 @@ try {
     Assert-Equal -Expected 2 -Actual @($unsafe.Data.brainFiles | Where-Object { $_.state -eq 'Unsafe' }).Count -Message 'reparse BrainRoot is not traversed for either required file'
     Assert-Equal -Expected 2 -Actual @($unsafe.Data.drift | Where-Object { $_.code -eq 'UnsafePath' }).Count -Message 'reparse BrainRoot reports path-safety evidence'
     Assert-Equal -Expected $beforeUnsafe -Actual $afterUnsafe -Message 'unsafe Check leaves the entire fixture tree unchanged'
+
+    $realParent = Join-Path $fixtureRoot 'parent-junction-real'
+    $realBrain = Join-Path $realParent 'brain'
+    Write-Utf8NoBom -Path (Join-Path $realBrain 'memory\rules\html-artifact-design.md') -Text "# Outside design rules`nPARENT-JUNCTION-SENTINEL`n"
+    Write-Utf8NoBom -Path (Join-Path $realBrain 'docs\reference\websites\ai-workspace-context-trust-navigator.md') -Text "# Outside reference`nPARENT-JUNCTION-SENTINEL`n"
+    $linkedParent = Join-Path $fixtureRoot 'parent-junction-link'
+    $null = New-Item -ItemType Junction -Path $linkedParent -Target $realParent
+    $nestedBrainRoot = Join-Path $linkedParent 'brain'
+    $beforeParentJunction = Get-TreeSignature -Root $fixtureRoot
+    $parentJunction = Invoke-Checker -BrainRoot $nestedBrainRoot -HomeRoot $healthyHome
+    $afterParentJunction = Get-TreeSignature -Root $fixtureRoot
+    Assert-Equal -Expected 3 -Actual $parentJunction.ExitCode -Message 'BrainRoot below a parent junction fails closed'
+    Assert-Equal -Expected 'Drift' -Actual $parentJunction.Data.status -Message 'parent junction BrainRoot drift status'
+    Assert-Equal -Expected 2 -Actual @($parentJunction.Data.brainFiles | Where-Object { $_.state -eq 'Unsafe' -and $null -eq $_.digest }).Count -Message 'parent junction files stay Unsafe without digest reads'
+    Assert-Equal -Expected 2 -Actual @($parentJunction.Data.drift | Where-Object { $_.code -eq 'UnsafePath' }).Count -Message 'parent junction reports path-safety evidence'
+    Assert-True -Condition (-not $parentJunction.Raw.Contains('PARENT-JUNCTION-SENTINEL')) -Message 'parent junction source content is never emitted'
+    Assert-Equal -Expected $beforeParentJunction -Actual $afterParentJunction -Message 'parent junction Check leaves target, link, and sentinel unchanged'
 
     $driftBrain = New-BrainFixture -Name 'drift-brain' -Complete
     $driftHome = Join-Path $fixtureRoot 'drift-home'

@@ -63,18 +63,21 @@ function Test-ExistingPathChainSafe {
     if (-not (Test-PathWithin -Root $Root -Candidate $Candidate)) { return $false }
     $normalizedRoot = Get-NormalizedFullPath -Path $Root
     $normalizedCandidate = Get-NormalizedFullPath -Path $Candidate
-    $current = $normalizedRoot
-    $segments = if ([string]::Equals($normalizedRoot, $normalizedCandidate, [StringComparison]::OrdinalIgnoreCase)) {
-        @()
-    }
-    else {
-        $normalizedCandidate.Substring($normalizedRoot.Length).TrimStart('\', '/') -split '[\\/]'
-    }
-    $paths = @($normalizedRoot)
-    foreach ($segment in $segments) {
+    $volumeRoot = [IO.Path]::GetPathRoot($normalizedRoot)
+    $paths = New-Object Collections.Generic.List[string]
+    $paths.Add($volumeRoot)
+    $current = $volumeRoot
+    $rootSegments = $normalizedRoot.Substring($volumeRoot.Length).TrimStart('\', '/') -split '[\\/]'
+    foreach ($segment in $rootSegments) {
         if ([string]::IsNullOrWhiteSpace($segment)) { continue }
         $current = Join-Path $current $segment
-        $paths += $current
+        $paths.Add($current)
+    }
+    $candidateSegments = $normalizedCandidate.Substring($normalizedRoot.Length).TrimStart('\', '/') -split '[\\/]'
+    foreach ($segment in $candidateSegments) {
+        if ([string]::IsNullOrWhiteSpace($segment)) { continue }
+        $current = Join-Path $current $segment
+        $paths.Add($current)
     }
     foreach ($path in $paths) {
         if (-not (Test-Path -LiteralPath $path)) { break }
