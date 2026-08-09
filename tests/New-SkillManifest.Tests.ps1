@@ -184,6 +184,40 @@ function Run-Test {
     }
 }
 
+function Remove-TestFixtureRoot {
+    $normalizedTempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    $normalizedFixtureRoot = [IO.Path]::GetFullPath($fixtureRoot).TrimEnd('\', '/')
+    if (-not $normalizedFixtureRoot.StartsWith($normalizedTempRoot, [StringComparison]::OrdinalIgnoreCase) -or
+        -not (Split-Path -Leaf $normalizedFixtureRoot).StartsWith('yohan-skill-manifest-tests-', [StringComparison]::Ordinal)) {
+        throw "Refusing to clean an unexpected fixture root: $normalizedFixtureRoot"
+    }
+
+    $pending = New-Object Collections.Generic.Stack[string]
+    $directories = New-Object Collections.Generic.List[string]
+    $pending.Push($normalizedFixtureRoot)
+    while ($pending.Count -gt 0) {
+        $directory = $pending.Pop()
+        $directories.Add($directory)
+        foreach ($entry in @(Get-ChildItem -LiteralPath $directory -Force)) {
+            if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+                if ($entry.PSIsContainer) { [IO.Directory]::Delete($entry.FullName, $false) }
+                else { [IO.File]::Delete($entry.FullName) }
+                continue
+            }
+            if ($entry.PSIsContainer) {
+                $pending.Push($entry.FullName)
+                continue
+            }
+            [IO.File]::SetAttributes($entry.FullName, [IO.FileAttributes]::Normal)
+            [IO.File]::Delete($entry.FullName)
+        }
+    }
+
+    foreach ($directory in @($directories | Sort-Object { $_.Length } -Descending)) {
+        if ([IO.Directory]::Exists($directory)) { [IO.Directory]::Delete($directory, $false) }
+    }
+}
+
 $null = New-Item -ItemType Directory -Path $xdgConfigRoot -Force
 $env:XDG_CONFIG_HOME = $xdgConfigRoot
 
@@ -315,6 +349,82 @@ Run-Test -Name 'staged skill change that differs from HEAD is rejected' -Body {
     Assert-Match -Actual $result.Text -Pattern '(?i)Git index differs from HEAD' -Message 'Index/HEAD mismatch reason'
 }
 
+Run-Test -Name 'Write rejects a distribution directory junction without changing the external manifest' -Body {
+    $fixture = New-CleanSkillRepository -Name 'distribution-output-junction'
+    $outsideDistribution = Join-Path $fixtureRoot 'outside-distribution'
+    $outsideManifests = Join-Path $outsideDistribution 'manifests'
+    $outsideManifest = Join-Path $outsideManifests 'fixture-skill.json'
+    $null = New-Item -ItemType Directory -Path $outsideManifests -Force
+    [IO.File]::WriteAllText($outsideManifest, "external sentinel`n", (New-Object Text.UTF8Encoding($false)))
+    $null = New-Item -ItemType Junction -Path (Join-Path $fixture 'distribution') -Target $outsideDistribution
+
+    $result = Invoke-Generator -RepositoryRoot $fixture -Skill 'fixture-skill' -Write
+    Assert-Equal -Expected "external sentinel`n" -Actual ([IO.File]::ReadAllText($outsideManifest, [Text.Encoding]::UTF8)) -Message 'Distribution junction target remains unchanged'
+    Assert-True -Condition ($result.ExitCode -ne 0) -Message 'Distribution directory junction must fail'
+    Assert-Match -Actual $result.Text -Pattern '(?i)reparse point' -Message 'Distribution junction failure reason'
+}
+
+Run-Test -Name 'Write rejects a manifests directory junction without changing the external manifest' -Body {
+    $fixture = New-CleanSkillRepository -Name 'manifests-output-junction'
+    $distribution = Join-Path $fixture 'distribution'
+    $outsideManifests = Join-Path $fixtureRoot 'outside-manifests'
+    $outsideManifest = Join-Path $outsideManifests 'fixture-skill.json'
+    $null = New-Item -ItemType Directory -Path $distribution -Force
+    $null = New-Item -ItemType Directory -Path $outsideManifests -Force
+    [IO.File]::WriteAllText($outsideManifest, "external sentinel`n", (New-Object Text.UTF8Encoding($false)))
+    $null = New-Item -ItemType Junction -Path (Join-Path $distribution 'manifests') -Target $outsideManifests
+
+    $result = Invoke-Generator -RepositoryRoot $fixture -Skill 'fixture-skill' -Write
+    Assert-Equal -Expected "external sentinel`n" -Actual ([IO.File]::ReadAllText($outsideManifest, [Text.Encoding]::UTF8)) -Message 'Manifests junction target remains unchanged'
+    Assert-True -Condition ($result.ExitCode -ne 0) -Message 'Manifests directory junction must fail'
+    Assert-Match -Actual $result.Text -Pattern '(?i)reparse point' -Message 'Manifests junction failure reason'
+}
+
+Run-Test -Name 'Write rejects an existing reparse target without changing its external content' -Body {
+    $fixture = New-CleanSkillRepository -Name 'manifest-target-reparse'
+    $manifestDirectory = Join-Path $fixture 'distribution\manifests'
+    $manifestTarget = Join-Path $manifestDirectory 'fixture-skill.json'
+    $outsideFile = Join-Path $fixtureRoot 'outside-target.json'
+    $outsideDirectory = Join-Path $fixtureRoot 'outside-target-directory'
+    $null = New-Item -ItemType Directory -Path $manifestDirectory -Force
+    [IO.File]::WriteAllText($outsideFile, "external sentinel`n", (New-Object Text.UTF8Encoding($false)))
+    $usesFileLink = $true
+    try {
+        $null = New-Item -ItemType SymbolicLink -Path $manifestTarget -Target $outsideFile -ErrorAction Stop
+    }
+    catch {
+        $usesFileLink = $false
+        $null = New-Item -ItemType Directory -Path $outsideDirectory -Force
+        [IO.File]::WriteAllText((Join-Path $outsideDirectory 'sentinel.txt'), "external sentinel`n", (New-Object Text.UTF8Encoding($false)))
+        $null = New-Item -ItemType Junction -Path $manifestTarget -Target $outsideDirectory
+    }
+
+    $result = Invoke-Generator -RepositoryRoot $fixture -Skill 'fixture-skill' -Write
+    if ($usesFileLink) {
+        Assert-Equal -Expected "external sentinel`n" -Actual ([IO.File]::ReadAllText($outsideFile, [Text.Encoding]::UTF8)) -Message 'Manifest file link target remains unchanged'
+    }
+    else {
+        Assert-Equal -Expected "external sentinel`n" -Actual ([IO.File]::ReadAllText((Join-Path $outsideDirectory 'sentinel.txt'), [Text.Encoding]::UTF8)) -Message 'Manifest junction target remains unchanged'
+    }
+    Assert-True -Condition ($result.ExitCode -ne 0) -Message 'Existing reparse manifest target must fail'
+    Assert-Match -Actual $result.Text -Pattern '(?i)reparse point' -Message 'Manifest target reparse failure reason'
+}
+
+Run-Test -Name 'Write rejects an existing hard-link target without changing its external content' -Body {
+    $fixture = New-CleanSkillRepository -Name 'manifest-target-hard-link'
+    $manifestDirectory = Join-Path $fixture 'distribution\manifests'
+    $manifestTarget = Join-Path $manifestDirectory 'fixture-skill.json'
+    $outsideFile = Join-Path $fixtureRoot 'outside-hard-link-target.json'
+    $null = New-Item -ItemType Directory -Path $manifestDirectory -Force
+    [IO.File]::WriteAllText($outsideFile, "external sentinel`n", (New-Object Text.UTF8Encoding($false)))
+    $null = New-Item -ItemType HardLink -Path $manifestTarget -Target $outsideFile
+
+    $result = Invoke-Generator -RepositoryRoot $fixture -Skill 'fixture-skill' -Write
+    Assert-Equal -Expected "external sentinel`n" -Actual ([IO.File]::ReadAllText($outsideFile, [Text.Encoding]::UTF8)) -Message 'Manifest hard-link target remains unchanged'
+    Assert-True -Condition ($result.ExitCode -ne 0) -Message 'Existing hard-link manifest target must fail'
+    Assert-Match -Actual $result.Text -Pattern '(?i)(hard.?link|linked target)' -Message 'Manifest hard-link failure reason'
+}
+
 if ($script:failures.Count -gt 0) {
     Write-Output "ERROR: $([string]::Join(' | ', $script:failures))"
     Write-Output "FAIL after $script:assertionCount assertions"
@@ -323,5 +433,6 @@ if ($script:failures.Count -gt 0) {
 }
 
 Write-Output "PASS: $script:assertionCount assertions"
-Write-Output "Fixture retained: $fixtureRoot"
+Remove-TestFixtureRoot
+Write-Output "Fixture cleaned: $fixtureRoot"
 exit 0

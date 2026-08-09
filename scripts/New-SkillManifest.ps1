@@ -246,6 +246,68 @@ function Sort-ManifestRows {
     return @($sorted)
 }
 
+function Initialize-SafeManifestWriteTarget {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$SkillName
+    )
+
+    $normalizedRoot = Get-NormalizedFullPath -Path $RepoRoot
+    $rootEntry = Get-Item -LiteralPath $normalizedRoot -Force
+    if (($rootEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "RepositoryRoot is a reparse point: $normalizedRoot"
+    }
+    if (-not $rootEntry.PSIsContainer) {
+        throw "RepositoryRoot is not a directory: $normalizedRoot"
+    }
+
+    $current = $normalizedRoot
+    foreach ($segment in @('distribution', 'manifests')) {
+        $candidate = Join-Path $current $segment
+        if (Test-Path -LiteralPath $candidate) {
+            $entry = Get-Item -LiteralPath $candidate -Force
+        }
+        else {
+            $null = New-Item -ItemType Directory -Path $candidate
+            $entry = Get-Item -LiteralPath $candidate -Force
+        }
+        if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "Manifest output path contains a reparse point: $candidate"
+        }
+        if (-not $entry.PSIsContainer) {
+            throw "Manifest output path is not a directory: $candidate"
+        }
+
+        $normalizedCandidate = Get-NormalizedFullPath -Path $candidate
+        $rootPrefix = $normalizedRoot + [IO.Path]::DirectorySeparatorChar
+        if (-not $normalizedCandidate.StartsWith($rootPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Manifest output path escapes RepositoryRoot: $normalizedCandidate"
+        }
+        $current = $normalizedCandidate
+    }
+
+    $target = Join-Path $current "$SkillName.json"
+    $normalizedTarget = Get-NormalizedFullPath -Path $target
+    $manifestPrefix = $current + [IO.Path]::DirectorySeparatorChar
+    if (-not $normalizedTarget.StartsWith($manifestPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Manifest output target escapes its directory: $normalizedTarget"
+    }
+    if (Test-Path -LiteralPath $normalizedTarget) {
+        $targetEntry = Get-Item -LiteralPath $normalizedTarget -Force
+        if (($targetEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "Manifest output target is a reparse point: $normalizedTarget"
+        }
+        $linkTypeProperty = $targetEntry.PSObject.Properties['LinkType']
+        if ($null -ne $linkTypeProperty -and -not [string]::IsNullOrWhiteSpace([string]$linkTypeProperty.Value)) {
+            throw "Manifest output target is a linked target ($($linkTypeProperty.Value)): $normalizedTarget"
+        }
+        if ($targetEntry.PSIsContainer) {
+            throw "Manifest output target is not a file: $normalizedTarget"
+        }
+    }
+    return $normalizedTarget
+}
+
 try {
     if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
         $RepositoryRoot = Split-Path -Parent $PSScriptRoot
@@ -279,10 +341,9 @@ try {
     $json = [string]($manifest | ConvertTo-Json -Depth 8)
 
     if ($Write) {
-        $manifestDirectory = Join-Path $normalizedRepositoryRoot 'distribution\manifests'
-        $null = New-Item -ItemType Directory -Path $manifestDirectory -Force
+        $manifestTarget = Initialize-SafeManifestWriteTarget -RepoRoot $normalizedRepositoryRoot -SkillName $Skill
         [IO.File]::WriteAllText(
-            (Join-Path $manifestDirectory "$Skill.json"),
+            $manifestTarget,
             $json + [Environment]::NewLine,
             (New-Object Text.UTF8Encoding($false))
         )
