@@ -18,9 +18,10 @@
 | 스킬 | 책임 |
 |---|---|
 | `adr-cycle` | 되돌리기 비싼 결정의 조사·Proposed 초안·검토·대체·폐기와 사람 승인 게이트 |
+| `design-to-html` | 승인한 시각 원본을 반응형 HTML로 구현하고 같은 상태 디자인 QA까지 검증 |
 | `goal-cycle` | 승인된 결정 아래 조사→스펙→설계→티켓→구현→검증→검수→품질확인→PR→관찰·개선 |
 
-자동 호출은 모델 판단이므로 100% 강제되지 않는다. 확실한 호출은 **“adr-cycle로 …”**, **“goal-cycle로 …”**처럼 벤더 공통 자연어를 사용한다.
+자동 호출은 모델 판단이므로 100% 강제되지 않는다. 확실한 호출은 **“adr-cycle로 …”**, **“design-to-html로 …”**, **“goal-cycle로 …”**처럼 벤더 공통 자연어를 사용한다. 두 PC 설치·검증 순서는 [HTML 디자인 환경 인계](docs/DESIGN_TO_HTML_HANDOFF.md)를 따른다.
 
 ### 읽기 전용 검사
 
@@ -102,6 +103,7 @@ claude plugin install statusline@yohan-cc-skills
 .claude-plugin/marketplace.json        # 마켓플레이스 매니페스트 (플러그인 4종)
 skills/
   adr-cycle/                           # 범용 ADR 워크플로 정본
+  design-to-html/                      # 승인 시각 원본의 반응형 HTML 구현·디자인 QA
   goal-cycle/                          # 범용 개발 목표 워크플로 정본
 distribution/manifests/               # 스킬 전체 파일 manifest
 scripts/Manage-MultivendorSkills.ps1   # Check · Install · Restore
