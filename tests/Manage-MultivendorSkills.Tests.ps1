@@ -141,11 +141,41 @@ function Get-TestTransactionRecoverySeal {
 }
 
 try {
+    $designHome = Join-Path $fixtureRoot 'design-to-html-home'
+    $designCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-to-html', '-HomeRoot', $designHome)
+    Assert-Equal -Expected 2 -Actual $designCheck.ExitCode -Message 'design-to-html missing targets must be installable'
+    Assert-Equal -Expected 'Installable' -Actual $designCheck.Data.status -Message 'design-to-html missing target status'
+    Assert-Equal -Expected 3 -Actual @($designCheck.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'design-to-html has three canonical junctions'
+    Assert-True -Condition (-not [IO.Directory]::Exists($designHome)) -Message 'design-to-html Check must not create HomeRoot'
+    $designManifest = Get-Content -LiteralPath (Join-Path $repoRoot 'distribution\manifests\design-to-html.json') -Raw | ConvertFrom-Json
+    $designSource = @($designCheck.Data.sources | Where-Object { $_.skill -eq 'design-to-html' })
+    Assert-Equal -Expected 1 -Actual $designSource.Count -Message 'design-to-html Check has one canonical source'
+    Assert-Equal -Expected ([string]$designManifest.digest) -Actual ([string]$designSource[0].manifest.digest) -Message 'design-to-html source digest matches the distribution manifest'
+
+    $designInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'design-to-html', '-HomeRoot', $designHome, '-PlanDigest', [string]$designCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $designInstall.ExitCode -Message 'design-to-html exact approved install must pass'
+    Assert-Equal -Expected 'Committed' -Actual $designInstall.Data.status -Message 'design-to-html install transaction status'
+    $designHealthy = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-to-html', '-HomeRoot', $designHome)
+    Assert-Equal -Expected 0 -Actual $designHealthy.ExitCode -Message 'design-to-html installed targets must be healthy'
+    Assert-Equal -Expected 'Healthy' -Actual $designHealthy.Data.status -Message 'design-to-html healthy status after install'
+
+    $designRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $designHome, '-BackupId', [string]$designInstall.Data.backupId)
+    Assert-Equal -Expected 0 -Actual $designRestoreCheck.ExitCode -Message 'design-to-html committed backup must be restorable'
+    Assert-Equal -Expected 'RestoreReady' -Actual $designRestoreCheck.Data.status -Message 'design-to-html restore preflight status'
+    $designRestore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $designHome, '-BackupId', [string]$designInstall.Data.backupId, '-PlanDigest', [string]$designRestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $designRestore.ExitCode -Message 'design-to-html approved restore must pass'
+    Assert-Equal -Expected 'Restored' -Actual $designRestore.Data.status -Message 'design-to-html restore status'
+    $designPostRestore = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-to-html', '-HomeRoot', $designHome)
+    Assert-Equal -Expected 'Installable' -Actual $designPostRestore.Data.status -Message 'design-to-html absent pre-install state must be restored'
+
     $emptyHome = Join-Path $fixtureRoot 'empty-home'
     $check = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'All', '-HomeRoot', $emptyHome)
     Assert-Equal -Expected 2 -Actual $check.ExitCode -Message 'Missing targets must be installable'
     Assert-Equal -Expected 'Installable' -Actual $check.Data.status -Message 'Missing target status'
-    Assert-Equal -Expected 6 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Three canonical junctions per skill'
+    Assert-Equal -Expected 3 -Actual @($check.Data.sources).Count -Message 'All selects three canonical skill sources'
+    Assert-Equal -Expected 3 -Actual @($check.Data.sources | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All source skill identities are unique'
+    Assert-Equal -Expected 9 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Three canonical junctions per skill'
+    Assert-Equal -Expected 3 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' } | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All standard targets cover three skills'
     Assert-True -Condition (-not [IO.Directory]::Exists($emptyHome)) -Message 'Check must not create HomeRoot'
 
     $stale = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'All', '-HomeRoot', $emptyHome, '-PlanDigest', ('0' * 64), '-ApproveGlobalHomeWrite')
