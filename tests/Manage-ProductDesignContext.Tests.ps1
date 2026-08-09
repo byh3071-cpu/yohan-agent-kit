@@ -169,6 +169,51 @@ function Invoke-Adapter {
     return [pscustomobject]@{ ExitCode = $exitCode; Data = $data; Raw = $raw }
 }
 
+function Get-ProductDesignPreflightEntries {
+    param([Parameter(Mandatory = $true)][string]$Markdown)
+
+    $entries = New-Object Collections.Generic.List[object]
+    $category = $null
+    $inSavedContext = $false
+    $current = $null
+    foreach ($rawLine in @($Markdown -split "`r?`n")) {
+        $line = $rawLine.Trim()
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        if ($line -match '^# ([^#].*?)\s*$') {
+            if ($null -ne $current) { $entries.Add($current); $current = $null }
+            $category = [string]$Matches[1]
+            $inSavedContext = $false
+            continue
+        }
+        if ($line -ceq '## Saved Links And Context') {
+            if ($null -ne $current) { $entries.Add($current); $current = $null }
+            $inSavedContext = $true
+            continue
+        }
+        if ([string]::IsNullOrWhiteSpace($category) -or -not $inSavedContext) { continue }
+        if (-not $line.StartsWith('- ')) {
+            if ($null -ne $current) { $entries.Add($current) }
+            $current = [pscustomobject][ordered]@{
+                category = $category
+                name = $line
+                usefulContext = ''
+                futureUse = ''
+            }
+            continue
+        }
+        if ($null -eq $current) { continue }
+        $bullet = $line.Substring(2).Trim()
+        if ($bullet.StartsWith('Useful Context:')) {
+            $current.usefulContext = $bullet.Substring('Useful Context:'.Length).Trim().TrimEnd('.')
+        }
+        elseif ($bullet.StartsWith('Future Use:')) {
+            $current.futureUse = $bullet.Substring('Future Use:'.Length).Trim().TrimEnd('.')
+        }
+    }
+    if ($null -ne $current) { $entries.Add($current) }
+    return @($entries.ToArray())
+}
+
 function Run-Test {
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -253,6 +298,7 @@ Run-Test -Name 'Approved exact plan installs official Product Design context and
     $target = Join-Path $fixture.Home '.codex\state\plugins\product-design\user-context.md'
     $transaction = Join-Path $fixture.Home '.yohan-product-design-context.transaction.json'
     $text = [IO.File]::ReadAllText($target, [Text.Encoding]::UTF8)
+    $savedEntries = @(Get-ProductDesignPreflightEntries -Markdown $text)
     $bytes = [IO.File]::ReadAllBytes($target)
     $hasBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
 
@@ -266,6 +312,15 @@ Run-Test -Name 'Approved exact plan installs official Product Design context and
     Assert-True -Condition ($text.Contains('# Design Tokens And Theme Sources')) -Message 'Official Design Tokens section is present'
     Assert-True -Condition ($text.Contains((Join-Path $fixture.Brain 'memory\rules\html-artifact-design.md'))) -Message 'Installed context resolves design rules to an absolute path'
     Assert-True -Condition ($text.Contains((Join-Path $fixture.Brain 'docs\reference\websites\ai-workspace-context-trust-navigator.md'))) -Message 'Installed context resolves reference to an absolute path'
+    Assert-Equal -Expected 2 -Actual $savedEntries.Count -Message 'Product Design preflight discovers both saved context entries'
+    Assert-Equal -Expected 'Codebase References' -Actual ([string]$savedEntries[0].category) -Message 'Product reference entry category'
+    Assert-Equal -Expected (Join-Path $fixture.Brain 'docs\reference\websites\ai-workspace-context-trust-navigator.md') -Actual ([string]$savedEntries[0].name) -Message 'Product reference entry path'
+    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace([string]$savedEntries[0].usefulContext)) -Message 'Product reference entry carries useful context'
+    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace([string]$savedEntries[0].futureUse)) -Message 'Product reference entry carries future use'
+    Assert-Equal -Expected 'Design Tokens And Theme Sources' -Actual ([string]$savedEntries[1].category) -Message 'Design rules entry category'
+    Assert-Equal -Expected (Join-Path $fixture.Brain 'memory\rules\html-artifact-design.md') -Actual ([string]$savedEntries[1].name) -Message 'Design rules entry path'
+    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace([string]$savedEntries[1].usefulContext)) -Message 'Design rules entry carries useful context'
+    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace([string]$savedEntries[1].futureUse)) -Message 'Design rules entry carries future use'
 }
 
 Run-Test -Name 'Edited installed target becomes Conflict and is never overwritten' -Body {

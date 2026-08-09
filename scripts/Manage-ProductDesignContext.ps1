@@ -165,12 +165,21 @@ function Get-GeneratedContext {
     return [string]::Join("`n", @(
         '# Codebase References',
         '',
-        "- HTML artifact design rules: ``$designRules``",
-        "- AI workspace context and trust reference: ``$reference``",
+        '- Description: Git-backed product layout, evidence, and trust references for Product Design work',
+        '## Saved Links And Context',
+        '',
+        $reference,
+        '- Useful Context: Approved AI workspace context and trust reference',
+        '- Future Use: Use as the product layout, evidence, and trust reference before Product Design work',
         '',
         '# Design Tokens And Theme Sources',
         '',
-        'Use both references as saved user context before Product Design work. Apply their typography, layout, evidence, and validation rules to the artifact.',
+        '- Description: Git-backed typography, layout, and validation rules for HTML artifacts',
+        '## Saved Links And Context',
+        '',
+        $designRules,
+        '- Useful Context: Approved typography, layout, evidence, and validation rules',
+        '- Future Use: Apply these rules to every Product Design HTML artifact unless the current request overrides them',
         ''
     ))
 }
