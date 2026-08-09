@@ -9,6 +9,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $checkerPath = Join-Path $repoRoot 'scripts\Test-DesignToHtmlEnvironment.ps1'
 $toolchainPath = Join-Path $repoRoot 'distribution\design-toolchain.json'
+$skillManifestPath = Join-Path $repoRoot 'distribution\manifests\design-to-html.json'
 $powerShell = (Get-Command powershell.exe -CommandType Application -ErrorAction Stop).Source
 $fixtureRoot = Join-Path $PSScriptRoot (".work\design-environment-run-{0}" -f [Guid]::NewGuid().ToString('N'))
 $script:assertionCount = 0
@@ -164,9 +165,14 @@ function Remove-FixtureRootSafely {
 
 try {
     Assert-True -Condition ([IO.File]::Exists($toolchainPath)) -Message 'toolchain contract exists'
+    Assert-True -Condition ([IO.File]::Exists($skillManifestPath)) -Message 'design-to-html manifest exists'
     Assert-True -Condition ([IO.File]::Exists($checkerPath)) -Message 'environment checker exists'
 
     $toolchain = [IO.File]::ReadAllText($toolchainPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
+    $skillManifest = [IO.File]::ReadAllText($skillManifestPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
+    Assert-Equal -Expected 'design-to-html' -Actual $skillManifest.skill -Message 'skill manifest identity'
+    Assert-True -Condition ([string]$skillManifest.digest -match '^[A-F0-9]{64}$') -Message 'skill manifest digest format'
+    $expectedSkillDigest = [string]$skillManifest.digest
     Assert-Equal -Expected 1 -Actual $toolchain.schemaVersion -Message 'toolchain schema version'
     Assert-Equal -Expected '0.1.52' -Actual $toolchain.tested.'product-design' -Message 'tested Product Design version'
     Assert-Equal -Expected '0.3.22' -Actual $toolchain.tested.'yohan-core' -Message 'tested yohan-core version'
@@ -181,7 +187,7 @@ try {
     Assert-Equal -Expected 2 -Actual $missing.ExitCode -Message 'missing prerequisites exit code'
     Assert-Equal -Expected 'Missing' -Actual $missing.Data.status -Message 'missing brain and skill status'
     Assert-Equal -Expected 'Installable' -Actual $missing.Data.skill.managerStatus -Message 'manager Check status is reported'
-    Assert-Equal -Expected '7A567FA2FB6B921041B0CC6BB598376AE99B81ABF8738A764CBD748FEE7C6F2D' -Actual $missing.Data.skill.sourceDigest -Message 'canonical source digest is reported'
+    Assert-Equal -Expected $expectedSkillDigest -Actual $missing.Data.skill.sourceDigest -Message 'canonical source digest is reported'
     Assert-True -Condition (@($missing.Data.missing).Count -ge 3) -Message 'missing evidence includes brain files and required skill'
     Assert-Equal -Expected $beforeMissing -Actual $afterMissing -Message 'missing Check leaves the entire fixture tree unchanged'
     Assert-True -Condition (-not [IO.Directory]::Exists($emptyHome)) -Message 'missing HomeRoot is not created or overblocked'

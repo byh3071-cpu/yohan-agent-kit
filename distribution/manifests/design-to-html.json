@@ -4,8 +4,8 @@
     "files":  [
                   {
                       "path":  "agents/openai.yaml",
-                      "bytes":  259,
-                      "sha256":  "53BACD86E456007D2AE029B74095BA29963BDE58F82D987682657EFE3D149415"
+                      "bytes":  300,
+                      "sha256":  "64E750B926371B0E7C17D93DE29074ED172BDAC9AB68F242B5AD9D6D03890485"
                   },
                   {
                       "path":  "references/context-contract.md",
@@ -23,5 +23,5 @@
                       "sha256":  "19DDE776B47BC2DA5D88B3AFC6655BA5468C42A9ED0612A9C48F778DAC37C05B"
                   }
               ],
-    "digest":  "7A567FA2FB6B921041B0CC6BB598376AE99B81ABF8738A764CBD748FEE7C6F2D"
+    "digest":  "7C634939CFD4C45D5F9D6EB5BE939C44A289BC43445AEBBFE12C5457E6EF4134"
 }
