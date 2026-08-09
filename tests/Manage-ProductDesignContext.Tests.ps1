@@ -130,6 +130,7 @@ function Invoke-Adapter {
         [Parameter(Mandatory = $true)][ValidateSet('Check', 'Install', 'Restore')][string]$Mode,
         [Parameter(Mandatory = $true)][string]$BrainRoot,
         [Parameter(Mandatory = $true)][string]$HomeRoot,
+        [string]$AdapterScriptPath = $adapterPath,
         [string]$PlanDigest,
         [switch]$ApproveGlobalHomeWrite,
         [ValidateSet('Human', 'Json')][string]$OutputFormat = 'Json'
@@ -145,7 +146,7 @@ function Invoke-Adapter {
 
     $arguments = @(
         '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-        '-File', $adapterPath,
+        '-File', $AdapterScriptPath,
         '-Mode', $Mode,
         '-BrainRoot', $BrainRoot,
         '-HomeRoot', $HomeRoot,
@@ -348,6 +349,26 @@ Run-Test -Name 'Stale plan digest is rejected before any home write' -Body {
     Assert-Equal -Expected 3 -Actual $result.ExitCode -Message 'Stale Install exit code'
     Assert-Equal -Expected 'Rejected' -Actual ([string]$result.Data.status) -Message 'Stale Install status'
     Assert-Equal -Expected $before -Actual (Get-TreeSignature -Root $fixture.Home) -Message 'Stale plan causes no home writes'
+}
+
+Run-Test -Name 'Generated context changes invalidate a previously approved plan' -Body {
+    $fixture = New-Fixture -Name 'stale-generated-context'
+    $fixtureAdapter = Join-Path $fixture.Root 'Manage-ProductDesignContext.ps1'
+    Copy-Item -LiteralPath $adapterPath -Destination $fixtureAdapter
+    $plan = Invoke-Adapter -Mode Check -BrainRoot $fixture.Brain -HomeRoot $fixture.Home -AdapterScriptPath $fixtureAdapter
+    $adapterText = [IO.File]::ReadAllText($fixtureAdapter, [Text.Encoding]::UTF8)
+    $changedAdapterText = $adapterText.Replace(
+        '- Useful Context: Approved AI workspace context and trust reference',
+        '- Useful Context: Changed context bytes that require a new approval'
+    )
+    Assert-True -Condition (-not [string]::Equals($adapterText, $changedAdapterText, [StringComparison]::Ordinal)) -Message 'Fixture adapter mutation changes generated context bytes'
+    Write-Utf8NoBom -Path $fixtureAdapter -Text $changedAdapterText
+    $before = Get-TreeSignature -Root $fixture.Home
+    $result = Invoke-Adapter -Mode Install -BrainRoot $fixture.Brain -HomeRoot $fixture.Home -AdapterScriptPath $fixtureAdapter -PlanDigest ([string]$plan.Data.planDigest) -ApproveGlobalHomeWrite
+
+    Assert-Equal -Expected 3 -Actual $result.ExitCode -Message 'Changed generated context rejects the old plan'
+    Assert-Equal -Expected 'Rejected' -Actual ([string]$result.Data.status) -Message 'Changed generated context rejection status'
+    Assert-Equal -Expected $before -Actual (Get-TreeSignature -Root $fixture.Home) -Message 'Changed generated context causes no home writes'
 }
 
 Run-Test -Name 'Restore removes only owned bytes and returns the exact pre-install tree' -Body {

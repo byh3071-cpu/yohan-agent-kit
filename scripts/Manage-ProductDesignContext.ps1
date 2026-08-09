@@ -300,6 +300,7 @@ function Get-ContextPlan {
     $digestLines.Add("brain|$brainRootKey")
     $digestLines.Add("home|$homeRootKey")
     foreach ($source in $sources) { $digestLines.Add("source|$($source.path)|$($source.sha256)") }
+    $digestLines.Add("generated|$generatedDigest")
     $digestLines.Add("target|$targetState|$($targetFile.digest)")
     $digestLines.Add("transaction|$($transaction.state)|$($transaction.digest)")
     $planDigestValue = Get-Sha256Text -Text ([string]::Join("`n", $digestLines.ToArray()))
