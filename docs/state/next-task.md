@@ -19,3 +19,7 @@
 - [ ] 2026-07-31 AGY 최초 fallback junction 설치·post-Check·RestoreReady는 완료했으나 새 세션 발견 실패로 런타임 반증 — schema 4 물리 생성 어댑터·schema 3 Restore 호환·직접 `git.exe` 해석을 격리 검증하고 별도 PR로 올린다. **다음: 회귀·자체 적대 리뷰→시크릿 검사→Draft PR→사람 머지 게이트. 전역 `~/.gemini/skills` 생성과 이전 fallback junction 이관은 새 승인 전 금지.**
 - [x] 2026-07-31 schema 4 AGY 물리 생성 어댑터·schema 3 Restore 호환·재귀 `git.cmd` 우회 구현 — 전체 Goal 게이트 PASS, 시크릿 검사 PASS, 실제 schema 3 BackupId 두 건 `RestoreReady`. **다음: Draft PR→사람 머지 게이트. 머지 뒤 새 AGY 증거·정확한 전역 변경 재승인 전에는 실제 홈을 쓰지 않는다.**
 - [x] 2026-07-31 PR #67 자체 적대 리뷰에서 이전 fallback junction이 음성 발견 증거 없이 일반 Install로 제거될 수 있는 게이트 우회를 발견·차단 — `FallbackMigration`도 현재 evidence 없이는 Conflict이며, 정본 commit 변경 시 생성 어댑터는 ADR-014에 따라 자동 갱신하지 않고 Restore→새 Check·승인→Install한다. **다음: 전체 회귀·시크릿 재검사 후 PR #67 사람 리뷰 게이트.**
+- [x] 2026-08-14 Goal 1 정본화 공식 gate 통과·DONE — 다음 Goal 2 lifecycle과 bounded PowerShell aggregate 수정.
+- [x] 2026-08-14 Goal 2 design-to-html 멀티벤더 배포 공식 gate 통과·DONE — 5개 suite 488 assertions, 집 PC read-only drift 감사 기록 완료. 전역 Install·Restore는 실행하지 않음.
+- [ ] 2026-08-14 Goal 3 DesignContext resolver·HTML 세로절단 IN_PROGRESS — yohan-brain ADR-023 Accepted와 Goal 20 승인 branch·exact SHA 전달 대기. 계약 확인 전 구현 금지.
+- [x] 2026-08-14 Goal 3 DONE — Brain 계약 `f7615ac2fce83bd93c37801c14640c20dede5980` 고정 resolver·append-only recorder·Context Trust Navigator HTML 세로절단·5개 뷰포트 QA를 완료하고 Draft PR #73 생성. **다음: yohan-brain PR #191 선머지→이 PR 사람 리뷰→ready/merge.**

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "tested": {
+    "product-design": "0.1.52",
+    "yohan-core": "0.3.22",
+    "workflow": "0.3.9"
+  },
+  "requiredBrainFiles": [
+    "memory/rules/html-artifact-design.md",
+    "docs/reference/websites/ai-workspace-context-trust-navigator.md"
+  ],
+  "requiredSkill": "design-to-html"
+}

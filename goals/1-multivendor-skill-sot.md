@@ -3,8 +3,9 @@ vhk_format: 1
 type: goal
 id: 1
 title: adr-cycle·goal-cycle 멀티벤더 정본화
-status: IN_PROGRESS
+status: DONE
 priority: P0
+completed: 2026-08-14
 ---
 
 # Goal 1: adr-cycle·goal-cycle 멀티벤더 정본화

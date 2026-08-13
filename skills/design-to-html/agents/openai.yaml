@@ -1,0 +1,7 @@
+interface:
+  display_name: "디자인을 HTML로"
+  short_description: "승인 시안을 반응형 HTML로 구현하고 검증합니다"
+  default_prompt: "이 시각 기준을 $design-to-html로 구현하고 브라우저 검증까지 완료해 주세요."
+
+policy:
+  allow_implicit_invocation: true
