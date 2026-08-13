@@ -1,0 +1,1811 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "yohan-agent-assets",
+  "assets": [
+    {
+      "id": "config.claude-marketplace",
+      "kind": "config",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".claude-plugin/marketplace.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".claude-plugin/marketplace.json"
+      ]
+    },
+    {
+      "id": "config.cursor-mcp-example",
+      "kind": "config",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".cursor/mcp.json.example",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".cursor/mcp.json.example"
+      ]
+    },
+    {
+      "id": "config.design-toolchain",
+      "kind": "config",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "distribution/design-toolchain.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/design-toolchain.json"
+      ]
+    },
+    {
+      "id": "config.claude-user-settings",
+      "kind": "config",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "dotfiles/claude/settings.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "dotfiles/claude/settings.json"
+      ]
+    },
+    {
+      "id": "manifest.adr-cycle",
+      "kind": "manifest",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "distribution/manifests/adr-cycle.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/adr-cycle.json"
+      ]
+    },
+    {
+      "id": "manifest.design-to-html",
+      "kind": "manifest",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "distribution/manifests/design-to-html.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/design-to-html.json"
+      ]
+    },
+    {
+      "id": "manifest.goal-cycle",
+      "kind": "manifest",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "distribution/manifests/goal-cycle.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/goal-cycle.json"
+      ]
+    },
+    {
+      "id": "plugin.critical-thinking",
+      "kind": "plugin",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "plugins/critical-thinking/.claude-plugin/plugin.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/.claude-plugin/plugin.json"
+      ]
+    },
+    {
+      "id": "plugin.statusline",
+      "kind": "plugin",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "plugins/statusline/.claude-plugin/plugin.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/statusline/.claude-plugin/plugin.json"
+      ]
+    },
+    {
+      "id": "plugin.workflow",
+      "kind": "plugin",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "plugins/workflow/.claude-plugin/plugin.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/.claude-plugin/plugin.json"
+      ]
+    },
+    {
+      "id": "plugin.yohan-core",
+      "kind": "plugin",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "plugins/yohan-core/.claude-plugin/plugin.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/.claude-plugin/plugin.json"
+      ]
+    },
+    {
+      "id": "skill.adr-cycle",
+      "kind": "skill",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "skills/adr-cycle",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/adr-cycle"
+      ]
+    },
+    {
+      "id": "skill.design-to-html",
+      "kind": "skill",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "skills/design-to-html",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/design-to-html"
+      ]
+    },
+    {
+      "id": "skill.goal-cycle",
+      "kind": "skill",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "skills/goal-cycle",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/goal-cycle"
+      ]
+    },
+    {
+      "id": "skill.critical-thinking",
+      "kind": "skill",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/skills/critical-thinking",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/skills/critical-thinking"
+      ]
+    },
+    {
+      "id": "skill.statusline.setup-statusline",
+      "kind": "skill",
+      "owner": "statusline",
+      "sourcePath": "plugins/statusline/skills/setup-statusline",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/statusline/skills/setup-statusline"
+      ]
+    },
+    {
+      "id": "skill.workflow.dogfood-crosscheck",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/dogfood-crosscheck",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/dogfood-crosscheck"
+      ]
+    },
+    {
+      "id": "skill.workflow.handoff",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/handoff",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/handoff"
+      ]
+    },
+    {
+      "id": "skill.workflow.new-repo",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/new-repo",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/new-repo"
+      ]
+    },
+    {
+      "id": "skill.workflow.overnight-autoloop",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/overnight-autoloop",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/overnight-autoloop"
+      ]
+    },
+    {
+      "id": "skill.workflow.parallel",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/parallel",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/parallel"
+      ]
+    },
+    {
+      "id": "skill.workflow.release-gate",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/release-gate",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/release-gate"
+      ]
+    },
+    {
+      "id": "skill.workflow.research-loop",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/research-loop",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/research-loop"
+      ]
+    },
+    {
+      "id": "skill.workflow.ship-plan-to-pr",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/ship-plan-to-pr",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/ship-plan-to-pr"
+      ]
+    },
+    {
+      "id": "skill.workflow.vhk-bootstrap-cursor",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/vhk-bootstrap-cursor",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/vhk-bootstrap-cursor"
+      ]
+    },
+    {
+      "id": "skill.workflow.vhk-dogfood-issue",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/vhk-dogfood-issue",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/vhk-dogfood-issue"
+      ]
+    },
+    {
+      "id": "skill.workflow.vhk-evolve-loop",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/vhk-evolve-loop",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/vhk-evolve-loop"
+      ]
+    },
+    {
+      "id": "skill.workflow.vhk-gate",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/vhk-gate",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/vhk-gate"
+      ]
+    },
+    {
+      "id": "skill.workflow.vhk-goal-health",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/vhk-goal-health",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/vhk-goal-health"
+      ]
+    },
+    {
+      "id": "skill.workflow.visualize",
+      "kind": "skill",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/visualize",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/visualize"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.cc-docs",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/cc-docs",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/cc-docs"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.cost-guard",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/cost-guard",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/cost-guard"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.cross-check",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/cross-check",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/cross-check"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.cursor-docs",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/cursor-docs",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/cursor-docs"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.naver-convert",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/naver-convert",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/naver-convert"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.plan-audit",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/plan-audit",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/plan-audit"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.ship-it",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/ship-it",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/ship-it"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.studio-post",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/studio-post",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/studio-post"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.yohan-writing",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/yohan-writing",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/yohan-writing"
+      ]
+    },
+    {
+      "id": "skill.yohan-core.youtube-summary",
+      "kind": "skill",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/skills/youtube-summary",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/skills/youtube-summary"
+      ]
+    },
+    {
+      "id": "agent.critical-thinking.skeptic",
+      "kind": "agent",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/agents/skeptic.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/agents/skeptic.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.critic",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/critic.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/critic.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.explorer",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/explorer.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/explorer.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.planner",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/planner.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/planner.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.prd-generator",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/prd-generator.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/prd-generator.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.prd-validator",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/prd-validator.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/prd-validator.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.shipper",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/shipper.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/shipper.md"
+      ]
+    },
+    {
+      "id": "command.critical-thinking.critical",
+      "kind": "command",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/commands/critical.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/commands/critical.md"
+      ]
+    },
+    {
+      "id": "command.yohan-core.flow",
+      "kind": "command",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/commands/flow.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/commands/flow.md"
+      ]
+    },
+    {
+      "id": "hook.critical-thinking",
+      "kind": "hook",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/hooks",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/hooks"
+      ]
+    },
+    {
+      "id": "hook.yohan-core",
+      "kind": "hook",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/hooks",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/hooks"
+      ]
+    },
+    {
+      "id": "mcp.yohan",
+      "kind": "mcp",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/.mcp.json",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;server-owned-by-yohan-mcp",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_ECOSYSTEM_ROOT"
+      ],
+      "evidenceRefs": [
+        "plugins/yohan-core/.mcp.json"
+      ]
+    },
+    {
+      "id": "rule.core",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "RULES.md",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "RULES.md"
+      ]
+    },
+    {
+      "id": "rule.agents-core",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".agents/CORE-RULES.md",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".agents/CORE-RULES.md"
+      ]
+    },
+    {
+      "id": "rule.agents-vhk",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".agents/rules/vhk-rules.md",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".agents/rules/vhk-rules.md"
+      ]
+    },
+    {
+      "id": "rule.claude-root",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "CLAUDE.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "id": "rule.antigravity-root",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "GEMINI.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "GEMINI.md"
+      ]
+    },
+    {
+      "id": "rule.cursor-legacy-root",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".cursorrules",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "deprecated",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".cursorrules"
+      ]
+    },
+    {
+      "id": "rule.cursor-ecosystem",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".cursor/rules/ecosystem.mdc",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".cursor/rules/ecosystem.mdc"
+      ]
+    },
+    {
+      "id": "rule.cline-vhk",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".clinerules/vhk-rules.md",
+      "portability": "LEGACY",
+      "vendors": [
+        "cline"
+      ],
+      "lifecycle": "deprecated",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".clinerules/vhk-rules.md"
+      ]
+    },
+    {
+      "id": "rule.windsurf-root",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".windsurfrules",
+      "portability": "LEGACY",
+      "vendors": [
+        "windsurf"
+      ],
+      "lifecycle": "deprecated",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".windsurfrules"
+      ]
+    },
+    {
+      "id": "rule.github-copilot",
+      "kind": "rule",
+      "owner": "yohan-cc-skills",
+      "sourcePath": ".github/copilot-instructions.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "github-copilot"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        ".github/copilot-instructions.md"
+      ]
+    },
+    {
+      "id": "rule.critical-thinking-agents",
+      "kind": "rule",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/AGENTS.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/AGENTS.md"
+      ]
+    },
+    {
+      "id": "rule.critical-thinking-antigravity",
+      "kind": "rule",
+      "owner": "critical-thinking",
+      "sourcePath": "plugins/critical-thinking/GEMINI.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/critical-thinking/GEMINI.md"
+      ]
+    },
+    {
+      "id": "rule.yohan-core-claude",
+      "kind": "rule",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/CLAUDE.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/CLAUDE.md"
+      ]
+    },
+    {
+      "id": "rule.yohan-core-voice",
+      "kind": "rule",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/output-styles/yohan-voice.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/output-styles/yohan-voice.md"
+      ]
+    },
+    {
+      "id": "script.check-goal-1",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/check-goal-1.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-goal-1.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-2",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/check-goal-2.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-goal-2.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-3",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/check-goal-3.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-goal-3.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-4",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/check-goal-4.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-goal-4.mjs"
+      ]
+    },
+    {
+      "id": "script.build-asset-catalog",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Build-AssetCatalog.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Build-AssetCatalog.mjs"
+      ]
+    },
+    {
+      "id": "script.manage-multivendor-skills",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Manage-MultivendorSkills.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Manage-MultivendorSkills.ps1"
+      ]
+    },
+    {
+      "id": "script.manage-product-design-context",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Manage-ProductDesignContext.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Manage-ProductDesignContext.ps1"
+      ]
+    },
+    {
+      "id": "script.new-skill-manifest",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/New-SkillManifest.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/New-SkillManifest.ps1"
+      ]
+    },
+    {
+      "id": "script.record-design-decision",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Record-DesignDecision.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Record-DesignDecision.ps1"
+      ]
+    },
+    {
+      "id": "script.resolve-design-context",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Resolve-DesignContext.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Resolve-DesignContext.ps1"
+      ]
+    },
+    {
+      "id": "script.scan-agent-assets",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Scan-AgentAssets.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Scan-AgentAssets.ps1"
+      ]
+    },
+    {
+      "id": "script.test-design-to-html-environment",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Test-DesignToHtmlEnvironment.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Test-DesignToHtmlEnvironment.ps1"
+      ]
+    },
+    {
+      "id": "script.test-session-end-timeout",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/Test-SessionEndTimeout.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Test-SessionEndTimeout.ps1"
+      ]
+    },
+    {
+      "id": "script.verify-design-context-html",
+      "kind": "script",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "scripts/verify-design-context-html.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/verify-design-context-html.mjs"
+      ]
+    },
+    {
+      "id": "template.workflow.research-report",
+      "kind": "template",
+      "owner": "workflow",
+      "sourcePath": "plugins/workflow/skills/research-loop/report-template.html",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/workflow/skills/research-loop/report-template.html"
+      ]
+    },
+    {
+      "id": "fixture.design-context-html-slice",
+      "kind": "fixture",
+      "owner": "yohan-cc-skills",
+      "sourcePath": "fixtures/design-context-html-slice",
+      "portability": "PROJECT_SPECIFIC",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored;goal-3-evidence",
+      "license": "MIXED-UNLICENSED-ISC",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/design-context-contract-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.html-doc",
+      "kind": "skill",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/skills/html-doc",
+      "portability": "UNKNOWN",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;skill-sha256:4ce488ac6c740f8967207043a501b1c3d426af4ee8f31402cc6d78c0d5e0a45e",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.planning-diagrams",
+      "kind": "skill",
+      "owner": "local-user",
+      "sourcePath": "home://.cursor/skills/planning-diagrams",
+      "portability": "UNKNOWN",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;skill-sha256:31c5c66de73573114754d0aa99bfd886e0417043fb250fd5be0de4a823f7f30c",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "legacy.competitive-brief",
+      "kind": "skill",
+      "owner": "local-user",
+      "sourcePath": "home://.cursor/skills/competitive-brief",
+      "portability": "LEGACY",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "deprecated",
+      "provenance": "home-scan:2026-08-14;broken-junction",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "legacy.interview-me",
+      "kind": "skill",
+      "owner": "local-user",
+      "sourcePath": "home://.cursor/skills/interview-me",
+      "portability": "LEGACY",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "deprecated",
+      "provenance": "home-scan:2026-08-14;broken-junction",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "project.yohan-instagram-cardnews",
+      "kind": "skill",
+      "owner": "yohan-studio",
+      "sourcePath": "project://yohan-studio/skills/yohan-instagram-cardnews",
+      "portability": "PROJECT_SPECIFIC",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;project-junction",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.agent.merge-advisor",
+      "kind": "agent",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/agents/merge-advisor.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;identical-cross-vendor-sha256:62479f160765f48c239c2b46d5e45494d57b190527eae7622e30792de53b82a6",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.agent.prompt-auditor",
+      "kind": "agent",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/agents/prompt-auditor.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;identical-cross-vendor-sha256:f3a86837ffd15510849ca48eee44dea9f05ea3874bff56d572e68230a6ed0b60",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.agent.prompt-forge",
+      "kind": "agent",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/agents/prompt-forge.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;identical-cross-vendor-sha256:a5adbc94520e9fce2bd1665cedc47bd5b793ce342d26197067b0d78b8d5470d7",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.agent.research-scout",
+      "kind": "agent",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/agents/research-scout.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;identical-cross-vendor-sha256:cd2d4896adda1701be984e0b149d8a9a537fb3b6c7d54a53ea33b1554e48a3d5",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.command.goal",
+      "kind": "command",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/commands/goal.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "cursor"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;claude-cursor-variants",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.command.routing-review",
+      "kind": "command",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/commands/routing-review.md",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;sha256:ae2909f3fab9334902b43fed883aca489a7367d3e52ce43abaf7629acad4493c",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    },
+    {
+      "id": "candidate.hook.session-title",
+      "kind": "hook",
+      "owner": "local-user",
+      "sourcePath": "home://.claude/hooks/session-title-hook.cjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "home-scan:2026-08-14;sha256:226d17a951ac5b72c7488cdc8eb7f94eadef365089b9c008166749d3e9a033bb",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-assets-home-2026-08-14.md"
+      ]
+    }
+  ]
+}
+

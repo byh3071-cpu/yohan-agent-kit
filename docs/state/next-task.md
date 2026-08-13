@@ -23,3 +23,6 @@
 - [x] 2026-08-14 Goal 2 design-to-html 멀티벤더 배포 공식 gate 통과·DONE — 5개 suite 488 assertions, 집 PC read-only drift 감사 기록 완료. 전역 Install·Restore는 실행하지 않음.
 - [ ] 2026-08-14 Goal 3 DesignContext resolver·HTML 세로절단 IN_PROGRESS — yohan-brain ADR-023 Accepted와 Goal 20 승인 branch·exact SHA 전달 대기. 계약 확인 전 구현 금지.
 - [x] 2026-08-14 Goal 3 DONE — Brain 계약 `f7615ac2fce83bd93c37801c14640c20dede5980` 고정 resolver·append-only recorder·Context Trust Navigator HTML 세로절단·5개 뷰포트 QA를 완료하고 Draft PR #73 생성. **다음: yohan-brain PR #191 선머지→이 PR 사람 리뷰→ready/merge.**
+
+- [x] 2026-08-14 선행 병합 게이트 완료 — yohan-brain PR #191을 merge commit `f2854526fa9b48062b22bb9ba296e151d7e33246`로 먼저 병합하고, yohan-cc-skills PR #73을 `fd3a63b5eee1d0be11a3e56994997cffff310fbb`로 뒤이어 병합했다. Brain 계약 커밋 `f7615ac2fce83bd93c37801c14640c20dede5980`은 `master`에서 도달 가능하다.
+- [ ] 2026-08-14 Goal 4 Agent 자산 Registry·집 PC read-only 인벤토리 IN_PROGRESS — `registry/assets.yaml` 정본, 생성 catalog, 논리 자산 무누락 검증, 홈 후보 분류 근거를 구현한다. 사용자 홈 쓰기와 자동 승격은 별도 사람 게이트다.
