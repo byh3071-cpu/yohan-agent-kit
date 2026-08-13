@@ -3,8 +3,9 @@ vhk_format: 1
 type: goal
 id: 3
 title: DesignContext resolver와 HTML 세로절단
-status: IN_PROGRESS
+status: DONE
 priority: P0
+completed: 2026-08-14
 ---
 
 # Goal 3: DesignContext resolver와 HTML 세로절단
@@ -42,7 +43,7 @@ priority: P0
 - [x] HTML fixture가 승인 원본의 단계 우선·확인 흐름을 보존하고 generic card-grid로 재해석되지 않는다.
 - [x] 360·432·768·1280·1440px에서 overflow 0, console error 0, keyboard path, WCAG AA, same-state source comparison, P0/P1 0을 증명한다.
 - [x] `design-qa.md`의 마지막 줄이 정확히 `final result: passed`다.
-- [ ] 테스트·secret guard·VHK verify→receipt→review·적대 검수를 통과하고 main 대상 Draft PR을 연다.
+- [x] 테스트·secret guard·VHK verify→receipt→review·적대 검수를 통과하고 main 대상 Draft PR #73을 열었다.
 
 ## 악수
 
