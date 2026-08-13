@@ -34,7 +34,7 @@ completed: 2026-08-14
 - 사용자 홈 Install·Restore
 - main 머지·ready 전환·publish
 
-## 완료 조건
+## Completion Check (완료 조건)
 
 - [x] DesignContext가 current request → project Git → media → common taste → golden 순서로 결정론적으로 해석된다.
 - [x] 승인 source는 yohan-brain Context Trust Navigator의 Git ref와 repository-relative path로 식별된다.
