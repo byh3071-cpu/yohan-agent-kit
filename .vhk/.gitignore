@@ -1,3 +1,6 @@
 backups/
 .synced
 events/
+reports/
+receipts/
+ledger.jsonl
