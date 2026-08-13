@@ -3,8 +3,9 @@ vhk_format: 1
 type: goal
 id: 4
 title: Agent 자산 Registry와 집 PC 인벤토리
-status: IN_PROGRESS
+status: DONE
 priority: P0
+completed: 2026-08-14
 ---
 
 # Goal 4: Agent 자산 Registry와 집 PC 인벤토리
@@ -34,18 +35,30 @@ priority: P0
 
 ## Completion Check (완료 조건)
 
-- [ ] 모든 registry record가 `id`, `kind`, `owner`, `sourcePath`, `portability`, `vendors`, `lifecycle`, `provenance`, `license`, `requiredEnv`, `evidenceRefs` 필드를 정확히 가진다.
-- [ ] 저장소 논리 자산의 미분류 항목과 중복 정본이 각각 0개다.
-- [ ] `registry/assets.yaml`에서 catalog가 결정론적으로 생성되고 stale catalog를 검출한다.
-- [ ] registry와 catalog에 API key·token·로그인 세션·Windows 절대경로가 없다.
-- [ ] 집 PC 스캔은 read-only이며 raw 결과를 stdout 또는 명시적 로컬 경로로만 내보낸다.
-- [ ] `html-doc`, `planning-diagrams`, 끊어진 `competitive-brief`·`interview-me`, 프로젝트 전용 `yohan-instagram-cardnews`의 현재 분류와 근거가 남는다.
-- [ ] 프로젝트 전용 Subagent는 프로젝트에 남고 일반 Agent만 승격 후보가 된다는 계약이 문서화된다.
-- [ ] Goal 4 gate, 기존 Goal 1·2·3 gate, secret scan, `git diff --check`가 통과한다.
+- [x] 모든 registry record가 `id`, `kind`, `owner`, `sourcePath`, `portability`, `vendors`, `lifecycle`, `provenance`, `license`, `requiredEnv`, `evidenceRefs` 필드를 정확히 가진다.
+- [x] 저장소 논리 자산의 미분류 항목과 중복 정본이 각각 0개다.
+- [x] `registry/assets.yaml`에서 catalog가 결정론적으로 생성되고 stale catalog를 검출한다.
+- [x] registry와 catalog에 API key·token·로그인 세션·Windows 절대경로가 없다.
+- [x] 집 PC 스캔은 read-only이며 raw 결과를 stdout으로만 내보낸다.
+- [x] `html-doc`, `planning-diagrams`, 끊어진 `competitive-brief`·`interview-me`, 프로젝트 전용 `yohan-instagram-cardnews`의 현재 분류와 근거가 남는다.
+- [x] 프로젝트 전용 Subagent는 프로젝트에 남고 일반 Agent만 승격 후보가 된다는 계약이 문서화된다.
+- [x] Goal 4 gate, 기존 Goal 1·2·3 gate, secret scan, `git diff --check`가 통과한다.
+
+## 완료 증거
+
+- Registry: 94 logical assets, duplicate source 0, unclassified repository asset 0
+- catalog digest: `af23413c3e594957e9b49a60ca0a1c341734ae55f7b43047e576f4eafb6eb40d`
+- 집 PC read-only scan: 19 roots, 235 observations, raw list not committed
+- scanner contract: 12 assertions
+- Goal 1: PASS
+- Goal 2: PASS, 5 suites 488 assertions
+- Goal 3: PASS, resolver/recorder 30 assertions and browser QA 5 viewports
+- Goal 4: PASS
+- secret-pr-guard: high-risk content hit 0, forbidden tracked backup 0
+- 경로 길이 교차검증: 긴 worktree의 fail-closed를 확인하고 짧은 detached worktree에서 전체 회귀 PASS
 
 ## 사람 게이트
 
 - 사용자 홈 raw Inbox 쓰기
 - 외부 Skill fork 또는 라이선스 미확정 자산 편입
 - registry candidate의 `approved` 또는 `released` 승격
-
