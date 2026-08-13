@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "contract": {
+    "repo": "yohan-brain",
+    "ref": "f7615ac2fce83bd93c37801c14640c20dede5980",
+    "path": "memory/design-intelligence/index.yaml",
+    "dependencyPr": "https://github.com/byh3071-cpu/yohan-brain/pull/191"
+  },
+  "approvedSource": {
+    "repo": "yohan-brain",
+    "ref": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+    "path": "docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png",
+    "sha256": "688212d5c2c651db759dd20fd292d4017492925b253057bb301ac8bcca87a7f5",
+    "viewport": 432,
+    "state": "before-tab--goal-expanded"
+  },
+  "supportingSource": {
+    "repo": "yohan-brain",
+    "ref": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+    "path": "docs/reference/websites/assets/ai-workspace-context-trust-navigator.png",
+    "sha256": "d8da8dfafb482b58b1640343ec5b2eba59e6f1b09b5e77058be273636c5f3c76"
+  },
+  "implementation": {
+    "path": "fixtures/design-context-html-slice/index.html",
+    "sameStateEvidence": "fixtures/design-context-html-slice/evidence/comparison-432.png",
+    "manualReview": "fixtures/design-context-html-slice/evidence/manual-visual-review.md",
+    "qaReport": "fixtures/design-context-html-slice/evidence/design-qa.md"
+  }
+}

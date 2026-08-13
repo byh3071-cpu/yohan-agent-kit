@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "designContext": {
+    "contract": {
+      "repo": "yohan-brain",
+      "ref": "f7615ac2fce83bd93c37801c14640c20dede5980",
+      "path": "memory/design-intelligence/index.yaml"
+    },
+    "resolutionOrder": ["current-request", "project-git", "media", "common-taste", "golden"],
+    "tiers": [
+      { "name": "current-request", "sourceCount": 1, "applied": true },
+      { "name": "project-git", "sourceCount": 1, "applied": true },
+      { "name": "media", "sourceCount": 0, "applied": true },
+      { "name": "common-taste", "sourceCount": 0, "applied": true },
+      { "name": "golden", "sourceCount": 0, "applied": true }
+    ],
+    "constraints": {
+      "interactionModel": "stage-first-confirmation",
+      "initialTab": "before",
+      "initialDisclosure": "goal",
+      "stableAutoPromotion": false,
+      "viewports": [360, 432, 768, 1280, 1440],
+      "bodyMinimumPx": 16,
+      "secondaryMinimumPx": 14,
+      "genericCardGrid": false
+    },
+    "approvedSources": [
+      {
+        "id": "context-trust-navigator-432-verification",
+        "kind": "asset",
+        "title": "Context Trust Navigator 432px 구현 검증본",
+        "owner": "yohan-brain",
+        "status": "approved",
+        "sourceRef": {
+          "repo": "yohan-brain",
+          "path": "docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png",
+          "gitRef": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+          "sha256": "688212d5c2c651db759dd20fd292d4017492925b253057bb301ac8bcca87a7f5"
+        },
+        "hashVerification": "git-blob"
+      },
+      {
+        "id": "context-trust-navigator-reference",
+        "kind": "reference",
+        "title": "AI 워크스페이스 Context Trust Navigator",
+        "owner": "yohan-brain",
+        "status": "approved",
+        "sourceRef": {
+          "repo": "yohan-brain",
+          "path": "docs/reference/websites/ai-workspace-context-trust-navigator.md",
+          "gitRef": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+          "sha256": "f31d0b1e13e3b3605471d46431b2ac383224bb7073ca5e78a9f3aa40ad4e077a"
+        },
+        "hashVerification": "git-checkout-crlf"
+      },
+      {
+        "id": "html-artifact-design-rule",
+        "kind": "reference",
+        "title": "HTML 산출물 디자인 규칙",
+        "owner": "yohan-brain",
+        "status": "approved",
+        "sourceRef": {
+          "repo": "yohan-brain",
+          "path": "memory/rules/html-artifact-design.md",
+          "gitRef": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+          "sha256": "a6665009e22f2ccc8031bf882c2b65098959810c02708637c43059438ffc1560"
+        },
+        "hashVerification": "git-checkout-crlf"
+      }
+    ]
+  },
+  "workContext": {
+    "goal": "DesignContext resolver와 append-only recorder를 실제 HTML 검증 흐름에 연결한다.",
+    "userAndTargetScreen": "AI 실행 전에 목표, 출처, 취향 규칙, 중단 조건을 확인하는 작업자용 화면",
+    "approvedVisualSource": "yohan-brain@7d82b08720ab4b20bd75dd38b969be37120707fc:docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png",
+    "selectedSourceOfTruth": "current request -> project Git -> media -> common taste -> golden",
+    "applicableProjectRules": ["ADR-023 Accepted", "Goal 20 DONE", "stable auto promotion disabled"],
+    "acceptanceCriteria": ["five viewports", "overflow 0", "console 0", "keyboard path", "WCAG AA", "same-state comparison", "P0/P1 0"]
+  },
+  "diagnostics": ["pinned-contract-verified", "selected-source-hashes-verified", "stable-auto-promotion-disabled"]
+}

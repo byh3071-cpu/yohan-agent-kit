@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "contractRef": "f7615ac2fce83bd93c37801c14640c20dede5980",
+  "source": {
+    "ref": "7d82b08720ab4b20bd75dd38b969be37120707fc",
+    "path": "docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png",
+    "sha256": "688212d5c2c651db759dd20fd292d4017492925b253057bb301ac8bcca87a7f5"
+  },
+  "viewports": [
+    {
+      "width": 360,
+      "documentOverflow": 0,
+      "overflowingElements": [],
+      "screenshot": "screenshots/viewport-360.png"
+    },
+    {
+      "width": 432,
+      "documentOverflow": 0,
+      "overflowingElements": [],
+      "screenshot": "screenshots/viewport-432.png"
+    },
+    {
+      "width": 768,
+      "documentOverflow": 0,
+      "overflowingElements": [],
+      "screenshot": "screenshots/viewport-768.png"
+    },
+    {
+      "width": 1280,
+      "documentOverflow": 0,
+      "overflowingElements": [],
+      "screenshot": "screenshots/viewport-1280.png"
+    },
+    {
+      "width": 1440,
+      "documentOverflow": 0,
+      "overflowingElements": [],
+      "screenshot": "screenshots/viewport-1440.png"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "keyboard": [
+    {
+      "step": "before tab -> ArrowRight",
+      "passed": true
+    },
+    {
+      "step": "during tab -> ArrowLeft",
+      "passed": true
+    },
+    {
+      "step": "goal -> Enter closes",
+      "passed": true
+    },
+    {
+      "step": "goal -> Space opens",
+      "passed": true
+    }
+  ],
+  "interaction": [
+    {
+      "control": "tab:request",
+      "passed": true
+    },
+    {
+      "control": "tab:before",
+      "passed": true
+    },
+    {
+      "control": "tab:during",
+      "passed": true
+    },
+    {
+      "control": "tab:after",
+      "passed": true
+    },
+    {
+      "control": "disclosure:goal",
+      "passed": true
+    },
+    {
+      "control": "disclosure:source",
+      "passed": true
+    },
+    {
+      "control": "disclosure:taste",
+      "passed": true
+    },
+    {
+      "control": "disclosure:stop",
+      "passed": true
+    }
+  ],
+  "contrast": [
+    {
+      "selector": "body",
+      "fontSize": 16,
+      "lineHeight": 26.4,
+      "color": "rgb(23, 32, 51)",
+      "background": "rgb(247, 248, 252)",
+      "ratio": 15.33,
+      "passed": true
+    },
+    {
+      "selector": ".lede",
+      "fontSize": 16,
+      "lineHeight": 26.4,
+      "color": "rgb(86, 98, 122)",
+      "background": "rgb(247, 248, 252)",
+      "ratio": 5.78,
+      "passed": true
+    },
+    {
+      "selector": ".trigger-copy small",
+      "fontSize": 14,
+      "lineHeight": 23.1,
+      "color": "rgb(86, 98, 122)",
+      "background": "rgba(255, 255, 255, 0.96)",
+      "ratio": 6.13,
+      "passed": true
+    },
+    {
+      "selector": ".section-heading > p:last-child",
+      "fontSize": 15,
+      "lineHeight": 24.75,
+      "color": "rgb(86, 98, 122)",
+      "background": "rgba(255, 255, 255, 0.96)",
+      "ratio": 6.13,
+      "passed": true
+    },
+    {
+      "selector": ".source-ref",
+      "fontSize": 14,
+      "lineHeight": 23.1,
+      "color": "rgb(67, 80, 106)",
+      "background": "rgba(255, 255, 255, 0.96)",
+      "ratio": 8.09,
+      "passed": true
+    },
+    {
+      "selector": ".trust-flow small",
+      "fontSize": 14,
+      "lineHeight": 23.1,
+      "color": "rgb(86, 98, 122)",
+      "background": "rgba(255, 255, 255, 0.96)",
+      "ratio": 6.13,
+      "passed": true
+    },
+    {
+      "selector": "footer",
+      "fontSize": 14,
+      "lineHeight": 23.1,
+      "color": "rgb(86, 98, 122)",
+      "background": "rgb(247, 248, 252)",
+      "ratio": 5.78,
+      "passed": true
+    }
+  ],
+  "sameState": {
+    "viewport": 432,
+    "state": "before-tab--goal-expanded",
+    "sourceWidth": 432,
+    "implementationWidth": 432,
+    "structural": {
+      "activeStage": "before",
+      "expandedDisclosure": "goal",
+      "stageCount": 4,
+      "disclosureCount": 4,
+      "flowLabels": [
+        "yohan-brain",
+        "AI / Codex",
+        "검증된 결과"
+      ],
+      "lucideVersion": "1.8.0"
+    },
+    "checks": {
+      "sameViewport": true,
+      "sameState": true,
+      "stageFirst": true,
+      "trustFlow": true,
+      "realIconLibrary": true
+    },
+    "evidence": "comparison-432.png"
+  },
+  "issues": {
+    "P0": [],
+    "P1": [],
+    "P2": []
+  },
+  "summary": {
+    "passed": true,
+    "p0": 0,
+    "p1": 0,
+    "p2": 0
+  }
+}

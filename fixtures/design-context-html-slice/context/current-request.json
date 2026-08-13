@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "workContext": {
+    "goal": "DesignContext resolver와 append-only recorder를 실제 HTML 검증 흐름에 연결한다.",
+    "userAndTargetScreen": "AI 실행 전에 목표, 출처, 취향 규칙, 중단 조건을 확인하는 작업자용 화면",
+    "approvedVisualSource": "yohan-brain@7d82b08720ab4b20bd75dd38b969be37120707fc:docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png",
+    "selectedSourceOfTruth": "current request -> project Git -> media -> common taste -> golden",
+    "applicableProjectRules": ["ADR-023 Accepted", "Goal 20 DONE", "stable auto promotion disabled"],
+    "acceptanceCriteria": ["five viewports", "overflow 0", "console 0", "keyboard path", "WCAG AA", "same-state comparison", "P0/P1 0"]
+  },
+  "constraints": {
+    "interactionModel": "stage-first-confirmation",
+    "initialTab": "before",
+    "initialDisclosure": "goal",
+    "stableAutoPromotion": false
+  },
+  "approvedReferenceIds": [
+    "context-trust-navigator-432-verification",
+    "context-trust-navigator-reference",
+    "html-artifact-design-rule"
+  ]
+}

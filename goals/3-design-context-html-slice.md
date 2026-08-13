@@ -48,8 +48,16 @@ priority: P0
 
 yohan-brain Accepted 계약의 source trust 순서와 이 저장소 resolver·HTML evidence가 같은 Git ref·repository-relative path·UI state를 뜻한다.
 
+## 선행조건 검증 증거
+
+- 계약 입력 ref: `yohan-brain@f7615ac2fce83bd93c37801c14640c20dede5980`
+- 게시 branch HEAD: `fe2da4e82d7a90cc223411c06b1fdcc324087142`
+- ADR-023: frontmatter와 본문 모두 `Accepted`
+- Goal 20: `DONE`
+- dependency: yohan-brain Draft PR #191
+- 상세 감사: `docs/audits/design-context-contract-2026-08-14.md`
+
 ## 남은 사람 게이트
 
-- ADR-023 Accepted와 Goal 20 계약의 승인 branch·exact SHA 전달
 - Brain contract PR보다 이 PR을 뒤에 머지
 - Draft PR의 ready 전환과 merge

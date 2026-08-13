@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "constraints": {
+    "interactionModel": "must-not-override-current-request",
+    "viewports": [360, 432, 768, 1280, 1440],
+    "bodyMinimumPx": 16,
+    "secondaryMinimumPx": 14,
+    "genericCardGrid": false
+  },
+  "approvedReferenceIds": [
+    "html-artifact-design-rule",
+    "context-trust-navigator-reference"
+  ]
+}

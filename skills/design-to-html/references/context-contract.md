@@ -6,10 +6,28 @@ Resolve conflicts in this order; a lower-priority source cannot override a highe
 
 1. Current request
 2. Project Git
-3. yohan-brain design context
-4. Notion view
+3. Approved media
+4. Common taste rules
+5. Golden references
+
+The resolver execution contract is pinned to yohan-brain commit `f7615ac2fce83bd93c37801c14640c20dede5980`. The yohan-brain design context is the metadata/schema/index authority. A Notion view may aid discovery, but it is not a resolution tier and cannot override an approved Git source.
 
 Use repository-relative paths, Git refs, stable links, or source names in tracked files. Do not record absolute machine paths.
+
+## Minimal DesignContext envelope
+
+Place a minimal `DesignContext` before the existing `WorkContext`. It identifies the pinned contract, the five-tier resolution order, resolved constraints, and approved source refs. Keep unresolved tiers explicit and empty; never invent taste, media, or golden records and never promote a candidate automatically.
+
+```json
+{
+  "contract": { "repo": "yohan-brain", "ref": "<40-hex commit>", "path": "memory/design-intelligence/index.yaml" },
+  "resolutionOrder": ["current-request", "project-git", "media", "common-taste", "golden"],
+  "constraints": {},
+  "approvedSources": []
+}
+```
+
+`Resolve-DesignContext.ps1` is read-only and resolves Git objects instead of a dirty checkout. `Record-DesignDecision.ps1` records only `reuse`, `adapt`, `remix`, or `create` as append-only evidence. Stable promotion always remains a human gate.
 
 ## Required context record
 
