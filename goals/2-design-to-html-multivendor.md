@@ -3,8 +3,9 @@ vhk_format: 1
 type: goal
 id: 2
 title: design-to-html 멀티벤더 스킬 배포
-status: NOT_STARTED
+status: DONE
 priority: P0
+completed: 2026-08-14
 ---
 
 # Goal 2: design-to-html 멀티벤더 스킬 배포

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { execFileSync } from 'node:child_process'
+import { execFile, execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { delimiter, dirname, join, relative, resolve, sep } from 'node:path'
@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url'
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const skipDeep = process.env.VHK_GATES_SKIP_DEEP === '1'
 const WINDOWS_SHELL_METACHARS = /[&|<>^%"\r\n]/
+const POWERSHELL_SUITE_TIMEOUT_MS = 5 * 60 * 1000
 let pass = true
 
 process.on('uncaughtException', () => {
@@ -61,6 +62,7 @@ function runDirect(command, args, summaryPattern = null) {
       cwd: repoRoot,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
+      timeout: 30 * 1000,
       stdio: ['ignore', 'pipe', 'pipe']
     })
     const match = summaryPattern ? output.match(summaryPattern) : null
@@ -70,6 +72,47 @@ function runDirect(command, args, summaryPattern = null) {
     const match = summaryPattern ? output.match(summaryPattern) : null
     return { ok: false, detail: match ? match[0] : `exit ${error?.status ?? 'unknown'}` }
   }
+}
+
+async function runDirectBounded(command, args, summaryPattern, timeoutMs) {
+  if (process.platform === 'win32' && /\.cmd$/i.test(command)) {
+    if (args.some((argument) => WINDOWS_SHELL_METACHARS.test(argument))) {
+      return { ok: false, detail: 'unsafe cmd.exe argument rejected', elapsedMs: 0, outputTail: '' }
+    }
+    return { ok: false, detail: 'command shim rejected', elapsedMs: 0, outputTail: '' }
+  }
+  if (args.some((argument) => /[\0\r\n]/.test(argument))) {
+    return { ok: false, detail: 'invalid direct-process argument rejected', elapsedMs: 0, outputTail: '' }
+  }
+
+  const startedAt = Date.now()
+  return await new Promise((resolveResult) => {
+    execFile(command, args, {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      maxBuffer: 64 * 1024 * 1024,
+      timeout: timeoutMs,
+      windowsHide: true
+    }, (error, stdout, stderr) => {
+      const elapsedMs = Date.now() - startedAt
+      const output = `${stdout ?? ''}${stderr ?? ''}`
+      const match = summaryPattern ? output.match(summaryPattern) : null
+      const timedOut = Boolean(error?.killed) && elapsedMs >= timeoutMs
+      const detail = timedOut
+        ? `timeout after ${timeoutMs}ms`
+        : match
+          ? `${match[0]}; ${elapsedMs}ms`
+          : error
+            ? `exit ${error.code ?? error.signal ?? 'unknown'}; ${elapsedMs}ms`
+            : `${elapsedMs}ms`
+      resolveResult({
+        ok: !error,
+        detail,
+        elapsedMs,
+        outputTail: error ? output.split(/\r?\n/).slice(-25).join('\n') : ''
+      })
+    })
+  })
 }
 
 function comparePortablePath(left, right) {
@@ -133,7 +176,8 @@ const requiredPaths = [
 for (const path of requiredPaths) must(existsSync(join(repoRoot, path)), `required artifact ${path}`)
 
 const goal = readUtf8('goals/2-design-to-html-multivendor.md')
-must(/^status:\s*NOT_STARTED\s*$/m.test(goal), 'Goal 2 status remains NOT_STARTED')
+const goalStatus = goal.match(/^status:\s*(\S+)\s*$/m)?.[1] ?? ''
+must(['IN_PROGRESS', 'DONE'].includes(goalStatus), `Goal 2 lifecycle is active or complete: ${goalStatus || 'missing'}`)
 must(/1\.[\s\S]*2\.[\s\S]*3\.[\s\S]*4\.[\s\S]*5\./.test(goal), 'Goal 2 keeps five completion conditions')
 
 const skill = readUtf8('skills/design-to-html/SKILL.md')
@@ -187,17 +231,19 @@ if (!skipDeep) {
     'tests/Manage-ProductDesignContext.Tests.ps1',
     'tests/DesignToHtmlInvocation.Tests.ps1'
   ]
-  for (const testFile of testFiles) {
-    const result = runDirect(powerShell, [
+  await Promise.all(testFiles.map(async (testFile) => {
+    console.log(`[goal 2] PowerShell ${testFile}: START (timeout ${POWERSHELL_SUITE_TIMEOUT_MS}ms)`)
+    const result = await runDirectBounded(powerShell, [
       '-NoProfile',
       '-NonInteractive',
       '-ExecutionPolicy',
       'Bypass',
       '-File',
       testFile
-    ], /(?:PASS:\s+\d+ assertions|assertions passed:\s+\d+)/)
+    ], /(?:PASS:\s+\d+ assertions|assertions passed:\s+\d+)/, POWERSHELL_SUITE_TIMEOUT_MS)
+    if (!result.ok && result.outputTail) console.log(result.outputTail)
     gate(`PowerShell ${testFile}`, result.ok, result.detail)
-  }
+  }))
 } else {
   console.log('[goal 2] deep PowerShell regressions: SKIP (VHK_GATES_SKIP_DEEP=1)')
 }
