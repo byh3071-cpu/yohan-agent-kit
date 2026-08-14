@@ -36,10 +36,10 @@ priority: P0
 - [x] GitHub 저장소 이름이 `yohan-agent-kit`으로 바뀌고 repository ID·PR·redirect가 보존됐다.
 - [x] 로컬 `origin`이 새 GitHub URL을 가리킨다.
 - [ ] Brain 계약 PR #194가 Agent Kit PR보다 먼저 Ready 전환·병합됐다.
-- [ ] Agent Kit의 현재 문서·Registry·catalog가 새 identity를 사용한다.
-- [ ] Marketplace name `yohan-cc-skills`와 네 plugin ID가 호환용으로 유지된다.
-- [ ] 디자인 resolver/recorder가 Brain 계약 커밋 `37068a625d85bb3955579a04d87cc0f5c503c823`을 고정한다.
-- [ ] Goal 1·2·3·4·5 gate, secret scan, `git diff --check`가 통과한다.
+- [x] Agent Kit의 현재 문서·Registry·catalog가 새 identity를 사용한다.
+- [x] Marketplace name `yohan-cc-skills`와 네 plugin ID가 호환용으로 유지된다.
+- [x] 디자인 resolver/recorder가 Brain 계약 커밋 `37068a625d85bb3955579a04d87cc0f5c503c823`을 고정한다.
+- [x] Goal 1·2·3·4·5 gate, secret scan, `git diff --check`가 통과한다.
 - [ ] Agent Kit PR #74가 Brain 계약 다음 순서로 병합됐다.
 
 ## 사람 게이트
@@ -48,3 +48,15 @@ priority: P0
 - Marketplace namespace 전환
 - 로컬 canonical folder 전환
 - 사용자 홈 쓰기
+
+## 검증 증거
+
+- Agent registry: 95 assets
+- catalog digest: `581fd7e3140b45a5021e128c2586d9c688cab46a808fd8e017ba5c160242641b`
+- Goal 1: PASS
+- Goal 2: PASS, 5 suites 488 assertions
+- Goal 3: PASS, resolver/recorder 30 assertions and browser QA 5 viewports
+- Goal 4: PASS, LF/CRLF-neutral catalog self-test 포함
+- Goal 5: PASS
+- secret-pr-guard: forbidden path 0, high-risk pattern 0, tracked env backup 0
+- 전체 회귀 환경: short detached worktree `C:\Users\Public\yak-g5-final`
