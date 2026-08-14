@@ -1,8 +1,8 @@
 # ARCHITECTURE — Yohan Agent Kit
 
-## 1. 세 평면
+## 1. 세 자산 평면과 두 수명주기 계층
 
-이 레포는 범용 스킬, Claude Code 플러그인, 프로젝트 규칙을 서로 다른 평면으로 관리한다.
+이 레포는 범용 스킬, Claude Code 플러그인, 프로젝트 규칙을 서로 다른 자산 평면으로 관리한다. Registry·release store는 이 자산을 배포 가능한 불변 릴리스로 만들고, Intake는 새 노하우를 검토 가능한 후보로 들여온다.
 
 ```text
 범용 스킬 평면                     Claude 플러그인 평면
@@ -19,6 +19,14 @@ Manage-MultivendorSkills.ps1
 
 규칙 평면
 RULES.md ──vhk sync──▶ AGENTS.md · .cursorrules
+
+배포 수명주기
+registry/assets.yaml → asset-catalog.json → Build-AgentKit → 5개 패키지
+                                               ↓
+                                    immutable release store → active
+
+지식 수명주기
+로컬 발견 → ~/.yohan-agent-kit/inbox → reviewed → Draft PR → eval → released
 ```
 
 VHK 규칙 평면은 사용자 홈 스킬을 설치하지 않는다. 범용 스킬은 Claude 플러그인 디렉터리에 중복 복사하지 않는다.
@@ -40,6 +48,13 @@ yohan-agent-kit/
 │  ├─ adr-cycle.json
 │  └─ goal-cycle.json
 ├─ scripts/Manage-MultivendorSkills.ps1
+├─ registry/assets.yaml               # 사람이 관리하는 자산 정본
+├─ registry/release-bundles.json      # 5개 배포 대상 계약
+├─ adapters/                          # 벤더별 얇은 Hook 어댑터
+├─ scripts/Build-AgentKit.mjs
+├─ scripts/Manage-AgentKit.ps1
+├─ scripts/Manage-AgentIntake.ps1
+├─ scripts/Test-AgentKitCompatibility.ps1
 ├─ tests/Manage-MultivendorSkills.Tests.ps1
 ├─ docs/
 │  ├─ MULTIVENDOR_SKILL_DISTRIBUTION.md
@@ -163,11 +178,27 @@ RULES.md
 
 생성물을 직접 편집하지 않는다. 규칙 동기화 성공이 범용 스킬 설치 성공을 뜻하지 않으며, 사용자 홈 상태는 배포 도구의 Check로만 판정한다.
 
-## 9. 검증
+## 9. 버전 고정 Agent Kit 릴리스
+
+`registry/assets.yaml`은 소유자·출처·이식성·수명주기를 가진 자산 정본이다. `distribution/asset-catalog.json`은 정렬된 생성 결과이며 직접 편집하지 않는다. `Build-AgentKit.mjs`는 정확한 Git commit과 catalog digest에서 Agent Plugins, Claude Code, Codex, Cursor, Antigravity 패키지와 파일별 SHA-256 manifest를 만든다.
+
+Agent Plugins 산출물은 v1 Working Draft의 고정 범위인 Skills·MCP만 포함한다. Hooks·Rules·Commands·Subagents는 네이티브 패키지로만 배포하며, Hook 설정은 `adapters/`에 두고 공통 무상태 스크립트 `scripts/agent-kit-hook.mjs`를 호출한다.
+
+`Manage-AgentKit.ps1`은 검증된 artifact를 `~/.yohan-agent-kit/releases/<release-id>/`에 복사하고 `active`와 벤더 발견 경로를 junction으로 전환한다. Check는 무변경이며 Install·Update·Restore는 동일 PlanDigest와 사용자 홈 쓰기 승인을 요구한다. 설치 실패는 역순 rollback하고, 중단된 Restore는 현재 junction 지문을 재검사해 이어서 실행한다. Claude Marketplace의 cache·installed state는 Claude가 소유하므로 직접 수정하지 않는다.
+
+## 10. 노하우 Intake
+
+`Manage-AgentIntake.ps1`은 외부 Skill·Agent·Command·Hook·Rule·Script·Template 후보를 로컬 Inbox에만 수집한다. 크기·reparse point·비밀정보·절대경로·중복·라이선스를 검사한 뒤 `candidate → reviewed`까지만 자동화한다. `approved`와 `released`, Git push, PR 생성은 사용자의 명시적 승인 없이는 수행하지 않는다. 외부 자산은 provenance·버전·라이선스·content digest를 보존한다.
+
+## 11. 검증
 
 - skill-creator 구조 검증: 두 `SKILL.md`
 - PowerShell 5.1 AST parser
 - 격리 HomeRoot 상태 전이·경로 탈출·변조·복구 재개 테스트: `tests/Manage-MultivendorSkills.Tests.ps1`
+- 불변 릴리스·5개 패키지·네이티브 Hook 어댑터: `tests/Build-AgentKit.Tests.ps1`
+- release store 설치·업데이트·멱등성·중간 실패 rollback·복원 재개: `tests/Manage-AgentKit.Tests.ps1`
+- Inbox 승인·중복·비밀정보·라이선스 경계: `tests/Manage-AgentIntake.Tests.ps1`
+- 두 머신 증거 봉인·동일 release 비교·합성 증거 차단: `tests/AgentKitCompatibility.Tests.ps1`
 - full manifest baseline Check
 - PR 전 시크릿 검사와 staged diff 검토
 - 새 벤더 세션의 자동·명시·부정 호출 smoke test

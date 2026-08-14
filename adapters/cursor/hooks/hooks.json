@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "command": "node \"./scripts/agent-kit-hook.mjs\" cursor sessionEnd",
+        "timeout": 5,
+        "failClosed": false
+      }
+    ]
+  }
+}

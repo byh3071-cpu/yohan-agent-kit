@@ -1,0 +1,7 @@
+{
+  "install": { "status": "PASS", "evidence": "TEST_ONLY: synthetic install transaction evidence." },
+  "update": { "status": "PASS", "evidence": "TEST_ONLY: synthetic update transaction evidence." },
+  "idempotency": { "status": "PASS", "evidence": "TEST_ONLY: synthetic idempotency evidence." },
+  "rollback": { "status": "PASS", "evidence": "TEST_ONLY: synthetic restore transaction evidence." },
+  "partialFailureRollback": { "status": "PASS", "evidence": "TEST_ONLY: synthetic partial-failure rollback evidence." }
+}

@@ -1,5 +1,5 @@
 {
-  "assetCount": 95,
+  "assetCount": 110,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -439,6 +439,70 @@
       ]
     },
     {
+      "contentDigest": "27c6f47ff16f5897f3ba1e2453a01b5df88161e124e651af84b9b197cad53202",
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ],
+      "id": "config.release-bundles",
+      "kind": "config",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "registry/release-bundles.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "1ada31bafebda631e58bdf6696342cedf60d3473895a0ca50ae3c2741473fea8",
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ],
+      "id": "fixture.agent-kit-session-results",
+      "kind": "fixture",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "fixtures/agent-kit-session-results.example.json",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "843ade7e87b25f840cfe6fe7366268c1fd44bc783f02b7a84bcdb955fd68aebb",
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ],
+      "id": "fixture.agent-kit-transaction-results",
+      "kind": "fixture",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "fixtures/agent-kit-transaction-results.example.json",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "89eaafa4f8714c8267ad1acbf791abff4fc04a11772dd4236ac67a7e848d53a9",
       "evidenceRefs": [
         "docs/audits/design-context-contract-2026-08-14.md"
@@ -457,6 +521,78 @@
         "codex",
         "cursor",
         "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "3a88a9cbb368ca19dcb68629128969772ac3917a689fb3fb20892c7ef19832c3",
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ],
+      "id": "hook.adapter.antigravity",
+      "kind": "hook",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "repo-authored;official-vendor-contract",
+      "requiredEnv": [],
+      "sourcePath": "adapters/antigravity/hooks.json",
+      "vendors": [
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "53640ab6bbdf6c3c4f04cdb3fded8f6cd6f042db0863552de5b7e3b9edec46c2",
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ],
+      "id": "hook.adapter.claude-code",
+      "kind": "hook",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "repo-authored;official-vendor-contract",
+      "requiredEnv": [],
+      "sourcePath": "adapters/claude-code/hooks",
+      "vendors": [
+        "claude-code"
+      ]
+    },
+    {
+      "contentDigest": "7f70c07a8c368b43cec8dc5a918e123d0e5989b3ec6be911acfc7cf999c04651",
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ],
+      "id": "hook.adapter.codex",
+      "kind": "hook",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "repo-authored;official-vendor-contract",
+      "requiredEnv": [],
+      "sourcePath": "adapters/codex/hooks.json",
+      "vendors": [
+        "codex"
+      ]
+    },
+    {
+      "contentDigest": "e6707087e7b26bbbd31e6c7bb2fc6dc62495357e900519bdccdcb4f942c5f108",
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ],
+      "id": "hook.adapter.cursor",
+      "kind": "hook",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "repo-authored;official-vendor-contract",
+      "requiredEnv": [],
+      "sourcePath": "adapters/cursor/hooks",
+      "vendors": [
+        "cursor"
       ]
     },
     {
@@ -982,7 +1118,50 @@
       ]
     },
     {
-      "contentDigest": "922d86335fa0b2d3486f8dc3d9fadc8f0fc687792fc29e6acaf5eb1ec629a751",
+      "contentDigest": "a025e33561cbec2438997e8819e8b1ecbd503fba1c0eda3e1347e65e349baaf0",
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ],
+      "id": "script.agent-kit-hook",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored;official-vendor-contract",
+      "requiredEnv": [],
+      "sourcePath": "scripts/agent-kit-hook.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "6a22a0010683771eab5f1928465f5896b95929c4d1abd7c2d0d5115cb69e1b1b",
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ],
+      "id": "script.build-agent-kit",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Build-AgentKit.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "dc38c381b315adc6fc3b5fc6b3afdfc4b3a6cdaffb0f4b5366b950f1db124a98",
       "evidenceRefs": [
         "scripts/Build-AssetCatalog.mjs"
       ],
@@ -1109,7 +1288,112 @@
       ]
     },
     {
-      "contentDigest": "257360eb0d55805063c96876b11e593c3b12f14919bf6cc93d499d2232486e6e",
+      "contentDigest": "681acaa2660597e7897be10be31764f383a06311ba23bb11ac6d7bf1bd533977",
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ],
+      "id": "script.check-goal-6",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-6.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "abb65ca905caf14081c4ff384968d12b6ff5d2e71c54d089d8485d65f96f9d36",
+      "evidenceRefs": [
+        "goals/7-knowledge-intake.md"
+      ],
+      "id": "script.check-goal-7",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-7.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "1b95e01bf3627a58ca03c4d5817c0e1ae741e41ee0595c6243c961c01c6d42f9",
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ],
+      "id": "script.check-goal-8",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-8.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "4958dcb0e4349b0b6319951b5a0d7bca52fc9730e3bced7df46f97b9730ed16f",
+      "evidenceRefs": [
+        "goals/7-knowledge-intake.md"
+      ],
+      "id": "script.manage-agent-intake",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Manage-AgentIntake.ps1",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "96476a82b1b0a60677df20906721a6a83922821783caa3a5d42f06fd1b335266",
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ],
+      "id": "script.manage-agent-kit",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Manage-AgentKit.ps1",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "0d4bf8d0778fb9fec8a6d0b0e2c3533ae7b8bc8344297499d8c4583a44d99d9d",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -1227,6 +1511,27 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/Scan-AgentAssets.ps1",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "c8cb4ff939bbdeb4be0d678a5dc56014fc419eb18d22aa16afe9e1fdd1145933",
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ],
+      "id": "script.test-agent-kit-compatibility",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Test-AgentKitCompatibility.ps1",
       "vendors": [
         "claude-code",
         "codex",
@@ -1921,9 +2226,9 @@
       ]
     }
   ],
-  "catalogDigest": "df64ee8f6a6ad31ede4bb171a36347e76f89293f4e493dd056c90d710525aa2f",
+  "catalogDigest": "9c41562884715cd45d7d0f9f83a547cba8ee835abc831b5c45ff855336ef3d9f",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "bb94a38ef51ae16d34101e19f87121c61250ca3b504f76491ac1d7a27dbec78c",
+  "registryDigest": "b75feb68966379983ae5bab2669dee99c31a9d54a74dabdb392fd526eddcef78",
   "schemaVersion": 1
 }

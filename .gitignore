@@ -24,3 +24,7 @@ settings.json.bak-*
 
 # Deterministic local fixtures for skill distribution tests
 tests/.work/
+
+# Generated Agent Kit releases and machine-local intake/evidence
+dist/
+.yohan-agent-kit/

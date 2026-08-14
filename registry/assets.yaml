@@ -1825,6 +1825,296 @@
       "evidenceRefs": [
         "goals/5-yohan-agent-kit-identity.md"
       ]
+    },
+    {
+      "id": "config.release-bundles",
+      "kind": "config",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "registry/release-bundles.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ]
+    },
+    {
+      "id": "script.build-agent-kit",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Build-AgentKit.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ]
+    },
+    {
+      "id": "script.manage-agent-kit",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Manage-AgentKit.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ]
+    },
+    {
+      "id": "script.manage-agent-intake",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Manage-AgentIntake.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/7-knowledge-intake.md"
+      ]
+    },
+    {
+      "id": "script.test-agent-kit-compatibility",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Test-AgentKitCompatibility.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ]
+    },
+    {
+      "id": "script.check-goal-6",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-6.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ]
+    },
+    {
+      "id": "script.check-goal-7",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-7.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/7-knowledge-intake.md"
+      ]
+    },
+    {
+      "id": "script.check-goal-8",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-8.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ]
+    },
+    {
+      "id": "fixture.agent-kit-session-results",
+      "kind": "fixture",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "fixtures/agent-kit-session-results.example.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ]
+    },
+    {
+      "id": "fixture.agent-kit-transaction-results",
+      "kind": "fixture",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "fixtures/agent-kit-transaction-results.example.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ]
+    },
+    {
+      "id": "hook.adapter.claude-code",
+      "kind": "hook",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "adapters/claude-code/hooks",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;official-vendor-contract",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ]
+    },
+    {
+      "id": "hook.adapter.codex",
+      "kind": "hook",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "adapters/codex/hooks.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "codex"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;official-vendor-contract",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ]
+    },
+    {
+      "id": "hook.adapter.cursor",
+      "kind": "hook",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "adapters/cursor/hooks",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;official-vendor-contract",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ]
+    },
+    {
+      "id": "hook.adapter.antigravity",
+      "kind": "hook",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "adapters/antigravity/hooks.json",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;official-vendor-contract",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ]
+    },
+    {
+      "id": "script.agent-kit-hook",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/agent-kit-hook.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;official-vendor-contract",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/AGENT_KIT_RELEASES.md"
+      ]
     }
   ]
 }

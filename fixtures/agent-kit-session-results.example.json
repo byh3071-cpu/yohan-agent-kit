@@ -1,0 +1,38 @@
+{
+  "claude-code": {
+    "explicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude explicit-skill evidence." },
+    "implicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude implicit-skill evidence." },
+    "negativeRouting": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude negative-routing evidence." },
+    "sharedScript": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude shared-script evidence." },
+    "subagent": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude subagent evidence." },
+    "hookFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude hook-isolation evidence." },
+    "mcpAuthFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Claude MCP-isolation evidence." }
+  },
+  "codex": {
+    "explicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex explicit-skill evidence." },
+    "implicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex implicit-skill evidence." },
+    "negativeRouting": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex negative-routing evidence." },
+    "sharedScript": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex shared-script evidence." },
+    "subagent": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex subagent evidence." },
+    "hookFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex hook-isolation evidence." },
+    "mcpAuthFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Codex MCP-isolation evidence." }
+  },
+  "cursor": {
+    "explicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor explicit-skill evidence." },
+    "implicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor implicit-skill evidence." },
+    "negativeRouting": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor negative-routing evidence." },
+    "sharedScript": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor shared-script evidence." },
+    "subagent": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor subagent evidence." },
+    "hookFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor hook-isolation evidence." },
+    "mcpAuthFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Cursor MCP-isolation evidence." }
+  },
+  "antigravity": {
+    "explicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity explicit-skill evidence." },
+    "implicitSkill": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity implicit-skill evidence." },
+    "negativeRouting": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity negative-routing evidence." },
+    "sharedScript": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity shared-script evidence." },
+    "subagent": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity CLI subagent evidence." },
+    "hookFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity hook-isolation evidence." },
+    "mcpAuthFailureIsolation": { "status": "PASS", "evidence": "TEST_ONLY: synthetic Antigravity MCP-isolation evidence." }
+  }
+}

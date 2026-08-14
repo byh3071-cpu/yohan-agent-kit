@@ -660,7 +660,16 @@ function Get-JunctionIdentity {
     $fullPath = Get-NormalizedFullPath -Path $Entry.FullName
     $fsutilPath = Join-Path ([Environment]::GetFolderPath('System')) 'fsutil.exe'
     if (-not [IO.File]::Exists($fsutilPath)) { throw 'System32 fsutil.exe is required to identify Windows junctions' }
-    $fileIdOutput = @(& $fsutilPath file queryfileid $fullPath 2>&1)
+    # fsutil still applies the legacy MAX_PATH limit to ordinary drive paths.
+    # Use the Win32 extended-path form so transaction staging remains reliable
+    # when the repository or backup identifier makes the junction path long.
+    $fileIdPath = if ($fullPath.StartsWith('\\')) {
+        '\\?\UNC\' + $fullPath.Substring(2)
+    }
+    else {
+        '\\?\' + $fullPath
+    }
+    $fileIdOutput = @(& $fsutilPath file queryfileid $fileIdPath 2>&1)
     $fileIdExitCode = $LASTEXITCODE
     $fileIdMatch = [regex]::Match([string]::Join(' ', @($fileIdOutput | ForEach-Object { [string]$_ })), '0x[0-9A-Fa-f]{16,32}')
     if ($fileIdExitCode -ne 0 -or -not $fileIdMatch.Success) {

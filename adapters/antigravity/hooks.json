@@ -1,0 +1,11 @@
+{
+  "yohan-agent-kit-observer": {
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "node \"./scripts/agent-kit-hook.mjs\" antigravity PostInvocation",
+        "timeout": 5
+      }
+    ]
+  }
+}

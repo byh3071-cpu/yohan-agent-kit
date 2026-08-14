@@ -77,7 +77,8 @@ function discoverRepoAssets() {
   ])
   const configs = new Set([
     '.claude-plugin/marketplace.json', '.cursor/mcp.json.example',
-    'distribution/design-toolchain.json', 'dotfiles/claude/settings.json'
+    'distribution/design-toolchain.json', 'dotfiles/claude/settings.json',
+    'registry/release-bundles.json'
   ])
 
   for (const path of gitFiles) {
@@ -88,11 +89,16 @@ function discoverRepoAssets() {
     else if (/^plugins\/[^/]+\/agents\/[^/]+\.md$/.test(path)) add('agent', path)
     else if (/^plugins\/[^/]+\/commands\/[^/]+\.md$/.test(path)) add('command', path)
     else if ((match = path.match(/^plugins\/([^/]+)\/hooks\/hooks\.json$/))) add('hook', `plugins/${match[1]}/hooks`)
+    else if (path === 'adapters/claude-code/hooks/hooks.json') add('hook', 'adapters/claude-code/hooks')
+    else if (path === 'adapters/codex/hooks.json') add('hook', path)
+    else if (path === 'adapters/cursor/hooks/hooks.json') add('hook', 'adapters/cursor/hooks')
+    else if (path === 'adapters/antigravity/hooks.json') add('hook', path)
     else if (/^plugins\/[^/]+\/\.mcp\.json$/.test(path)) add('mcp', path)
     else if (/^scripts\/[^/]+\.(?:mjs|ps1)$/.test(path)) add('script', path)
     else if (/^distribution\/manifests\/[^/]+\.json$/.test(path)) add('manifest', path)
     else if (path.endsWith('/report-template.html')) add('template', path)
     else if (path === 'fixtures/design-context-html-slice/index.html') add('fixture', 'fixtures/design-context-html-slice')
+    else if (/^fixtures\/agent-kit-(?:session|transaction)-results\.example\.json$/.test(path)) add('fixture', path)
     else if (rules.has(path)) add('rule', path)
     else if (configs.has(path)) add('config', path)
   }

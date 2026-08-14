@@ -60,6 +60,19 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 내용이 정본과 다르면 승인 플래그가 있어도 덮어쓰지 않는다. 자세한 경로·상태·AGY fallback 계약은 [멀티벤더 스킬 배포](docs/MULTIVENDOR_SKILL_DISTRIBUTION.md)를 따른다.
 
+## 버전 고정 Agent Kit 릴리스
+
+개별 Skill junction과 별도로, 검증된 commit에서 다섯 패키지(Agent Plugins·Claude Code·Codex·Cursor·Antigravity)를 만들고 동일 release ID로 두 PC에 활성화한다.
+
+```powershell
+node .\scripts\Build-AgentKit.mjs --release v0.1.0-<short-sha> --output-root dist\releases
+.\scripts\Manage-AgentKit.ps1 -Mode Check -Release <id> -Targets All
+.\scripts\Manage-AgentKit.ps1 -Mode Install -Release <id> -Targets All `
+  -PlanDigest <digest> -ApproveGlobalHomeWrite
+```
+
+`dist/`는 생성 결과이고 정본이 아니다. 신규 노하우는 자동 push하지 않으며 로컬 Inbox에서 검사·검토한 뒤 승인된 Draft PR로 승격한다. 자세한 계약은 [릴리스 저장소](docs/AGENT_KIT_RELEASES.md), [노하우 Intake](docs/AGENT_KIT_INTAKE.md), [두 PC 검증](docs/AGENT_KIT_TWO_MACHINE_RUNBOOK.md)을 따른다.
+
 ## Claude Code 플러그인을 새 머신에 설치
 GitHub 에 push 된 뒤:
 ```
@@ -110,6 +123,13 @@ skills/
 distribution/manifests/               # 스킬 전체 파일 manifest
 scripts/Manage-MultivendorSkills.ps1   # Check · Install · Restore
 tests/Manage-MultivendorSkills.Tests.ps1
+registry/assets.yaml                   # 자산 Registry 정본
+registry/release-bundles.json          # 패키지·호환 버전 계약
+adapters/                              # Claude/Codex/Cursor/Antigravity 어댑터
+scripts/Build-AgentKit.mjs             # 불변 release artifact 생성
+scripts/Manage-AgentKit.ps1            # release Check · Install · Update · Restore
+scripts/Manage-AgentIntake.ps1         # 로컬 Inbox 후보 수집·검토
+scripts/Test-AgentKitCompatibility.ps1 # 두 PC·네 벤더 증거 봉인·비교
 plugins/
   yohan-core/                          # 공통 코어 "두뇌"
     .claude-plugin/plugin.json
