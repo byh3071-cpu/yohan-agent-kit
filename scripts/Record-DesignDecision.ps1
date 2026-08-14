@@ -4,7 +4,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$BrainRoot,
     [string]$ContractRepositoryRoot,
-    [string]$ContractRef = 'f7615ac2fce83bd93c37801c14640c20dede5980',
+    [string]$ContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823',
     [Parameter(Mandatory = $true)][ValidatePattern('^memory/design-intelligence/events/[a-z0-9][a-z0-9-]*\.jsonl$')][string]$EventLogPath,
     [Parameter(Mandatory = $true)][ValidatePattern('^[a-z0-9][a-z0-9-]*$')][string]$EventId,
     [Parameter(Mandatory = $true)][datetime]$OccurredAt,
@@ -21,7 +21,7 @@ param(
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
-$script:pinnedContractRef = 'f7615ac2fce83bd93c37801c14640c20dede5980'
+$script:pinnedContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823'
 
 function Get-NormalizedRoot {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -72,7 +72,7 @@ function Assert-PinnedContract {
     if ($indexExit -ne 0) { throw 'Pinned design intelligence index is unavailable' }
     $index = [string]::Join("`n", @($indexOutput | ForEach-Object { [string]$_ }))
     foreach ($required in @(
-        'resolver_recording_execution: yohan-cc-skills',
+        'resolver_recording_execution: yohan-agent-kit',
         'stable_auto_promotion: false',
         'stable_promotion_requires_human: true',
         'correction_mode: append-only',

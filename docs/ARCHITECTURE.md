@@ -1,4 +1,4 @@
-# ARCHITECTURE — yohan-cc-skills
+# ARCHITECTURE — Yohan Agent Kit
 
 ## 1. 세 평면
 
@@ -26,7 +26,7 @@ VHK 규칙 평면은 사용자 홈 스킬을 설치하지 않는다. 범용 스�
 ## 2. 디렉터리 구조
 
 ```text
-yohan-cc-skills/
+yohan-agent-kit/
 ├─ skills/
 │  ├─ adr-cycle/
 │  │  ├─ SKILL.md

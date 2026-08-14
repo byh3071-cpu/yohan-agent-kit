@@ -1,5 +1,5 @@
 {
-  "assetCount": 94,
+  "assetCount": 95,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -371,7 +371,7 @@
       "kind": "config",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -381,7 +381,7 @@
       ]
     },
     {
-      "contentDigest": "12e9ba2d41ef9443e65ae7d8c91b04f86d94f14368407c6c265c76fe36c10a27",
+      "contentDigest": "64c253c5dd41deb30ea699d76220a4feefbad1be58a0a7f05bc0d0a849683410",
       "evidenceRefs": [
         "dotfiles/claude/settings.json"
       ],
@@ -389,7 +389,7 @@
       "kind": "config",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -399,7 +399,7 @@
       ]
     },
     {
-      "contentDigest": "8047c1aa80f06cad927deec3e3bbde1788d7f7088a5e105c7719b9afdb342988",
+      "contentDigest": "ffe9485ffe5bcfc8564d69493522e8eed2a15e05dd20c4becacf70a472bbbf7e",
       "evidenceRefs": [
         ".cursor/mcp.json.example"
       ],
@@ -407,7 +407,7 @@
       "kind": "config",
       "license": "UNLICENSED",
       "lifecycle": "approved",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -425,7 +425,7 @@
       "kind": "config",
       "license": "UNLICENSED",
       "lifecycle": "approved",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -439,7 +439,7 @@
       ]
     },
     {
-      "contentDigest": "98b809791f6ba7d42a281b9c4c556c4b3503925dc7f906a227ebc51876dbeab6",
+      "contentDigest": "89eaafa4f8714c8267ad1acbf791abff4fc04a11772dd4236ac67a7e848d53a9",
       "evidenceRefs": [
         "docs/audits/design-context-contract-2026-08-14.md"
       ],
@@ -447,7 +447,7 @@
       "kind": "fixture",
       "license": "MIXED-UNLICENSED-ISC",
       "lifecycle": "approved",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PROJECT_SPECIFIC",
       "provenance": "repo-authored;goal-3-evidence",
       "requiredEnv": [],
@@ -540,7 +540,7 @@
       "kind": "manifest",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -562,7 +562,7 @@
       "kind": "manifest",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -584,7 +584,7 @@
       "kind": "manifest",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -622,7 +622,7 @@
       ]
     },
     {
-      "contentDigest": "0ed15ed668981978b04e1ea09e17b9c72d101a94003dd903daa315ff0f3c5b67",
+      "contentDigest": "ff9f8efd8570e1e56bdc600e95fe7ad26032f6f7c4665981cf40a7bbba42e955",
       "evidenceRefs": [
         "plugins/critical-thinking/.claude-plugin/plugin.json"
       ],
@@ -630,7 +630,7 @@
       "kind": "plugin",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -648,7 +648,7 @@
       "kind": "plugin",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -666,7 +666,7 @@
       "kind": "plugin",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -676,7 +676,7 @@
       ]
     },
     {
-      "contentDigest": "1a957d86079690b36a00f9958115345efcfe88946ff23bf1953b5f77d05889ad",
+      "contentDigest": "1ecaef77aae6ecde09de71e3083e17a7a0a4fcca8364d062142c9c060bb18e45",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -684,7 +684,7 @@
       "kind": "plugin",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -723,7 +723,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -737,7 +737,7 @@
       ]
     },
     {
-      "contentDigest": "fc76ab085c83aafe7fe7e436e0ae5498ab427a560f5826db8c22c2990c5331b2",
+      "contentDigest": "9ad1e4426d874d72a4d369b5ab9c0cfde6195eb8e872e35ff761f5a671c4c883",
       "evidenceRefs": [
         ".agents/rules/vhk-rules.md"
       ],
@@ -745,7 +745,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -759,7 +759,7 @@
       ]
     },
     {
-      "contentDigest": "993bca106bf0ecf49d18789d12ac8602b5f1da7c82a2667ee637bf2f341d15a0",
+      "contentDigest": "ec9cbabfbed6ab9286ac04e4304be41f8400c69fb013fa790edf28ac12b44bcc",
       "evidenceRefs": [
         "GEMINI.md"
       ],
@@ -767,7 +767,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -777,7 +777,7 @@
       ]
     },
     {
-      "contentDigest": "dc3a3322218627ac598d58ff7aa3f559115b15dadec344e221f78b1f37d7c401",
+      "contentDigest": "de9e4e734ece779e30d6d3c3f2eeebf8000206782ea0b7323f833e8e81b01d5b",
       "evidenceRefs": [
         "CLAUDE.md"
       ],
@@ -785,7 +785,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -795,7 +795,7 @@
       ]
     },
     {
-      "contentDigest": "8bb0bcff313465e152500de3cb7098c1c63a50287c06a4320adbd737a2f84a0a",
+      "contentDigest": "628f4ca01a5a268a55b0000589dcee9f4b08ed6bf4604f0bc735ab312ab7c0d4",
       "evidenceRefs": [
         ".clinerules/vhk-rules.md"
       ],
@@ -803,7 +803,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "deprecated",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "LEGACY",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -813,7 +813,7 @@
       ]
     },
     {
-      "contentDigest": "6ded02a135f7c5e31f1d0cdf2a021a13835bf909dd7b09810ac92723a755d858",
+      "contentDigest": "5d8d1423f91c6656f9444f2dbc3ac04b7f197dda3e4844e2bb57c838e2dff9bd",
       "evidenceRefs": [
         "RULES.md"
       ],
@@ -821,7 +821,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -882,7 +882,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -892,7 +892,7 @@
       ]
     },
     {
-      "contentDigest": "903b130638bbbf7c2b5620824e0aa96b030e5c564024aedf418155f81f2f938a",
+      "contentDigest": "a32d910b13418bbea2e520fb334e09657865249a473401000191630890b6deef",
       "evidenceRefs": [
         ".cursorrules"
       ],
@@ -900,7 +900,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "deprecated",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -910,7 +910,7 @@
       ]
     },
     {
-      "contentDigest": "a05f1dc253980c0c91667fca61a3ce45a319f0732d604494a827283cc49a2879",
+      "contentDigest": "6f750cd4ed2148153f4bcd20ed0ff040d43f169d229eff2eb39bc8b38f882857",
       "evidenceRefs": [
         ".github/copilot-instructions.md"
       ],
@@ -918,7 +918,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "approved",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -928,7 +928,7 @@
       ]
     },
     {
-      "contentDigest": "f553127083874589a9da830222aa07fac7d60a31f852e75ffc3de960a307fb2e",
+      "contentDigest": "e2df906d49f61760815c05ff8b1117b2ab67d4e320d5ca8e01ad8a082b003a38",
       "evidenceRefs": [
         ".windsurfrules"
       ],
@@ -936,7 +936,7 @@
       "kind": "rule",
       "license": "UNLICENSED",
       "lifecycle": "deprecated",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "LEGACY",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -990,7 +990,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "reviewed",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1012,7 +1012,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1033,7 +1033,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1046,7 +1046,7 @@
       ]
     },
     {
-      "contentDigest": "1df5f4e58709af7637f6e9ed7d0369f7454a1859e71688c49cab28952bb09d1b",
+      "contentDigest": "2ee3797c5f26c82061e3525f1b40ae0224c1bf0fb947163ca7aa184ff665b4ee",
       "evidenceRefs": [
         "scripts/check-goal-3.mjs"
       ],
@@ -1054,7 +1054,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1075,12 +1075,34 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "reviewed",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-4.mjs",
       "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "04f8980f22ab69758900d192bbf3e833d5473ff9518b1d6ddfde9340cb77844c",
+      "evidenceRefs": [
+        "goals/5-yohan-agent-kit-identity.md"
+      ],
+      "id": "script.check-goal-5",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-5.mjs",
+      "vendors": [
+        "agent-plugins",
         "claude-code",
         "codex",
         "cursor",
@@ -1096,7 +1118,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1117,7 +1139,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1138,7 +1160,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1151,7 +1173,7 @@
       ]
     },
     {
-      "contentDigest": "2e2389d377deaabdb0c8d2e409ca60435a3f0ca546dd62fbf6de91da91028aaf",
+      "contentDigest": "0e603d6fd78be0c7a917077e4dddaea8dfc8e9e6f8e7aecbb09e75ad8d4a6382",
       "evidenceRefs": [
         "scripts/Record-DesignDecision.ps1"
       ],
@@ -1159,7 +1181,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1172,7 +1194,7 @@
       ]
     },
     {
-      "contentDigest": "5dd3ff3eff5364ea2eb6b45af6304c3519fdd4851935aaf75c30eb97945ff750",
+      "contentDigest": "a2481d84267e86eee18ba55695d275c9108bc3280e393f43b10d64ed56eb587b",
       "evidenceRefs": [
         "scripts/Resolve-DesignContext.ps1"
       ],
@@ -1180,7 +1202,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1201,7 +1223,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "reviewed",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1222,7 +1244,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1243,7 +1265,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1256,7 +1278,7 @@
       ]
     },
     {
-      "contentDigest": "66044973362c02e0dc332cffbc6346781c05a1c25baa7774d2e61a5a8fe38736",
+      "contentDigest": "75a3b6acfb707f99e5ed7eb1c1ecf9ca728116a8d9148720a9ad2c921c352b35",
       "evidenceRefs": [
         "scripts/verify-design-context-html.mjs"
       ],
@@ -1264,7 +1286,7 @@
       "kind": "script",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1285,7 +1307,7 @@
       "kind": "skill",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1321,7 +1343,7 @@
       ]
     },
     {
-      "contentDigest": "0c4d2cbbade58a475fd60f79d71298e5c1f7e744b9a11a47e45fd8bd81df5709",
+      "contentDigest": "ec9cb4bf20f49f3ec35142ae8bab5a907170c87ccdc522b773d816745b3a1597",
       "evidenceRefs": [
         "skills/design-to-html"
       ],
@@ -1329,7 +1351,7 @@
       "kind": "skill",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1351,7 +1373,7 @@
       "kind": "skill",
       "license": "UNLICENSED",
       "lifecycle": "released",
-      "owner": "yohan-cc-skills",
+      "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
       "requiredEnv": [],
@@ -1900,9 +1922,9 @@
       ]
     }
   ],
-  "catalogDigest": "af23413c3e594957e9b49a60ca0a1c341734ae55f7b43047e576f4eafb6eb40d",
+  "catalogDigest": "d24bf5f440f73fca55deb16308251bec5cf616d916c1d533f1eb6620b2467f82",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "3182a325b5a7e6e905f70456cc87c073d0ac49127c5493fb415d6fc2886b18f8",
+  "registryDigest": "39d34e7c86324297410cd8d69f9ba24e6d5f27dc1b8922c1af835eeb94e6908d",
   "schemaVersion": 1
 }

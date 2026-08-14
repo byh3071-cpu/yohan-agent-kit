@@ -1,11 +1,11 @@
-# yohan-cc-skills — 프로젝트 규칙 단일 소스 (Single Source of Truth)
+# Yohan Agent Kit — 프로젝트 규칙 단일 소스 (Single Source of Truth)
 
 > ⚡ 규칙 변경은 **여기서만** — `vhk sync` 로 AGENTS.md · .cursorrules 전파.
 
 ## 서문
 
 - 한 줄 설명: 멀티벤더 범용 스킬 정본·배포 자동화 + Claude Code 플러그인 마켓플레이스
-- 레포: https://github.com/byh3071-cpu/yohan-cc-skills
+- 레포: https://github.com/byh3071-cpu/yohan-agent-kit
 - tier: S (inheritance-registry)
 
 ## 기술 스택

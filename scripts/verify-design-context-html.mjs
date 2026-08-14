@@ -20,7 +20,7 @@ if (!allowedEvidenceRoot) throw new Error('Evidence output must be the committed
 const screenshotRoot = join(evidenceRoot, 'screenshots')
 const brainRootInput = valueAfter('--brain-root') || process.env.YOHAN_BRAIN_ROOT
 const brainRoot = brainRootInput ? resolve(brainRootInput) : ''
-const contractRef = 'f7615ac2fce83bd93c37801c14640c20dede5980'
+const contractRef = '37068a625d85bb3955579a04d87cc0f5c503c823'
 const sourceRef = '7d82b08720ab4b20bd75dd38b969be37120707fc'
 const sourcePath = 'docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png'
 const sourceSha = '688212d5c2c651db759dd20fd292d4017492925b253057bb301ac8bcca87a7f5'

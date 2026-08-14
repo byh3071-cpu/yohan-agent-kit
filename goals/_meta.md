@@ -1,7 +1,7 @@
 ---
 vhk_format: 1
 type: meta
-project: yohan-cc-skills
+project: yohan-agent-kit
 version: v0.1
 ---
 

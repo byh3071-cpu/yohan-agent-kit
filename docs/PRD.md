@@ -1,10 +1,10 @@
-# PRD — yohan-cc-skills
+# PRD — Yohan Agent Kit
 
 > 정본: `RULES.md`, `skills/`, `distribution/`, `.claude-plugin/marketplace.json`, `plugins/`
 
 ## 1. 제품 정의
 
-yohan-cc-skills는 두 배포 표면을 한 Git 이력에서 관리한다.
+Yohan Agent Kit은 두 배포 표면을 한 Git 이력에서 관리한다.
 
 1. Codex·Cursor·Claude Code·Antigravity가 공유하는 범용 개인 스킬의 원문·무결성 manifest·Windows 설치 자동화
 2. Claude Code 전용 스킬·서브에이전트·훅·명령·MCP를 묶는 기존 플러그인 마켓플레이스

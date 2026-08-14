@@ -1,6 +1,8 @@
-# yohan-cc-skills
+# Yohan Agent Kit
 
 요한의 **멀티벤더 범용 스킬 Git 정본**이자 기존 **Claude Code 플러그인 마켓플레이스**다. 범용 스킬은 Codex·Cursor·Claude Code·Antigravity가 같은 원문을 읽고, Claude 전용 훅·명령·에이전트 번들은 기존 `plugins/`에서 독립적으로 유지한다.
+
+GitHub 정본은 `byh3071-cpu/yohan-agent-kit`이다. 첫 호환 릴리스 동안 Claude Marketplace namespace `yohan-cc-skills`와 `@yohan-cc-skills` 설치 suffix는 유지한다. 전체 전환 순서와 롤백은 [Yohan Agent Kit 이름 전환](docs/YOHAN_AGENT_KIT_MIGRATION.md)을 따른다.
 
 ## 왜 레포인가
 에이전트 스킬은 사용자 홈의 제품별 경로에 설치되므로 수동 복사만으로는 정본·리뷰·복원이 보장되지 않는다.
@@ -61,13 +63,13 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 ## Claude Code 플러그인을 새 머신에 설치
 GitHub 에 push 된 뒤:
 ```
-claude plugin marketplace add byh3071-cpu/yohan-cc-skills
+claude plugin marketplace add byh3071-cpu/yohan-agent-kit
 claude plugin install statusline@yohan-cc-skills
 ```
 또는 `~/.claude/settings.json` 에 직접:
 ```json
 "extraKnownMarketplaces": {
-  "yohan-cc-skills": { "source": { "source": "github", "repo": "byh3071-cpu/yohan-cc-skills" } }
+  "yohan-cc-skills": { "source": { "source": "github", "repo": "byh3071-cpu/yohan-agent-kit" } }
 },
 "enabledPlugins": { "statusline@yohan-cc-skills": true }
 ```
