@@ -554,7 +554,7 @@
       ]
     },
     {
-      "contentDigest": "e619be9605a409607bf63e07d96b9f3eb38c8c7fbb83678eb05b767c1cd5b96d",
+      "contentDigest": "a264e5eb4d7c48efe40be4544937b5d797946cfc333b3abcc66ccdcb861d9ad1",
       "evidenceRefs": [
         "distribution/manifests/design-to-html.json"
       ],
@@ -1922,7 +1922,7 @@
       ]
     }
   ],
-  "catalogDigest": "b11c30ff2ad3e64bd558ff5e74d16820f4752248cb3a17daf7a0ff240ab5a3e8",
+  "catalogDigest": "581fd7e3140b45a5021e128c2586d9c688cab46a808fd8e017ba5c160242641b",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "39d34e7c86324297410cd8d69f9ba24e6d5f27dc1b8922c1af835eeb94e6908d",

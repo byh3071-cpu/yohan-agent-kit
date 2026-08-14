@@ -10,7 +10,7 @@
                   {
                       "path":  "references/context-contract.md",
                       "bytes":  2886,
-                      "sha256":  "BCE94F8CDA0C99BA58E82E5D59399EA50CFE69C9184413863BBFCB68B2E5E911"
+                      "sha256":  "110CFC849ADD6B3D6B65F69B77254EBFA4619ACFAAD7D1B9F6EEAC979D198D95"
                   },
                   {
                       "path":  "references/quality-gate.md",
@@ -23,5 +23,5 @@
                       "sha256":  "19DDE776B47BC2DA5D88B3AFC6655BA5468C42A9ED0612A9C48F778DAC37C05B"
                   }
               ],
-    "digest":  "FC8813170B6F6B05026D3370249675321705152056A7520201D3F2D60322568F"
+    "digest":  "15F898CD4B39CCE061E2C5E4152154322EFEC720B113F807038C4360AD3B7F6D"
 }
