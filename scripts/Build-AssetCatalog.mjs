@@ -25,7 +25,7 @@ const vendorValues = new Set([
   'github-copilot', 'cline', 'windsurf'
 ])
 const lifecycleValues = new Set(['candidate', 'reviewed', 'approved', 'released', 'rejected', 'deprecated'])
-const textExtensions = new Set(['', '.cjs', '.css', '.html', '.js', '.json', '.md', '.mdc', '.mjs', '.ps1', '.toml', '.yaml', '.yml'])
+const textExtensions = new Set(['', '.cjs', '.css', '.example', '.html', '.js', '.json', '.md', '.mdc', '.mjs', '.ps1', '.toml', '.yaml', '.yml'])
 
 const fail = (message) => { throw new Error(message) }
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
@@ -143,6 +143,27 @@ function sourceDigest(sourcePath) {
     hash.update('\0')
   }
   return hash.digest('hex')
+}
+
+if (args.has('--self-test')) {
+  const path = '.cursor/mcp.json.example'
+  const digest = (bytes) => {
+    const hash = createHash('sha256')
+    const extension = extname(path).toLowerCase()
+    const content = textExtensions.has(extension)
+      ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n'), 'utf8')
+      : bytes
+    hash.update(path)
+    hash.update('\0')
+    hash.update(content)
+    hash.update('\0')
+    return hash.digest('hex')
+  }
+  const lf = Buffer.from('{\n  "mcpServers": {}\n}\n', 'utf8')
+  const crlf = Buffer.from('{\r\n  "mcpServers": {}\r\n}\r\n', 'utf8')
+  if (digest(lf) !== digest(crlf)) fail('Text asset digests must be LF/CRLF neutral')
+  console.log('[asset-catalog] SELF-TEST PASS LF/CRLF neutral text digest')
+  process.exit(0)
 }
 
 function buildCatalog(registry) {

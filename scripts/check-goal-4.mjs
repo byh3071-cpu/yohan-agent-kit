@@ -29,6 +29,15 @@ const goal = read('goals/4-agent-asset-registry.md')
 gate('Goal 4 lifecycle', /status:\s*(?:IN_PROGRESS|DONE)/.test(goal))
 
 try {
+  const output = execFileSync(process.execPath, ['scripts/Build-AssetCatalog.mjs', '--self-test'], {
+    cwd: repoRoot, encoding: 'utf8', timeout: 30_000, windowsHide: true
+  }).trim()
+  gate('catalog digest is LF/CRLF neutral', output.includes('SELF-TEST PASS'), output)
+} catch (error) {
+  gate('catalog digest is LF/CRLF neutral', false, `exit ${error.status ?? 'unknown'}`)
+}
+
+try {
   const output = execFileSync(process.execPath, ['scripts/Build-AssetCatalog.mjs', '--check'], {
     cwd: repoRoot, encoding: 'utf8', timeout: 60_000, windowsHide: true
   }).trim()
