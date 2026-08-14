@@ -54,7 +54,7 @@
     },
     "cursor": {
       "manifest": ".cursor-plugin/plugin.json",
-      "testedVersion": "2026.07.23-e383d2b",
+      "testedVersion": "2026.08.11-e8db854",
       "discoveryPath": ".cursor/plugins/local/yohan-agent-kit",
       "components": [
         "skills",
@@ -68,7 +68,7 @@
     },
     "antigravity": {
       "manifest": "plugin.json",
-      "testedVersion": "1.1.8",
+      "testedVersion": "1.1.13",
       "discoveryPath": ".gemini/config/plugins/yohan-agent-kit",
       "additionalDiscoveryPaths": [
         ".gemini/antigravity-cli/plugins/yohan-agent-kit"
