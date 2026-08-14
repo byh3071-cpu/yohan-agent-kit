@@ -46,7 +46,9 @@ try {
   const catalog = JSON.parse(read('distribution/asset-catalog.json'))
   const repoOwned = registry.assets.filter((asset) => asset.provenance === 'repo-authored')
   gate('repo-authored registry owner renamed', repoOwned.every((asset) => asset.owner !== 'yohan-cc-skills'))
-  gate('new Goal 5 gate is registered', registry.assets.some((asset) => asset.sourcePath === 'scripts/check-goal-5.mjs' && asset.owner === 'yohan-agent-kit'))
+  const goal5Gate = registry.assets.find((asset) => asset.sourcePath === 'scripts/check-goal-5.mjs')
+  gate('new Goal 5 gate is registered', goal5Gate?.owner === 'yohan-agent-kit')
+  gate('Goal 5 gate remains adapter-bound', goal5Gate?.portability === 'ADAPTER_REQUIRED' && !goal5Gate?.vendors.includes('agent-plugins'))
   gate('catalog and registry counts agree', catalog.assetCount === registry.assets.length, `${catalog.assetCount} assets`)
 } catch (error) { gate('registry identity checks', false, error.message) }
 

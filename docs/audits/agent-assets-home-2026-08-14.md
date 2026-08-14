@@ -79,4 +79,3 @@ powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass `
 ```
 
 이 명령은 stdout만 사용한다. 향후 Goal 7이 승인된 로컬 Inbox writer를 제공하기 전까지 script 내부 파일 쓰기는 금지한다.
-

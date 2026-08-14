@@ -52,11 +52,12 @@ priority: P0
 ## 검증 증거
 
 - Agent registry: 95 assets
-- catalog digest: `581fd7e3140b45a5021e128c2586d9c688cab46a808fd8e017ba5c160242641b`
+- catalog digest: `df64ee8f6a6ad31ede4bb171a36347e76f89293f4e493dd056c90d710525aa2f`
 - Goal 1: PASS
 - Goal 2: PASS, 5 suites 488 assertions
 - Goal 3: PASS, resolver/recorder 30 assertions and browser QA 5 viewports
 - Goal 4: PASS, LF/CRLF-neutral catalog self-test 포함
 - Goal 5: PASS
 - secret-pr-guard: forbidden path 0, high-risk pattern 0, tracked env backup 0
+- review remediation: scanner 16 assertions, external broken target redaction/existence 판정 PASS, Goal 5 adapter-bound registry gate PASS
 - 전체 회귀 환경: short detached worktree `C:\Users\Public\yak-g5-final`

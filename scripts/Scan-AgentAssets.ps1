@@ -31,13 +31,18 @@ function ConvertTo-HomeUri {
     return 'external://' + [IO.Path]::GetFileName($full.TrimEnd('\'))
 }
 
-function Get-SafeTarget {
+function Get-SafeTargetObservation {
     param([Parameter(Mandatory = $true)]$Item)
     $targets = @($Item.Target | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
-    if ($targets.Count -eq 0) { return $null }
+    if ($targets.Count -eq 0) {
+        return [pscustomobject]@{ safeTarget = $null; targetExists = $true }
+    }
     $raw = [string]$targets[0]
     $absolute = if ([IO.Path]::IsPathRooted($raw)) { $raw } else { Join-Path $Item.Parent.FullName $raw }
-    return ConvertTo-HomeUri -Path $absolute
+    return [pscustomobject]@{
+        safeTarget = ConvertTo-HomeUri -Path $absolute
+        targetExists = [bool](Test-Path -LiteralPath $absolute)
+    }
 }
 
 function Get-ContentDigest {
@@ -81,11 +86,9 @@ foreach ($spec in $rootSpecs) {
     if (-not $exists) { continue }
     $items = if ($spec.Mode -eq 'Directory') { @(Get-ChildItem -LiteralPath $root -Directory -Force -ErrorAction Stop) } else { @(Get-ChildItem -LiteralPath $root -File -Force -ErrorAction Stop) }
     foreach ($item in $items) {
-        $target = Get-SafeTarget -Item $item
-        $targetExists = if ($null -eq $target) { $true } elseif ($target.StartsWith('home://')) {
-            $relativeTarget = $target.Substring('home://'.Length).Replace('/', '\')
-            Test-Path -LiteralPath (Join-Path $resolvedHome $relativeTarget)
-        } else { $true }
+        $targetObservation = Get-SafeTargetObservation -Item $item
+        $target = $targetObservation.safeTarget
+        $targetExists = [bool]$targetObservation.targetExists
         $portability = 'UNKNOWN'
         $lifecycle = 'candidate'
         if ($spec.Kind -eq 'plugin-cache') { $portability = 'LOCAL_ONLY'; $lifecycle = 'released' }
@@ -123,4 +126,3 @@ $result = [ordered]@{
 $depth = 8
 if ($OutputFormat -eq 'PrettyJson') { $result | ConvertTo-Json -Depth $depth }
 else { $result | ConvertTo-Json -Depth $depth -Compress }
-

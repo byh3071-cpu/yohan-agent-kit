@@ -1088,7 +1088,7 @@
       ]
     },
     {
-      "contentDigest": "04f8980f22ab69758900d192bbf3e833d5473ff9518b1d6ddfde9340cb77844c",
+      "contentDigest": "5e6bc4c1e2c13c6c6ee29711d1310ae3a372df35a79622b6d767bcb7f5d8f8a8",
       "evidenceRefs": [
         "goals/5-yohan-agent-kit-identity.md"
       ],
@@ -1097,12 +1097,11 @@
       "license": "UNLICENSED",
       "lifecycle": "approved",
       "owner": "yohan-agent-kit",
-      "portability": "PORTABLE",
+      "portability": "ADAPTER_REQUIRED",
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-5.mjs",
       "vendors": [
-        "agent-plugins",
         "claude-code",
         "codex",
         "cursor",
@@ -1215,7 +1214,7 @@
       ]
     },
     {
-      "contentDigest": "5dc398105422ba0e6bce1d296f1cf3fc4de6194ea48179dad18552759559d5d8",
+      "contentDigest": "b479aaec2c47b38a5a8725f76abe966fbdc21d88e25029d3e4d25eec4b3a048a",
       "evidenceRefs": [
         "scripts/Scan-AgentAssets.ps1"
       ],
@@ -1922,9 +1921,9 @@
       ]
     }
   ],
-  "catalogDigest": "581fd7e3140b45a5021e128c2586d9c688cab46a808fd8e017ba5c160242641b",
+  "catalogDigest": "df64ee8f6a6ad31ede4bb171a36347e76f89293f4e493dd056c90d710525aa2f",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "39d34e7c86324297410cd8d69f9ba24e6d5f27dc1b8922c1af835eeb94e6908d",
+  "registryDigest": "bb94a38ef51ae16d34101e19f87121c61250ca3b504f76491ac1d7a27dbec78c",
   "schemaVersion": 1
 }
