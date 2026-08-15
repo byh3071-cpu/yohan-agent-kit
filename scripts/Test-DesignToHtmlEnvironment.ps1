@@ -90,7 +90,10 @@ function Test-ExistingPathChainSafe {
 function Get-FileDigest {
     param([Parameter(Mandatory = $true)][string]$Path)
 
-    return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToUpperInvariant()
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
 }
 
 function Invoke-ManagerCheck {

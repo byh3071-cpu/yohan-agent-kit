@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -37,7 +38,7 @@ if (!brainRoot || !existsSync(brainRoot)) {
   gate('pinned Brain repository', false, 'pass --brain-root or set YOHAN_BRAIN_ROOT')
 } else {
   try {
-    const testOutput = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'tests/DesignContext.Tests.ps1', '-BrainRoot', resolve(brainRoot)], { cwd: repoRoot, encoding: 'utf8', timeout: 5 * 60 * 1000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })
+    const testOutput = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'tests/DesignContext.Tests.ps1', '-BrainRoot', resolve(brainRoot)], { cwd: repoRoot, encoding: 'utf8', timeout: 5 * 60 * 1000, windowsHide: true, maxBuffer: 16 * 1024 * 1024, env: getWindowsPowerShellEnv(process.env) })
     gate('resolver and recorder tests', /PASS:\s+\d+ assertions/.test(testOutput), testOutput.trim().split(/\r?\n/).slice(-1)[0])
   } catch (error) {
     const output = `${error.stdout || ''}${error.stderr || ''}`

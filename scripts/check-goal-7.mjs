@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const skipDeep = process.env.VHK_GATES_SKIP_DEEP === '1'
@@ -36,7 +37,8 @@ gate('top-level automation obeys HARD_STOP', script.includes('.vhk\\HARD_STOP'))
 if (!skipDeep) {
   try {
     const output = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', 'tests/Manage-AgentIntake.Tests.ps1'], {
-      cwd: repoRoot, encoding: 'utf8', timeout: 8 * 60_000, windowsHide: true, maxBuffer: 64 * 1024 * 1024
+      cwd: repoRoot, encoding: 'utf8', timeout: 8 * 60_000, windowsHide: true, maxBuffer: 64 * 1024 * 1024,
+      env: getWindowsPowerShellEnv(process.env)
     })
     const summary = output.match(/PASS:\s+\d+ assertions/)?.[0] ?? ''
     gate('intake lifecycle and safety tests', Boolean(summary), summary)

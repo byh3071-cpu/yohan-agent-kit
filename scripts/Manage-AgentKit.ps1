@@ -21,13 +21,17 @@ param(
 
     [string]$PlanDigest,
 
+    [string]$AntigravityCommandDigest,
+
     [string]$BackupId,
 
     [switch]$ApproveGlobalHomeWrite,
 
     [switch]$AllowDirtyArtifact,
 
-    [ValidateSet('', 'AfterReleaseCopy', 'AfterFirstTarget', 'AfterActive', 'AfterFirstRestoreTarget')]
+    [string]$AntigravityCommand = 'agy',
+
+    [ValidateSet('', 'AfterReleaseCopy', 'AfterFirstTarget', 'AfterAntigravityInstall', 'AfterActive', 'AfterFirstRestoreTarget')]
     [string]$TestFault = ''
 )
 
@@ -66,15 +70,24 @@ function Assert-PathWithin {
 
 function Assert-NoReparseAncestors {
     param(
+        [Parameter(Mandatory = $true)][string]$AllowedRoot,
         [Parameter(Mandatory = $true)][string]$Candidate,
         [switch]$IncludeLeaf
     )
+    $root = Get-NormalizedFullPath -Path $AllowedRoot
     $full = Get-NormalizedFullPath -Path $Candidate
-    $pathRoot = [IO.Path]::GetPathRoot($full)
-    $relative = $full.Substring($pathRoot.Length).TrimStart('\', '/')
+    Assert-PathWithin -Root $root -Candidate $full -Label 'Reparse-point check'
+
+    if ([IO.Directory]::Exists($root)) {
+        $rootEntry = Get-Item -LiteralPath $root -Force
+        if (($rootEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Allowed root is a reparse point: $root" }
+        if (-not $rootEntry.PSIsContainer) { throw "Allowed root is not a directory: $root" }
+    }
+
+    $relative = $full.Substring($root.Length).TrimStart('\', '/')
     $segments = @($relative -split '[\\/]' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     $limit = if ($IncludeLeaf) { $segments.Count } else { [Math]::Max(0, $segments.Count - 1) }
-    $current = $pathRoot
+    $current = $root
     for ($index = 0; $index -lt $limit; $index++) {
         if (-not [IO.Directory]::Exists($current)) { break }
         $leaf = $segments[$index]
@@ -96,7 +109,7 @@ function Assert-SafeDestinationPath {
         [switch]$IncludeLeaf
     )
     Assert-PathWithin -Root $AllowedRoot -Candidate $Candidate -Label $Label
-    Assert-NoReparseAncestors -Candidate $Candidate -IncludeLeaf:$IncludeLeaf
+    Assert-NoReparseAncestors -AllowedRoot $AllowedRoot -Candidate $Candidate -IncludeLeaf:$IncludeLeaf
 }
 
 function Assert-SafeFilePath {
@@ -300,6 +313,298 @@ function Move-OwnedJunction {
     if ($moved.kind -ne 'Junction' -or [string]$moved.identity -cne $Identity) { throw "Moved junction verification failed: $Destination" }
 }
 
+function Get-DirectoryFingerprint {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $root = Get-NormalizedFullPath -Path $Path
+    $entry = Get-PathEntryInfo -Path $root
+    if ($entry.kind -ne 'Directory') { throw "Expected an ordinary directory: $root" }
+    Assert-NoReparseAncestors -AllowedRoot $root -Candidate $root -IncludeLeaf
+    $lines = @()
+    foreach ($item in @(Get-ChildItem -LiteralPath $root -Recurse -Force | Sort-Object FullName)) {
+        if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Directory contains a reparse point: $($item.FullName)" }
+        $relative = $item.FullName.Substring($root.Length).TrimStart('\').Replace('\', '/')
+        if ($item.PSIsContainer) { $lines += "D|$relative" }
+        else {
+            $bytes = [IO.File]::ReadAllBytes($item.FullName)
+            $lines += "F|$relative|$($bytes.LongLength)|$(Get-Sha256Bytes -Bytes $bytes)"
+        }
+    }
+    return Get-Sha256Text -Text ([string]::Join("`n", $lines))
+}
+
+function Copy-OwnedDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest,
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot
+    )
+    Assert-SafeDestinationPath -AllowedRoot $SourceRoot -Candidate $Source -Label 'Owned directory copy source' -IncludeLeaf
+    Assert-SafeDestinationPath -AllowedRoot $DestinationRoot -Candidate $Destination -Label 'Owned directory copy destination'
+    if ((Get-DirectoryFingerprint -Path $Source) -cne $ExpectedDigest) { throw "Owned directory digest mismatch: $Source" }
+    if ((Get-PathEntryInfo -Path $Destination).kind -ne 'Missing') { throw "Owned directory copy destination exists: $Destination" }
+    $null = New-Item -ItemType Directory -Path $Destination -Force
+    foreach ($directory in @(Get-ChildItem -LiteralPath $Source -Directory -Recurse -Force | Sort-Object FullName)) {
+        if (($directory.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Owned directory contains a reparse point: $($directory.FullName)" }
+        $relative = $directory.FullName.Substring((Get-NormalizedFullPath -Path $Source).Length).TrimStart('\')
+        $null = New-Item -ItemType Directory -Path (Join-Path $Destination $relative) -Force
+    }
+    foreach ($file in @(Get-ChildItem -LiteralPath $Source -File -Recurse -Force | Sort-Object FullName)) {
+        if (($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "Owned directory contains a reparse point: $($file.FullName)" }
+        $relative = $file.FullName.Substring((Get-NormalizedFullPath -Path $Source).Length).TrimStart('\')
+        $target = Join-Path $Destination $relative
+        $parent = Split-Path -Parent $target
+        if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
+        [IO.File]::Copy($file.FullName, $target, $false)
+    }
+    if ((Get-DirectoryFingerprint -Path $Destination) -cne $ExpectedDigest) { throw "Owned directory copy verification failed: $Destination" }
+}
+
+function Move-OwnedDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest,
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot
+    )
+    Assert-SafeDestinationPath -AllowedRoot $SourceRoot -Candidate $Source -Label 'Owned directory move source' -IncludeLeaf
+    Assert-SafeDestinationPath -AllowedRoot $DestinationRoot -Candidate $Destination -Label 'Owned directory move destination'
+    if ((Get-DirectoryFingerprint -Path $Source) -cne $ExpectedDigest) { throw "Owned directory digest mismatch: $Source" }
+    if ((Get-PathEntryInfo -Path $Destination).kind -ne 'Missing') { throw "Owned directory move destination exists: $Destination" }
+    $parent = Split-Path -Parent $Destination
+    if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
+    [IO.Directory]::Move((Get-NormalizedFullPath -Path $Source), (Get-NormalizedFullPath -Path $Destination))
+    if ((Get-DirectoryFingerprint -Path $Destination) -cne $ExpectedDigest) { throw "Owned directory move verification failed: $Destination" }
+}
+
+function Get-AntigravityCommandIdentity {
+    param([Parameter(Mandatory = $true)][string]$Command)
+    $resolved = Get-Command -Name $Command -ErrorAction Stop
+    $commandPath = if ($resolved.Path) { [string]$resolved.Path } else { [string]$resolved.Source }
+    $commandType = [string]$resolved.CommandType
+    if ([string]::IsNullOrWhiteSpace($commandPath)) { throw "Unable to resolve Antigravity command: $Command" }
+    $commandPath = Get-NormalizedFullPath -Path $commandPath
+    $entry = Get-Item -LiteralPath $commandPath -Force -ErrorAction Stop
+    if ($entry.PSIsContainer -or ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Antigravity command is not an ordinary file: $commandPath"
+    }
+    if ($Command -ceq 'agy' -and ($commandType -cne 'Application' -or [IO.Path]::GetFileName($commandPath) -cne 'agy.exe')) {
+        throw "Production Antigravity command must resolve to the native agy.exe application: $commandPath"
+    }
+    return [pscustomobject][ordered]@{
+        path = $commandPath
+        commandType = $commandType
+        sha256 = Get-Sha256Bytes -Bytes ([IO.File]::ReadAllBytes($commandPath))
+    }
+}
+
+function Assert-AntigravityCommandIdentity {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)]$ExpectedIdentity
+    )
+    $current = Get-AntigravityCommandIdentity -Command $Command
+    if (-not [string]::Equals([string]$current.path, [string]$ExpectedIdentity.path, [StringComparison]::OrdinalIgnoreCase) -or
+        [string]$current.commandType -cne [string]$ExpectedIdentity.commandType -or
+        [string]$current.sha256 -cne [string]$ExpectedIdentity.sha256) {
+        throw 'Antigravity command identity changed after Check; run Check again'
+    }
+    return $current
+}
+
+function Get-AntigravityCommandDigest {
+    param([Parameter(Mandatory = $true)]$Identity)
+    return Get-Sha256Text -Text ([string]::Join('|', @(
+        'agent-kit-antigravity-command-v1',
+        ([string]$Identity.path).ToLowerInvariant(),
+        [string]$Identity.commandType,
+        [string]$Identity.sha256
+    )))
+}
+
+function Assert-AntigravityCommandDigest {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest
+    )
+    if ($ExpectedDigest -notmatch '^[a-f0-9]{64}$') { throw 'AntigravityCommandDigest from Check is required' }
+    $identity = Get-AntigravityCommandIdentity -Command $Command
+    if ((Get-AntigravityCommandDigest -Identity $identity) -cne $ExpectedDigest) {
+        throw 'Antigravity command digest changed after Check; run Check again'
+    }
+    return $identity
+}
+
+function Invoke-AntigravityPluginCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        $ExpectedCommandIdentity = $null
+    )
+    $identity = if ($null -eq $ExpectedCommandIdentity) {
+        Get-AntigravityCommandIdentity -Command $Command
+    }
+    else {
+        Assert-AntigravityCommandIdentity -Command $Command -ExpectedIdentity $ExpectedCommandIdentity
+    }
+    $commandPath = [string]$identity.path
+    $isNativeCommand = [string]$identity.commandType -eq 'Application'
+    $previousUserProfile = $env:USERPROFILE
+    $previousHome = $env:HOME
+    $previousTestHome = $env:YOHAN_TEST_AGY_HOME
+    try {
+        $env:USERPROFILE = $UserHome
+        $env:HOME = $UserHome
+        $env:YOHAN_TEST_AGY_HOME = $UserHome
+        $output = @(& $commandPath @Arguments 2>&1)
+        $exitCode = if ($isNativeCommand) { $LASTEXITCODE } else { 0 }
+    }
+    finally {
+        $env:USERPROFILE = $previousUserProfile
+        $env:HOME = $previousHome
+        $env:YOHAN_TEST_AGY_HOME = $previousTestHome
+    }
+    $text = [string]::Join([Environment]::NewLine, @($output | ForEach-Object { [string]$_ })).Trim()
+    if ($exitCode -ne 0) { throw "Antigravity command failed ($exitCode): $Command $([string]::Join(' ', $Arguments)); $text" }
+    return $text
+}
+
+function Test-AntigravityPluginRegistered {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        [Parameter(Mandatory = $true)][string]$PluginName,
+        $ExpectedCommandIdentity = $null
+    )
+    $text = Invoke-AntigravityPluginCommand -Command $Command -UserHome $UserHome -Arguments @('plugin', 'list') -ExpectedCommandIdentity $ExpectedCommandIdentity
+    if ([string]::IsNullOrWhiteSpace($text) -or $text -eq 'No imported plugins.') { return $false }
+    try {
+        $parsed = $text | ConvertFrom-Json
+        $imports = if ($null -ne $parsed.PSObject.Properties['imports']) { @($parsed.imports) } else { @($parsed) }
+        return @($imports | Where-Object { [string]$_.name -ceq $PluginName }).Count -eq 1
+    }
+    catch {
+        return @($text -split "`r?`n" | Where-Object { $_.Trim() -ceq $PluginName }).Count -eq 1
+    }
+}
+
+function Get-AntigravityPluginName {
+    param([Parameter(Mandatory = $true)][string]$Source)
+    $manifest = Read-JsonFile -Path (Join-Path $Source 'plugin.json') -Label 'Antigravity plugin manifest' -AllowedRoot $Source
+    $name = [string]$manifest.name
+    if ($name -cne 'yohan-agent-kit') { throw "Unexpected Antigravity plugin name: $name" }
+    return $name
+}
+
+function Install-AntigravityManagedPlugin {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest,
+        [Parameter(Mandatory = $true)]$CommandIdentity
+    )
+    $name = Get-AntigravityPluginName -Source $Source
+    Assert-SafeDestinationPath -AllowedRoot $UserHome -Candidate $Destination -Label 'Antigravity official install destination'
+    if ((Get-DirectoryFingerprint -Path $Source) -cne $ExpectedDigest) { throw 'Antigravity source package digest mismatch' }
+    if ((Get-PathEntryInfo -Path $Destination).kind -ne 'Missing') { throw "Antigravity destination exists before official install: $Destination" }
+    $null = Invoke-AntigravityPluginCommand -Command $Command -UserHome $UserHome -Arguments @('plugin', 'validate', $Source) -ExpectedCommandIdentity $CommandIdentity
+    $null = Invoke-AntigravityPluginCommand -Command $Command -UserHome $UserHome -Arguments @('plugin', 'install', $Source) -ExpectedCommandIdentity $CommandIdentity
+    $entry = Get-PathEntryInfo -Path $Destination
+    if ($entry.kind -ne 'Directory') { throw "Antigravity official install did not create an ordinary directory: $Destination" }
+    if ((Get-DirectoryFingerprint -Path $Destination) -cne $ExpectedDigest) { throw 'Antigravity installed package digest mismatch' }
+    if (-not (Test-AntigravityPluginRegistered -Command $Command -UserHome $UserHome -PluginName $name -ExpectedCommandIdentity $CommandIdentity)) { throw 'Antigravity official plugin registry did not record yohan-agent-kit' }
+}
+
+function Uninstall-AntigravityManagedPlugin {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        [Parameter(Mandatory = $true)][string]$Destination,
+        [Parameter(Mandatory = $true)][string]$ExpectedDigest,
+        [Parameter(Mandatory = $true)]$CommandIdentity
+    )
+    Assert-SafeDestinationPath -AllowedRoot $UserHome -Candidate $Destination -Label 'Antigravity official uninstall destination'
+    $entry = Get-PathEntryInfo -Path $Destination
+    if ($entry.kind -ne 'Directory' -or (Get-DirectoryFingerprint -Path $Destination) -cne $ExpectedDigest) { throw "Refusing to uninstall an unowned Antigravity package: $Destination" }
+    if (-not (Test-AntigravityPluginRegistered -Command $Command -UserHome $UserHome -PluginName 'yohan-agent-kit' -ExpectedCommandIdentity $CommandIdentity)) { throw 'Refusing to uninstall an unregistered Antigravity package' }
+    $null = Invoke-AntigravityPluginCommand -Command $Command -UserHome $UserHome -Arguments @('plugin', 'uninstall', 'yohan-agent-kit') -ExpectedCommandIdentity $CommandIdentity
+    if ((Get-PathEntryInfo -Path $Destination).kind -ne 'Missing') { throw 'Antigravity uninstall left the managed directory behind' }
+    if (Test-AntigravityPluginRegistered -Command $Command -UserHome $UserHome -PluginName 'yohan-agent-kit' -ExpectedCommandIdentity $CommandIdentity) { throw 'Antigravity uninstall left the plugin registered' }
+}
+
+function Get-AntigravityManagedRestoreState {
+    param(
+        [Parameter(Mandatory = $true)]$Item,
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        $ExpectedCommandIdentity = $null
+    )
+    $entry = Get-PathEntryInfo -Path ([string]$Item.path)
+    $registered = Test-AntigravityPluginRegistered -Command $Command -UserHome $UserHome -PluginName 'yohan-agent-kit' -ExpectedCommandIdentity $ExpectedCommandIdentity
+    if ($entry.kind -eq 'Directory') {
+        $digest = Get-DirectoryFingerprint -Path ([string]$Item.path)
+        if ($digest -ceq [string]$Item.newDigest -and $registered) {
+            if ([string]$Item.originalKind -eq 'Junction') {
+                $backup = Get-PathEntryInfo -Path ([string]$Item.priorBackupPath)
+                if ($backup.kind -ne 'Junction' -or [string]$backup.identity -cne [string]$Item.priorIdentity) { return 'Conflict' }
+            }
+            elseif ([string]$Item.originalKind -eq 'Directory') {
+                if ((Get-PathEntryInfo -Path ([string]$Item.priorBackupPath)).kind -ne 'Directory' -or (Get-DirectoryFingerprint -Path ([string]$Item.priorBackupPath)) -cne [string]$Item.priorDigest) { return 'Conflict' }
+            }
+            return 'Installed'
+        }
+        if ([string]$Item.originalKind -eq 'Directory' -and $digest -ceq [string]$Item.priorDigest -and $registered -eq [bool]$Item.priorRegistered) { return 'Restored' }
+        return 'Conflict'
+    }
+    if ($entry.kind -eq 'Junction' -and [string]$Item.originalKind -eq 'Junction' -and -not $registered -and [string]$entry.identity -ceq [string]$Item.priorIdentity -and [string]::Equals([string]$entry.target, (Get-NormalizedFullPath -Path ([string]$Item.priorTarget)), [StringComparison]::OrdinalIgnoreCase)) { return 'Restored' }
+    if ($entry.kind -ne 'Missing' -or $registered) { return 'Conflict' }
+    if ([string]$Item.originalKind -eq 'Missing') { return 'Restored' }
+    if ([string]$Item.originalKind -eq 'Junction') {
+        $backup = Get-PathEntryInfo -Path ([string]$Item.priorBackupPath)
+        if ($backup.kind -eq 'Junction' -and [string]$backup.identity -ceq [string]$Item.priorIdentity) { return 'Recoverable' }
+    }
+    if ([string]$Item.originalKind -eq 'Directory') {
+        $backup = Get-PathEntryInfo -Path ([string]$Item.priorBackupPath)
+        if ($backup.kind -eq 'Directory' -and (Get-DirectoryFingerprint -Path ([string]$Item.priorBackupPath)) -ceq [string]$Item.priorDigest) { return 'Recoverable' }
+    }
+    return 'Conflict'
+}
+
+function Restore-AntigravityManagedItem {
+    param(
+        [Parameter(Mandatory = $true)]$Item,
+        [Parameter(Mandatory = $true)][string]$Command,
+        [Parameter(Mandatory = $true)][string]$UserHome,
+        [Parameter(Mandatory = $true)][string]$KitRoot,
+        [Parameter(Mandatory = $true)]$CommandIdentity
+    )
+    $state = Get-AntigravityManagedRestoreState -Item $Item -Command $Command -UserHome $UserHome -ExpectedCommandIdentity $CommandIdentity
+    if ($state -eq 'Conflict') { throw 'Antigravity managed plugin ownership changed' }
+    if ($state -eq 'Restored') { return }
+    if ($state -eq 'Installed') {
+        Uninstall-AntigravityManagedPlugin -Command $Command -UserHome $UserHome -Destination ([string]$Item.path) -ExpectedDigest ([string]$Item.newDigest) -CommandIdentity $CommandIdentity
+        $state = Get-AntigravityManagedRestoreState -Item $Item -Command $Command -UserHome $UserHome -ExpectedCommandIdentity $CommandIdentity
+    }
+    if ($state -ne 'Recoverable' -and [string]$Item.originalKind -ne 'Missing') { throw 'Antigravity managed plugin is not recoverable' }
+    if ([string]$Item.originalKind -eq 'Junction') {
+        Move-OwnedJunction -Source ([string]$Item.priorBackupPath) -Destination ([string]$Item.path) -Target ([string]$Item.priorTarget) -Identity ([string]$Item.priorIdentity) -SourceRoot $KitRoot -DestinationRoot $UserHome
+    }
+    elseif ([string]$Item.originalKind -eq 'Directory') {
+        if ([bool]$Item.priorRegistered) {
+            Install-AntigravityManagedPlugin -Command $Command -UserHome $UserHome -Source ([string]$Item.priorBackupPath) -Destination ([string]$Item.path) -ExpectedDigest ([string]$Item.priorDigest) -CommandIdentity $CommandIdentity
+        }
+        else {
+            Move-OwnedDirectory -Source ([string]$Item.priorBackupPath) -Destination ([string]$Item.path) -ExpectedDigest ([string]$Item.priorDigest) -SourceRoot $KitRoot -DestinationRoot $UserHome
+        }
+    }
+    if ((Get-AntigravityManagedRestoreState -Item $Item -Command $Command -UserHome $UserHome -ExpectedCommandIdentity $CommandIdentity) -ne 'Restored') { throw 'Antigravity managed plugin restore verification failed' }
+}
+
 function Get-SelectedTargets {
     param([string[]]$Selection)
     $requested = if ($Selection -contains 'All') { @('AgentPlugins', 'ClaudeCode', 'Codex', 'Cursor', 'Antigravity') } else { @($Selection | Select-Object -Unique) }
@@ -322,7 +627,7 @@ function Get-TargetDefinitions {
         ClaudeCode = [pscustomobject][ordered]@{ name = 'ClaudeCode'; path = $null; source = Join-Path $ReleaseRoot 'packages\claude-code'; deployment = 'MarketplaceManaged' }
         Codex = [pscustomobject][ordered]@{ name = 'Codex'; path = Join-Path $UserHome 'plugins\yohan-agent-kit'; source = Join-Path $ReleaseRoot 'packages\codex\yohan-agent-kit'; deployment = 'Junction' }
         Cursor = [pscustomobject][ordered]@{ name = 'Cursor'; path = Join-Path $UserHome '.cursor\plugins\local\yohan-agent-kit'; source = Join-Path $ReleaseRoot 'packages\cursor\yohan-agent-kit'; deployment = 'Junction' }
-        AntigravityIde = [pscustomobject][ordered]@{ name = 'AntigravityIde'; path = Join-Path $UserHome '.gemini\config\plugins\yohan-agent-kit'; source = Join-Path $ReleaseRoot 'packages\antigravity\yohan-agent-kit'; deployment = 'Junction' }
+        AntigravityIde = [pscustomobject][ordered]@{ name = 'AntigravityIde'; path = Join-Path $UserHome '.gemini\config\plugins\yohan-agent-kit'; source = Join-Path $ReleaseRoot 'packages\antigravity\yohan-agent-kit'; deployment = 'AntigravityManaged' }
         AntigravityCli = [pscustomobject][ordered]@{ name = 'AntigravityCli'; path = Join-Path $UserHome '.gemini\antigravity-cli\plugins\yohan-agent-kit'; source = Join-Path $ReleaseRoot 'packages\antigravity\yohan-agent-kit'; deployment = 'Junction' }
     }
     return @(Get-SelectedTargets -Selection $Selection | ForEach-Object { $all[$_] })
@@ -388,6 +693,8 @@ function Get-ReleasePlan {
         [Parameter(Mandatory = $true)][string]$RequestedRelease,
         [Parameter(Mandatory = $true)][string]$SourceArtifact,
         [Parameter(Mandatory = $true)][string[]]$Selection,
+        [Parameter(Mandatory = $true)][string]$AntigravityCliCommand,
+        [string]$ExpectedAntigravityCommandDigest,
         [switch]$PermitDirty
     )
     $artifact = Test-ReleaseArtifact -Root $SourceArtifact -ExpectedRelease $RequestedRelease -PermitDirty:$PermitDirty
@@ -412,6 +719,49 @@ function Get-ReleasePlan {
             $targetPlans += [pscustomobject][ordered]@{ name = $target.name; deployment = $target.deployment; path = $null; source = $target.source; state = 'External'; action = 'VerifyMarketplace'; currentTarget = $null; currentIdentity = $null }
             continue
         }
+        if ([string]$target.deployment -eq 'AntigravityManaged') {
+            $approvedAntigravityCommandIdentity = $null
+            if (-not [string]::IsNullOrWhiteSpace($ExpectedAntigravityCommandDigest)) {
+                $approvedAntigravityCommandIdentity = Assert-AntigravityCommandDigest -Command $AntigravityCliCommand -ExpectedDigest $ExpectedAntigravityCommandDigest
+            }
+            Assert-SafeDestinationPath -AllowedRoot $UserHome -Candidate ([string]$target.path) -Label "$($target.name) discovery path"
+            $validationSource = if ([IO.Directory]::Exists([string]$target.source)) { [string]$target.source } else { Join-Path ([string]$artifact.root) 'packages\antigravity\yohan-agent-kit' }
+            $newDigest = Get-DirectoryFingerprint -Path $validationSource
+            $entry = Get-PathEntryInfo -Path ([string]$target.path)
+            $registered = Test-AntigravityPluginRegistered -Command $AntigravityCliCommand -UserHome $UserHome -PluginName 'yohan-agent-kit' -ExpectedCommandIdentity $approvedAntigravityCommandIdentity
+            $state = 'Conflict'
+            $action = 'None'
+            $currentDigest = $null
+            if ($entry.kind -eq 'Missing') {
+                if ($registered) { $errors += 'Antigravity registry contains yohan-agent-kit but its managed directory is missing' }
+                else { $state = 'Missing'; $action = 'InstallManaged' }
+            }
+            elseif ($entry.kind -eq 'Junction') {
+                if ($registered) { $errors += 'Antigravity managed path is a registered junction; refusing official uninstall because it could mutate an immutable release' }
+                elseif (Test-PathWithin -Root (Join-Path $KitRoot 'releases') -Candidate ([string]$entry.target)) { $state = 'LegacyJunction'; $action = 'ReplaceManaged' }
+                else { $errors += "$($target.name) discovery junction is not owned by Yohan Agent Kit: $($target.path)" }
+            }
+            elseif ($entry.kind -eq 'Directory') {
+                $currentDigest = Get-DirectoryFingerprint -Path ([string]$target.path)
+                if ($currentDigest -ceq $newDigest) {
+                    if ($registered) { $state = 'Current'; $action = 'None' }
+                    else { $state = 'Unregistered'; $action = 'ReplaceManaged' }
+                }
+                elseif ($null -ne $active) {
+                    $priorSource = Join-Path $KitRoot "releases\$([string]$active.releaseId)\packages\antigravity\yohan-agent-kit"
+                    if ([IO.Directory]::Exists($priorSource) -and $currentDigest -ceq (Get-DirectoryFingerprint -Path $priorSource)) { $state = 'PreviousRelease'; $action = 'ReplaceManaged' }
+                    else { $errors += "$($target.name) managed directory does not match the active or requested release: $($target.path)" }
+                }
+                else { $errors += "$($target.name) managed directory has no active ownership record: $($target.path)" }
+            }
+            else { $errors += "$($target.name) discovery path is not an ordinary managed directory: $($target.path)" }
+            $targetPlans += [pscustomobject][ordered]@{
+                name = $target.name; deployment = $target.deployment; path = $target.path; source = $target.source
+                state = $state; action = $action; currentTarget = $entry.target; currentIdentity = $entry.identity
+                currentKind = $entry.kind; currentDigest = $currentDigest; newDigest = $newDigest; registered = $registered
+            }
+            continue
+        }
         Assert-PathWithin -Root $UserHome -Candidate ([string]$target.path) -Label "$($target.name) discovery path"
         $entry = Get-PathEntryInfo -Path ([string]$target.path)
         $state = 'Conflict'
@@ -421,6 +771,16 @@ function Get-ReleasePlan {
         elseif ($entry.kind -eq 'Junction' -and (Test-PathWithin -Root (Join-Path $KitRoot 'releases') -Candidate ([string]$entry.target))) { $state = 'PreviousRelease'; $action = 'ReplaceOwnedJunction' }
         else { $errors += "$($target.name) discovery path is not owned by Yohan Agent Kit: $($target.path)" }
         $targetPlans += [pscustomobject][ordered]@{ name = $target.name; deployment = $target.deployment; path = $target.path; source = $target.source; state = $state; action = $action; currentTarget = $entry.target; currentIdentity = $entry.identity }
+    }
+
+    $antigravityCommandIdentity = $null
+    if (@($targetPlans | Where-Object { $_.deployment -eq 'AntigravityManaged' }).Count -gt 0) {
+        # The registry read above may auto-update the CLI. Bind the post-read executable to the approved plan.
+        $antigravityCommandIdentity = Get-AntigravityCommandIdentity -Command $AntigravityCliCommand
+    }
+    $antigravityCommandDigest = if ($null -eq $antigravityCommandIdentity) { $null } else { Get-AntigravityCommandDigest -Identity $antigravityCommandIdentity }
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedAntigravityCommandDigest) -and $antigravityCommandDigest -cne $ExpectedAntigravityCommandDigest) {
+        throw 'Antigravity command changed while building the plan; run Check again'
     }
 
     $activePath = Join-Path $KitRoot 'active'
@@ -440,6 +800,12 @@ function Get-ReleasePlan {
     if ($null -eq $active -and @($targetPlans | Where-Object { $_.state -in @('Current', 'PreviousRelease') }).Count -gt 0) { $errors += 'Vendor junctions exist without active.json state' }
 
     $activeReleaseId = if ($null -eq $active) { $null } else { [string]$active.releaseId }
+    $antigravityIdentityLine = if ($null -eq $antigravityCommandIdentity) {
+        'antigravityCommand='
+    }
+    else {
+        "antigravityCommand=$($antigravityCommandIdentity.path)|$($antigravityCommandIdentity.commandType)|$($antigravityCommandIdentity.sha256)"
+    }
     $lines = @(
         "release=$RequestedRelease",
         "manifest=$($artifact.manifestSha256)",
@@ -447,9 +813,15 @@ function Get-ReleasePlan {
         "active=$activeReleaseId",
         "activeAction=$activeAction",
         "activeTarget=$($activeEntry.target)",
-        "selected=$([string]::Join(',', @(Get-SelectedTargets -Selection $Selection)))"
+        "selected=$([string]::Join(',', @(Get-SelectedTargets -Selection $Selection)))",
+        $antigravityIdentityLine
     )
-    foreach ($target in $targetPlans) { $lines += "target|$($target.name)|$($target.action)|$($target.path)|$($target.source)|$($target.currentTarget)|$($target.currentIdentity)" }
+    foreach ($target in $targetPlans) {
+        $currentDigest = if ($null -ne $target.PSObject.Properties['currentDigest']) { [string]$target.currentDigest } else { '' }
+        $newDigest = if ($null -ne $target.PSObject.Properties['newDigest']) { [string]$target.newDigest } else { '' }
+        $registered = if ($null -ne $target.PSObject.Properties['registered']) { [string]$target.registered } else { '' }
+        $lines += "target|$($target.name)|$($target.deployment)|$($target.action)|$($target.path)|$($target.source)|$($target.currentTarget)|$($target.currentIdentity)|$currentDigest|$newDigest|$registered"
+    }
     $planDigest = Get-Sha256Text -Text ([string]::Join("`n", $lines))
     $needsChange = $null -eq $installed -or $activeAction -ne 'None' -or @($targetPlans | Where-Object { $_.action -ne 'None' -and $_.action -ne 'VerifyMarketplace' }).Count -gt 0 -or $null -eq $active -or [string]$active.releaseId -cne $RequestedRelease -or [string]$active.manifestSha256 -cne [string]$artifact.manifestSha256
     $status = if ($errors.Count) { 'Conflict' } elseif (-not $needsChange) { 'Healthy' } elseif ($null -eq $active) { 'Installable' } else { 'Updatable' }
@@ -460,6 +832,7 @@ function Get-ReleasePlan {
         manifestSha256 = [string]$artifact.manifestSha256; sourceArtifact = [string]$artifact.root
         releaseRoot = $releaseRoot; activeRelease = if ($null -eq $active) { $null } else { [string]$active.releaseId }
         activePath = $activePath; activeAction = $activeAction; activeTarget = $activeEntry.target; activeIdentity = $activeEntry.identity
+        antigravityCommandIdentity = $antigravityCommandIdentity; antigravityCommandDigest = $antigravityCommandDigest
         targets = $targetPlans; errors = $errors; planDigest = $planDigest; exitCode = $exitCode
     }
 }
@@ -517,6 +890,7 @@ function Invoke-ReleaseMutation {
         [Parameter(Mandatory = $true)][string]$KitRoot,
         [Parameter(Mandatory = $true)][string]$ApprovedDigest,
         [Parameter(Mandatory = $true)][string]$RequestedMode,
+        [Parameter(Mandatory = $true)][string]$AntigravityCliCommand,
         [switch]$PermitDirty,
         [string]$InjectedFault
     )
@@ -525,6 +899,9 @@ function Invoke-ReleaseMutation {
     if ([string]$Plan.status -eq 'Conflict') { throw "$RequestedMode cannot proceed from Conflict" }
     if ($RequestedMode -eq 'Install' -and [string]$Plan.status -eq 'Updatable') { throw 'An active release exists; use -Mode Update' }
     if ([string]$Plan.status -eq 'Healthy') { return [pscustomobject][ordered]@{ schemaVersion = 1; mode = $RequestedMode; status = 'NoChange'; releaseId = $Plan.releaseId; planDigest = $Plan.planDigest; backupId = $null; exitCode = 0 } }
+    if ($null -ne $Plan.antigravityCommandIdentity) {
+        $null = Assert-AntigravityCommandIdentity -Command $AntigravityCliCommand -ExpectedIdentity $Plan.antigravityCommandIdentity
+    }
 
     $backupId = "$(Get-Date -Format 'yyyyMMdd-HHmmssfff')-$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
     $transactionRoot = Join-Path $KitRoot "backups\$backupId"
@@ -532,6 +909,7 @@ function Invoke-ReleaseMutation {
     $transaction = [pscustomobject][ordered]@{
         schemaVersion = 1; backupId = $backupId; status = 'Executing'; mode = $RequestedMode
         releaseId = $Plan.releaseId; planDigest = $Plan.planDigest; manifestSha256 = $Plan.manifestSha256
+        antigravityCommandIdentity = $Plan.antigravityCommandIdentity
         homeRoot = $UserHome; kitRoot = $KitRoot; previousActiveJson = $null; previousActiveJsonExisted = $false
         releaseCopied = $false; active = $null; targets = @(); error = $null; restoredPlanDigest = $null
     }
@@ -552,7 +930,7 @@ function Invoke-ReleaseMutation {
         $processed = 0
         foreach ($target in @($Plan.targets | Where-Object { $_.deployment -eq 'Junction' })) {
             $item = [pscustomobject][ordered]@{
-                name = [string]$target.name; path = [string]$target.path; newTarget = [string]$target.source
+                name = [string]$target.name; deployment = 'Junction'; path = [string]$target.path; newTarget = [string]$target.source
                 newIdentity = $null; priorTarget = [string]$target.currentTarget; priorIdentity = [string]$target.currentIdentity
                 priorBackupPath = Join-Path $transactionRoot "items\$($target.name)"; originalKind = if ($target.state -eq 'Missing') { 'Missing' } else { 'Junction' }
                 changed = $false
@@ -571,6 +949,51 @@ function Invoke-ReleaseMutation {
             Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
             $processed++
             if ($InjectedFault -eq 'AfterFirstTarget' -and $processed -eq 1) { throw 'Injected test fault after first target' }
+        }
+
+        foreach ($target in @($Plan.targets | Where-Object { $_.deployment -eq 'AntigravityManaged' })) {
+            $item = [pscustomobject][ordered]@{
+                name = [string]$target.name; deployment = 'AntigravityManaged'; path = [string]$target.path; newTarget = [string]$target.source
+                newIdentity = $null; newDigest = [string]$target.newDigest; newInstalled = $false
+                priorTarget = [string]$target.currentTarget; priorIdentity = [string]$target.currentIdentity; priorDigest = [string]$target.currentDigest
+                priorRegistered = [bool]$target.registered; priorBackupPath = Join-Path $transactionRoot "items\$($target.name)"
+                originalKind = [string]$target.currentKind; priorPreserved = $false; changed = $false
+            }
+            $transaction.targets += $item
+            Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+            if ([string]$target.action -eq 'None') { continue }
+
+            if ([string]$item.originalKind -eq 'Junction') {
+                Move-OwnedJunction -Source ([string]$item.path) -Destination ([string]$item.priorBackupPath) -Target ([string]$item.priorTarget) -Identity ([string]$item.priorIdentity) -SourceRoot $UserHome -DestinationRoot $KitRoot
+                $item.priorPreserved = $true
+                $item.changed = $true
+                Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+            }
+            elseif ([string]$item.originalKind -eq 'Directory') {
+                if ([bool]$item.priorRegistered) {
+                    Copy-OwnedDirectory -Source ([string]$item.path) -Destination ([string]$item.priorBackupPath) -ExpectedDigest ([string]$item.priorDigest) -SourceRoot $UserHome -DestinationRoot $KitRoot
+                    $item.priorPreserved = $true
+                    Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+                    $item.changed = $true
+                    Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+                    Uninstall-AntigravityManagedPlugin -Command $AntigravityCliCommand -UserHome $UserHome -Destination ([string]$item.path) -ExpectedDigest ([string]$item.priorDigest) -CommandIdentity $Plan.antigravityCommandIdentity
+                }
+                else {
+                    Move-OwnedDirectory -Source ([string]$item.path) -Destination ([string]$item.priorBackupPath) -ExpectedDigest ([string]$item.priorDigest) -SourceRoot $UserHome -DestinationRoot $KitRoot
+                    $item.priorPreserved = $true
+                    $item.changed = $true
+                }
+                Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+            }
+            else {
+                $item.changed = $true
+                Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+            }
+
+            Install-AntigravityManagedPlugin -Command $AntigravityCliCommand -UserHome $UserHome -Source ([string]$item.newTarget) -Destination ([string]$item.path) -ExpectedDigest ([string]$item.newDigest) -CommandIdentity $Plan.antigravityCommandIdentity
+            $item.newInstalled = $true
+            Write-JsonAtomic -Path $transactionPath -Value $transaction -AllowedRoot $KitRoot
+            if ($InjectedFault -eq 'AfterAntigravityInstall') { throw 'Injected test fault after Antigravity official install' }
         }
 
         $activeItem = [pscustomobject][ordered]@{
@@ -616,9 +1039,14 @@ function Invoke-ReleaseMutation {
         [array]::Reverse($changedTargets)
         foreach ($item in $changedTargets) {
             try {
-                Remove-OwnedJunction -Path ([string]$item.path) -Target ([string]$item.newTarget) -Identity ([string]$item.newIdentity) -AllowedRoot $UserHome
-                if ([string]$item.originalKind -eq 'Junction') {
-                    Move-OwnedJunction -Source ([string]$item.priorBackupPath) -Destination ([string]$item.path) -Target ([string]$item.priorTarget) -Identity ([string]$item.priorIdentity) -SourceRoot $KitRoot -DestinationRoot $UserHome
+                if ($null -ne $item.PSObject.Properties['deployment'] -and [string]$item.deployment -eq 'AntigravityManaged') {
+                    Restore-AntigravityManagedItem -Item $item -Command $AntigravityCliCommand -UserHome $UserHome -KitRoot $KitRoot -CommandIdentity $Plan.antigravityCommandIdentity
+                }
+                else {
+                    Remove-OwnedJunction -Path ([string]$item.path) -Target ([string]$item.newTarget) -Identity ([string]$item.newIdentity) -AllowedRoot $UserHome
+                    if ([string]$item.originalKind -eq 'Junction') {
+                        Move-OwnedJunction -Source ([string]$item.priorBackupPath) -Destination ([string]$item.path) -Target ([string]$item.priorTarget) -Identity ([string]$item.priorIdentity) -SourceRoot $KitRoot -DestinationRoot $UserHome
+                    }
                 }
             } catch { $rollbackErrors += $_.Exception.Message }
         }
@@ -660,7 +1088,10 @@ function Get-RestorePlan {
     param(
         [Parameter(Mandatory = $true)][string]$UserHome,
         [Parameter(Mandatory = $true)][string]$KitRoot,
-        [Parameter(Mandatory = $true)][string]$RequestedBackupId
+        [Parameter(Mandatory = $true)][string]$RequestedBackupId,
+        [Parameter(Mandatory = $true)][string]$AntigravityCliCommand,
+        [string]$ExpectedAntigravityCommandDigest,
+        [switch]$RequireAntigravityCommandDigest
     )
     if ($RequestedBackupId -notmatch '^\d{8}-\d{9}-[a-f0-9]{8}$') { throw 'BackupId format is invalid; latest and path traversal are not supported' }
     $transactionPath = Join-Path $KitRoot "backups\$RequestedBackupId\transaction.json"
@@ -671,17 +1102,53 @@ function Get-RestorePlan {
         return [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Check'; status = 'AlreadyRestored'; backupId = $RequestedBackupId; transactionPath = $transactionPath; planDigest = Get-Sha256Text -Text "restored|$RequestedBackupId|$($transaction.planDigest)"; transaction = $transaction; errors = @(); exitCode = 0 }
     }
     if ([string]$transaction.status -notin @('Committed', 'Restoring')) { throw "Transaction is not restorable: $($transaction.status)" }
+    $requiresAntigravityCommand = @($transaction.targets | Where-Object {
+        [bool]$_.changed -and $null -ne $_.PSObject.Properties['deployment'] -and [string]$_.deployment -eq 'AntigravityManaged'
+    }).Count -gt 0
+    $approvedAntigravityCommandIdentity = $null
+    if ($requiresAntigravityCommand) {
+        if ($RequireAntigravityCommandDigest -and [string]::IsNullOrWhiteSpace($ExpectedAntigravityCommandDigest)) {
+            throw 'Restore requires -AntigravityCommandDigest from Check before invoking agy'
+        }
+        if (-not [string]::IsNullOrWhiteSpace($ExpectedAntigravityCommandDigest)) {
+            $approvedAntigravityCommandIdentity = Assert-AntigravityCommandDigest -Command $AntigravityCliCommand -ExpectedDigest $ExpectedAntigravityCommandDigest
+        }
+    }
     $errors = @()
     foreach ($item in @($transaction.targets | Where-Object { [bool]$_.changed })) {
-        if ((Get-RestoreEntryState -Item $item) -eq 'Conflict') { $errors += "Restore target ownership changed: $($item.name)" }
+        $deployment = if ($null -ne $item.PSObject.Properties['deployment']) { [string]$item.deployment } else { 'Junction' }
+        $state = if ($deployment -eq 'AntigravityManaged') { Get-AntigravityManagedRestoreState -Item $item -Command $AntigravityCliCommand -UserHome $UserHome -ExpectedCommandIdentity $approvedAntigravityCommandIdentity } else { Get-RestoreEntryState -Item $item }
+        if ($state -eq 'Conflict') { $errors += "Restore target ownership changed: $($item.name)" }
     }
     if ($null -ne $transaction.active -and [bool]$transaction.active.changed) {
         if ((Get-RestoreEntryState -Item $transaction.active) -eq 'Conflict') { $errors += 'Restore active pointer ownership changed' }
     }
-    $digestLines = @("restore=$RequestedBackupId", "transaction=$($transaction.planDigest)")
-    foreach ($item in @($transaction.targets)) { $digestLines += "target|$($item.name)|$($item.path)|$($item.newIdentity)|$($item.priorIdentity)" }
+    $antigravityCommandIdentity = $null
+    if (@($transaction.targets | Where-Object {
+        [bool]$_.changed -and $null -ne $_.PSObject.Properties['deployment'] -and [string]$_.deployment -eq 'AntigravityManaged'
+    }).Count -gt 0) {
+        # Bind the executable after all read-only registry inspection used to build the restore plan.
+        $antigravityCommandIdentity = Get-AntigravityCommandIdentity -Command $AntigravityCliCommand
+    }
+    $antigravityCommandDigest = if ($null -eq $antigravityCommandIdentity) { $null } else { Get-AntigravityCommandDigest -Identity $antigravityCommandIdentity }
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedAntigravityCommandDigest) -and $antigravityCommandDigest -cne $ExpectedAntigravityCommandDigest) {
+        throw 'Antigravity command changed while building the restore plan; run Check again'
+    }
+    $antigravityIdentityLine = if ($null -eq $antigravityCommandIdentity) {
+        'antigravityCommand='
+    }
+    else {
+        "antigravityCommand=$($antigravityCommandIdentity.path)|$($antigravityCommandIdentity.commandType)|$($antigravityCommandIdentity.sha256)"
+    }
+    $digestLines = @("restore=$RequestedBackupId", "transaction=$($transaction.planDigest)", $antigravityIdentityLine)
+    foreach ($item in @($transaction.targets)) {
+        $deployment = if ($null -ne $item.PSObject.Properties['deployment']) { [string]$item.deployment } else { 'Junction' }
+        $newDigest = if ($null -ne $item.PSObject.Properties['newDigest']) { [string]$item.newDigest } else { '' }
+        $priorDigest = if ($null -ne $item.PSObject.Properties['priorDigest']) { [string]$item.priorDigest } else { '' }
+        $digestLines += "target|$($item.name)|$deployment|$($item.path)|$($item.newIdentity)|$($item.priorIdentity)|$newDigest|$priorDigest"
+    }
     $planDigest = Get-Sha256Text -Text ([string]::Join("`n", $digestLines))
-    return [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Check'; status = if ($errors.Count) { 'Conflict' } else { 'RestoreReady' }; backupId = $RequestedBackupId; transactionPath = $transactionPath; planDigest = $planDigest; transaction = $transaction; errors = $errors; exitCode = if ($errors.Count) { 3 } else { 2 } }
+    return [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Check'; status = if ($errors.Count) { 'Conflict' } else { 'RestoreReady' }; backupId = $RequestedBackupId; transactionPath = $transactionPath; antigravityCommandIdentity = $antigravityCommandIdentity; antigravityCommandDigest = $antigravityCommandDigest; planDigest = $planDigest; transaction = $transaction; errors = $errors; exitCode = if ($errors.Count) { 3 } else { 2 } }
 }
 
 function Invoke-AgentKitRestore {
@@ -690,12 +1157,16 @@ function Invoke-AgentKitRestore {
         [Parameter(Mandatory = $true)][string]$UserHome,
         [Parameter(Mandatory = $true)][string]$KitRoot,
         [Parameter(Mandatory = $true)][string]$ApprovedDigest,
+        [Parameter(Mandatory = $true)][string]$AntigravityCliCommand,
         [string]$InjectedFault
     )
     if (-not $ApproveGlobalHomeWrite) { throw 'Restore requires -ApproveGlobalHomeWrite' }
     if ([string]::IsNullOrWhiteSpace($ApprovedDigest) -or [string]$RestorePlan.planDigest -cne $ApprovedDigest) { throw 'Restore PlanDigest does not match the current Check' }
     if ([string]$RestorePlan.status -eq 'AlreadyRestored') { return [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Restore'; status = 'NoChange'; backupId = $RestorePlan.backupId; planDigest = $RestorePlan.planDigest; exitCode = 0 } }
     if ([string]$RestorePlan.status -ne 'RestoreReady') { throw 'Restore cannot proceed from Conflict' }
+    if ($null -ne $RestorePlan.antigravityCommandIdentity) {
+        $null = Assert-AntigravityCommandIdentity -Command $AntigravityCliCommand -ExpectedIdentity $RestorePlan.antigravityCommandIdentity
+    }
     $transaction = $RestorePlan.transaction
     if ($null -eq $transaction.PSObject.Properties['restoreProgress']) {
         $transaction | Add-Member -NotePropertyName restoreProgress -NotePropertyValue ([pscustomobject][ordered]@{ targets = @(); active = $false; activeJson = $false })
@@ -706,11 +1177,17 @@ function Invoke-AgentKitRestore {
     [array]::Reverse($changedTargets)
     $processed = 0
     foreach ($item in $changedTargets) {
-        $state = Get-RestoreEntryState -Item $item
+        $deployment = if ($null -ne $item.PSObject.Properties['deployment']) { [string]$item.deployment } else { 'Junction' }
+        $state = if ($deployment -eq 'AntigravityManaged') { Get-AntigravityManagedRestoreState -Item $item -Command $AntigravityCliCommand -UserHome $UserHome -ExpectedCommandIdentity $RestorePlan.antigravityCommandIdentity } else { Get-RestoreEntryState -Item $item }
         if ($state -eq 'Conflict') { throw "Restore target ownership changed: $($item.name)" }
-        if ($state -eq 'Installed') { Remove-OwnedJunction -Path ([string]$item.path) -Target ([string]$item.newTarget) -Identity ([string]$item.newIdentity) -AllowedRoot $UserHome }
-        if ($state -in @('Installed', 'Recoverable') -and [string]$item.originalKind -eq 'Junction') {
-            Move-OwnedJunction -Source ([string]$item.priorBackupPath) -Destination ([string]$item.path) -Target ([string]$item.priorTarget) -Identity ([string]$item.priorIdentity) -SourceRoot $KitRoot -DestinationRoot $UserHome
+        if ($deployment -eq 'AntigravityManaged') {
+            Restore-AntigravityManagedItem -Item $item -Command $AntigravityCliCommand -UserHome $UserHome -KitRoot $KitRoot -CommandIdentity $RestorePlan.antigravityCommandIdentity
+        }
+        else {
+            if ($state -eq 'Installed') { Remove-OwnedJunction -Path ([string]$item.path) -Target ([string]$item.newTarget) -Identity ([string]$item.newIdentity) -AllowedRoot $UserHome }
+            if ($state -in @('Installed', 'Recoverable') -and [string]$item.originalKind -eq 'Junction') {
+                Move-OwnedJunction -Source ([string]$item.priorBackupPath) -Destination ([string]$item.path) -Target ([string]$item.priorTarget) -Identity ([string]$item.priorIdentity) -SourceRoot $KitRoot -DestinationRoot $UserHome
+            }
         }
         if (@($transaction.restoreProgress.targets) -notcontains [string]$item.name) { $transaction.restoreProgress.targets += [string]$item.name }
         Write-JsonAtomic -Path ([string]$RestorePlan.transactionPath) -Value $transaction -AllowedRoot $KitRoot
@@ -746,6 +1223,7 @@ function Write-HumanResult {
     if ($Result.PSObject.Properties['releaseId']) { Write-Output "Release: $($Result.releaseId)" }
     if ($Result.PSObject.Properties['backupId'] -and $null -ne $Result.backupId) { Write-Output "BackupId: $($Result.backupId)" }
     if ($Result.PSObject.Properties['planDigest']) { Write-Output "PlanDigest: $($Result.planDigest)" }
+    if ($Result.PSObject.Properties['antigravityCommandDigest'] -and $null -ne $Result.antigravityCommandDigest) { Write-Output "AntigravityCommandDigest: $($Result.antigravityCommandDigest)" }
     if ($Result.PSObject.Properties['errors']) { foreach ($message in @($Result.errors)) { Write-Output "ERROR: $message" } }
 }
 
@@ -765,27 +1243,40 @@ try {
         $temporaryTestRoot = Join-Path ([IO.Path]::GetTempPath()) 'yohan-agent-kit-tests'
         if (-not (Test-PathWithin -Root $testRoot -Candidate $HomeRoot) -and -not (Test-PathWithin -Root $temporaryTestRoot -Candidate $HomeRoot)) { throw 'Test-only switches require HomeRoot under tests/.work or the bounded Agent Kit temp root' }
     }
+    if ($AntigravityCommand -cne 'agy') {
+        $testRoot = Join-Path $RepositoryRoot 'tests\.work'
+        $temporaryTestRoot = Join-Path ([IO.Path]::GetTempPath()) 'yohan-agent-kit-tests'
+        if (-not (Test-PathWithin -Root $testRoot -Candidate $HomeRoot) -and -not (Test-PathWithin -Root $temporaryTestRoot -Candidate $HomeRoot)) { throw 'Alternate Antigravity commands are test-only and require a bounded test HomeRoot' }
+    }
+
+    if ($Mode -in @('Install', 'Update', 'Restore') -and -not $ApproveGlobalHomeWrite) {
+        throw "$Mode requires -ApproveGlobalHomeWrite"
+    }
 
     if ($Mode -eq 'Restore' -or ($Mode -eq 'Check' -and -not [string]::IsNullOrWhiteSpace($BackupId))) {
         if ([string]::IsNullOrWhiteSpace($BackupId)) { throw 'Restore requires an exact -BackupId' }
-        $result = Get-RestorePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedBackupId $BackupId
+        $result = Get-RestorePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedBackupId $BackupId -AntigravityCliCommand $AntigravityCommand -ExpectedAntigravityCommandDigest $AntigravityCommandDigest -RequireAntigravityCommandDigest:($Mode -eq 'Restore')
         if ($Mode -eq 'Restore') {
             $mutex = Enter-AgentKitMutex -UserHome $HomeRoot
-            try { $result = Invoke-AgentKitRestore -RestorePlan $result -UserHome $HomeRoot -KitRoot $kitRoot -ApprovedDigest $PlanDigest -InjectedFault $TestFault }
+            try { $result = Invoke-AgentKitRestore -RestorePlan $result -UserHome $HomeRoot -KitRoot $kitRoot -ApprovedDigest $PlanDigest -AntigravityCliCommand $AntigravityCommand -InjectedFault $TestFault }
             finally { Exit-AgentKitMutex -Mutex $mutex; $mutex = $null }
         }
     }
     else {
         if ([string]::IsNullOrWhiteSpace($Release)) { throw "$Mode requires -Release" }
         if ($Release -notmatch '^[a-z0-9][a-z0-9._-]{0,127}$' -or $Release.Contains('..')) { throw 'Release ID is invalid' }
+        $requiresAntigravityCommand = @(Get-SelectedTargets -Selection $Targets | Where-Object { $_ -eq 'AntigravityIde' }).Count -gt 0
+        if ($Mode -ne 'Check' -and $requiresAntigravityCommand -and [string]::IsNullOrWhiteSpace($AntigravityCommandDigest)) {
+            throw "$Mode requires -AntigravityCommandDigest from Check before invoking agy"
+        }
         if ([string]::IsNullOrWhiteSpace($ArtifactRoot)) { $ArtifactRoot = Join-Path $RepositoryRoot "dist\releases\$Release" }
-        $plan = Get-ReleasePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedRelease $Release -SourceArtifact $ArtifactRoot -Selection $Targets -PermitDirty:$AllowDirtyArtifact
+        $plan = Get-ReleasePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedRelease $Release -SourceArtifact $ArtifactRoot -Selection $Targets -AntigravityCliCommand $AntigravityCommand -ExpectedAntigravityCommandDigest $AntigravityCommandDigest -PermitDirty:$AllowDirtyArtifact
         if ($Mode -eq 'Check') { $result = $plan }
         else {
             $mutex = Enter-AgentKitMutex -UserHome $HomeRoot
             try {
-                $plan = Get-ReleasePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedRelease $Release -SourceArtifact $ArtifactRoot -Selection $Targets -PermitDirty:$AllowDirtyArtifact
-                $result = Invoke-ReleaseMutation -Plan $plan -UserHome $HomeRoot -KitRoot $kitRoot -ApprovedDigest $PlanDigest -RequestedMode $Mode -PermitDirty:$AllowDirtyArtifact -InjectedFault $TestFault
+                $plan = Get-ReleasePlan -UserHome $HomeRoot -KitRoot $kitRoot -RequestedRelease $Release -SourceArtifact $ArtifactRoot -Selection $Targets -AntigravityCliCommand $AntigravityCommand -ExpectedAntigravityCommandDigest $AntigravityCommandDigest -PermitDirty:$AllowDirtyArtifact
+                $result = Invoke-ReleaseMutation -Plan $plan -UserHome $HomeRoot -KitRoot $kitRoot -ApprovedDigest $PlanDigest -RequestedMode $Mode -AntigravityCliCommand $AntigravityCommand -PermitDirty:$AllowDirtyArtifact -InjectedFault $TestFault
             }
             finally { Exit-AgentKitMutex -Mutex $mutex; $mutex = $null }
         }

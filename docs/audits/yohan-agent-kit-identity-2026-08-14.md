@@ -22,9 +22,11 @@
 
 ## 계약 연결
 
-- Brain 계약 후보 커밋: `37068a625d85bb3955579a04d87cc0f5c503c823`
-- Brain Draft PR: #194
+- Brain 계약 커밋: `37068a625d85bb3955579a04d87cc0f5c503c823`
+- Brain PR #194: merge commit `caf83175aa0466c063ac98d6c0764b67b2866cb7`
+- Merge parents: base `06e8b2ece815f6bf9f23aec3d327c6ff52b4fdb8` + head `3257e5cf1610e869e19a16f73f5622fd188e0e35`
+- Ancestry: Brain 계약 커밋이 `master`에서 도달 가능함을 확인했다.
 - 디자인 resolver/recording 실행 소유자: `yohan-agent-kit`
 - Agent Kit resolver/recorder는 위 Brain 커밋을 exact ref로 고정한다.
 
-Brain PR #194가 먼저 병합되고 Agent Kit PR #74가 그다음 병합되어야 한다.
+Brain PR #194의 선행 병합은 완료됐다. Agent Kit PR #74는 전체 회귀와 별도 사람 게이트를 통과한 뒤 병합한다.

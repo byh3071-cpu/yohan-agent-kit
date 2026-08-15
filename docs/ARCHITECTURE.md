@@ -184,7 +184,7 @@ RULES.md
 
 Agent Plugins 산출물은 v1 Working Draft의 고정 범위인 Skills·MCP만 포함한다. Hooks·Rules·Commands·Subagents는 네이티브 패키지로만 배포하며, Hook 설정은 `adapters/`에 두고 공통 무상태 스크립트 `scripts/agent-kit-hook.mjs`를 호출한다.
 
-`Manage-AgentKit.ps1`은 검증된 artifact를 `~/.yohan-agent-kit/releases/<release-id>/`에 복사하고 `active`와 벤더 발견 경로를 junction으로 전환한다. Check는 무변경이며 Install·Update·Restore는 동일 PlanDigest와 사용자 홈 쓰기 승인을 요구한다. 설치 실패는 역순 rollback하고, 중단된 Restore는 현재 junction 지문을 재검사해 이어서 실행한다. Claude Marketplace의 cache·installed state는 Claude가 소유하므로 직접 수정하지 않는다.
+`Manage-AgentKit.ps1`은 검증된 artifact를 `~/.yohan-agent-kit/releases/<release-id>/`에 복사하고 `active`와 일반 벤더 발견 경로를 junction으로 전환한다. Antigravity 공유 경로만은 공식 `agy plugin install`로 물리 staging하고, 전체 디렉터리 digest와 `agy plugin list`의 정확한 등록 이름을 함께 소유권 증거로 사용한다. 기존 Agent Kit junction은 immutable release를 CLI가 수정하지 못하도록 transaction backup으로 먼저 이동한다. 이후 Update는 이전 물리 패키지를 검증·백업하고 공식 uninstall/install을 수행하며, Restore는 백업 패키지를 공식 install로 재등록한다. Check는 무변경이며 Install·Update·Restore는 동일 PlanDigest와 사용자 홈 쓰기 승인을 요구한다. Antigravity mutation은 별도로 네이티브 `agy.exe`의 정규화 경로·명령 형식·파일 SHA-256을 `AntigravityCommandDigest`에 묶고, 계획 재계산과 각 외부 명령 직전에 같은 정체성을 검증한다. 설치 실패는 역순 rollback하되 실행파일 정체성이 바뀌었으면 바뀐 CLI를 자동 호출하지 않고 복구 필요 상태로 멈춘다. 중단된 Restore는 현재 junction 지문 또는 Antigravity 패키지 digest·등록 상태를 재검사해 이어서 실행한다. Claude Marketplace의 cache·installed state는 Claude가 소유하므로 직접 수정하지 않는다.
 
 ## 10. 노하우 Intake
 
@@ -196,9 +196,9 @@ Agent Plugins 산출물은 v1 Working Draft의 고정 범위인 Skills·MCP만 �
 - PowerShell 5.1 AST parser
 - 격리 HomeRoot 상태 전이·경로 탈출·변조·복구 재개 테스트: `tests/Manage-MultivendorSkills.Tests.ps1`
 - 불변 릴리스·5개 패키지·네이티브 Hook 어댑터: `tests/Build-AgentKit.Tests.ps1`
-- release store 설치·업데이트·멱등성·중간 실패 rollback·복원 재개: `tests/Manage-AgentKit.Tests.ps1`
+- release store 설치·업데이트·멱등성·중간 실패 rollback·복원 재개·Antigravity 공식 등록·`agy.exe` 교체 선차단: `tests/Manage-AgentKit.Tests.ps1`
 - Inbox 승인·중복·비밀정보·라이선스 경계: `tests/Manage-AgentIntake.Tests.ps1`
-- 두 머신 증거 봉인·동일 release 비교·합성 증거 차단: `tests/AgentKitCompatibility.Tests.ps1`
+- 단일 머신 증거 봉인·검증, 선택적 동일 release 멀티 머신 비교·합성 증거 차단: `tests/AgentKitCompatibility.Tests.ps1`
 - full manifest baseline Check
 - PR 전 시크릿 검사와 staged diff 검토
 - 새 벤더 세션의 자동·명시·부정 호출 smoke test

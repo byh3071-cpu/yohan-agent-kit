@@ -1989,6 +1989,26 @@
       ]
     },
     {
+      "id": "script.windows-powershell-env",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/windows-powershell-env.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ]
+    },
+    {
       "id": "fixture.agent-kit-session-results",
       "kind": "fixture",
       "owner": "yohan-agent-kit",

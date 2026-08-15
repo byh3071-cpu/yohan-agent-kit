@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const skipDeep = process.env.VHK_GATES_SKIP_DEEP === '1'
@@ -38,6 +39,15 @@ try {
 const manager = read('scripts/Manage-AgentKit.ps1')
 gate('top-level public modes', ['Check', 'Install', 'Update', 'Restore'].every((mode) => manager.includes(`'${mode}'`)))
 gate('mutations require explicit global-home approval', manager.includes('ApproveGlobalHomeWrite') && manager.includes('PlanDigest'))
+gate('Antigravity mutations bind the checked native agy identity',
+  manager.includes('AntigravityCommandDigest') &&
+  manager.includes('Get-AntigravityCommandIdentity') &&
+  manager.includes('Production Antigravity command must resolve to the native agy.exe application') &&
+  manager.includes('Antigravity command identity changed after Check; run Check again'))
+gate('Antigravity read-only preflight binds the approved agy identity',
+  manager.split('$approvedAntigravityCommandIdentity = Assert-AntigravityCommandDigest').length - 1 === 2 &&
+  manager.includes("Test-AntigravityPluginRegistered -Command $AntigravityCliCommand -UserHome $UserHome -PluginName 'yohan-agent-kit' -ExpectedCommandIdentity $approvedAntigravityCommandIdentity") &&
+  manager.includes('Get-AntigravityManagedRestoreState -Item $item -Command $AntigravityCliCommand -UserHome $UserHome -ExpectedCommandIdentity $approvedAntigravityCommandIdentity'))
 gate('top-level automation obeys HARD_STOP', manager.includes('.vhk\\HARD_STOP') && read('scripts/Build-AgentKit.mjs').includes("'.vhk', 'HARD_STOP'"))
 gate('exact rollback identity', manager.includes('Get-JunctionIdentity') && manager.includes('BackupId format is invalid'))
 gate('low-level skill manager remains present', existsSync(join(repoRoot, 'scripts/Manage-MultivendorSkills.ps1')))
@@ -46,7 +56,8 @@ if (!skipDeep) {
   for (const test of ['tests/Build-AgentKit.Tests.ps1', 'tests/Manage-AgentKit.Tests.ps1']) {
     try {
       const output = execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', test], {
-        cwd: repoRoot, encoding: 'utf8', timeout: 8 * 60_000, windowsHide: true, maxBuffer: 64 * 1024 * 1024
+        cwd: repoRoot, encoding: 'utf8', timeout: 8 * 60_000, windowsHide: true, maxBuffer: 64 * 1024 * 1024,
+        env: getWindowsPowerShellEnv(process.env)
       })
       const summary = output.match(/PASS:\s+\d+ assertions/)?.[0] ?? ''
       gate(test, Boolean(summary), summary)

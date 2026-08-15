@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto'
 import { existsSync, lstatSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { delimiter, dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const skipDeep = process.env.VHK_GATES_SKIP_DEEP === '1'
@@ -74,7 +75,7 @@ function runDirect(command, args, summaryPattern = null) {
   }
 }
 
-async function runDirectBounded(command, args, summaryPattern, timeoutMs) {
+async function runDirectBounded(command, args, summaryPattern, timeoutMs, environment = process.env) {
   if (process.platform === 'win32' && /\.cmd$/i.test(command)) {
     if (args.some((argument) => WINDOWS_SHELL_METACHARS.test(argument))) {
       return { ok: false, detail: 'unsafe cmd.exe argument rejected', elapsedMs: 0, outputTail: '' }
@@ -92,7 +93,8 @@ async function runDirectBounded(command, args, summaryPattern, timeoutMs) {
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
       timeout: timeoutMs,
-      windowsHide: true
+      windowsHide: true,
+      env: environment
     }, (error, stdout, stderr) => {
       const elapsedMs = Date.now() - startedAt
       const output = `${stdout ?? ''}${stderr ?? ''}`
@@ -240,7 +242,7 @@ if (!skipDeep) {
       'Bypass',
       '-File',
       testFile
-    ], /(?:PASS:\s+\d+ assertions|assertions passed:\s+\d+)/, POWERSHELL_SUITE_TIMEOUT_MS)
+    ], /(?:PASS:\s+\d+ assertions|assertions passed:\s+\d+)/, POWERSHELL_SUITE_TIMEOUT_MS, getWindowsPowerShellEnv(process.env))
     if (!result.ok && result.outputTail) console.log(result.outputTail)
     gate(`PowerShell ${testFile}`, result.ok, result.detail)
   }))

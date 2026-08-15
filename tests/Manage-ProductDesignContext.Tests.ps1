@@ -13,6 +13,14 @@ $fixtureRoot = Join-Path $PSScriptRoot (".work\product-design-context-run-{0}" -
 $script:assertionCount = 0
 $script:failures = @()
 
+function Get-TestSha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Assert-True {
     param(
         [Parameter(Mandatory = $true)][bool]$Condition,
@@ -117,7 +125,7 @@ function Get-TreeSignature {
                 $pending.Push($entry.FullName)
             }
             else {
-                $digest = (Get-FileHash -LiteralPath $entry.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+                $digest = Get-TestSha256File -Path $entry.FullName
                 $rows.Add("file|$relative|$digest")
             }
         }
@@ -431,7 +439,7 @@ Run-Test -Name 'A resealed transaction cannot claim and delete arbitrary target 
     Write-Utf8NoBom -Path $target -Text $arbitraryBytes
     Write-Utf8NoBom -Path $outside -Text "external sentinel must survive`n"
     $transaction = [IO.File]::ReadAllText($transactionPath, [Text.Encoding]::UTF8) | ConvertFrom-Json
-    $transaction.targetDigest = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash.ToUpperInvariant()
+    $transaction.targetDigest = Get-TestSha256File -Path $target
     $transaction.evidenceDigest = Get-FixtureTransactionSeal -Transaction $transaction
     Write-Utf8NoBom -Path $transactionPath -Text ([string]($transaction | ConvertTo-Json -Depth 8 -Compress))
     $check = Invoke-Adapter -Mode Check -BrainRoot $fixture.Brain -HomeRoot $fixture.Home

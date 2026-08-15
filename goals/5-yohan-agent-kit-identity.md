@@ -35,7 +35,7 @@ priority: P0
 - [x] ADR-024가 Accepted 상태로 Brain `master`에 병합됐다.
 - [x] GitHub 저장소 이름이 `yohan-agent-kit`으로 바뀌고 repository ID·PR·redirect가 보존됐다.
 - [x] 로컬 `origin`이 새 GitHub URL을 가리킨다.
-- [ ] Brain 계약 PR #194가 Agent Kit PR보다 먼저 Ready 전환·병합됐다.
+- [x] Brain 계약 PR #194가 Agent Kit PR보다 먼저 Ready 전환·병합됐다.
 - [x] Agent Kit의 현재 문서·Registry·catalog가 새 identity를 사용한다.
 - [x] Marketplace name `yohan-cc-skills`와 네 plugin ID가 호환용으로 유지된다.
 - [x] 디자인 resolver/recorder가 Brain 계약 커밋 `37068a625d85bb3955579a04d87cc0f5c503c823`을 고정한다.
@@ -51,6 +51,8 @@ priority: P0
 
 ## 검증 증거
 
+- Brain PR #194: merge commit `caf83175aa0466c063ac98d6c0764b67b2866cb7`
+- Brain 계약 ancestry: `37068a625d85bb3955579a04d87cc0f5c503c823` → `master` 도달 가능 PASS
 - Agent registry: 95 assets
 - catalog digest: `df64ee8f6a6ad31ede4bb171a36347e76f89293f4e493dd056c90d710525aa2f`
 - Goal 1: PASS

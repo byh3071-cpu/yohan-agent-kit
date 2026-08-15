@@ -2,7 +2,7 @@
 
 [CmdletBinding()]
 param(
-    [ValidateSet('Probe', 'Finalize', 'Compare')]
+    [ValidateSet('Probe', 'Finalize', 'Verify', 'Compare')]
     [string]$Mode = 'Probe',
 
     [string]$Release,
@@ -86,6 +86,27 @@ function Get-Sha256Text {
     return Get-Sha256Bytes -Bytes ([Text.Encoding]::UTF8.GetBytes($Text))
 }
 
+function Get-HomeRootDigest {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $canonical = Get-NormalizedFullPath -Path $Path
+    $current = $canonical
+    while (-not [string]::IsNullOrWhiteSpace($current)) {
+        if ([IO.File]::Exists($current)) { throw "HomeRoot ancestor is not a directory: $current" }
+        if ([IO.Directory]::Exists($current)) {
+            $entry = Get-Item -LiteralPath $current -Force -ErrorAction Stop
+            $linkType = $entry.PSObject.Properties['LinkType']
+            if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 -or
+                ($null -ne $linkType -and -not [string]::IsNullOrWhiteSpace([string]$linkType.Value))) {
+                throw "HomeRoot contains a linked ancestor: $current"
+            }
+        }
+        $parent = Split-Path -Parent $current
+        if ([string]::IsNullOrWhiteSpace($parent) -or [string]::Equals($parent, $current, [StringComparison]::OrdinalIgnoreCase)) { break }
+        $current = $parent
+    }
+    return Get-Sha256Text -Text "agent-kit-home-root-v1|$($canonical.ToLowerInvariant())"
+}
+
 function Get-ReleaseManifestDigest {
     param($Manifest)
     $lines = @(
@@ -130,14 +151,34 @@ function Read-JsonFile {
 function Get-CliEvidence {
     param([string]$Name)
     $command = Get-Command $Name -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($null -eq $command) { return [pscustomobject][ordered]@{ state = 'NOT_INSTALLED'; version = $null } }
+    if ($null -eq $command) { return [pscustomobject][ordered]@{ state = 'NOT_INSTALLED'; version = $null; path = $null; commandType = $null; sha256 = $null } }
     try {
-        $output = @(& $command.Source --version 2>&1)
+        $commandPath = if ($command.Path) { [string]$command.Path } else { [string]$command.Source }
+        if ([string]::IsNullOrWhiteSpace($commandPath)) { throw "Unable to resolve CLI path: $Name" }
+        $commandPath = Get-NormalizedFullPath -Path $commandPath
+        $entry = Get-Item -LiteralPath $commandPath -Force -ErrorAction Stop
+        if ($entry.PSIsContainer -or ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "CLI is not an ordinary file: $commandPath" }
+        $commandType = [string]$command.CommandType
+        if ($commandType -notin @('Application', 'ExternalScript')) { throw "Unsupported CLI command type: $commandType" }
+        if ($Name -ceq 'agy' -and ($commandType -cne 'Application' -or [IO.Path]::GetFileName($commandPath) -cne 'agy.exe')) {
+            throw "Antigravity evidence requires the native agy.exe application: $commandPath"
+        }
+        $sha256 = Get-Sha256Bytes -Bytes ([IO.File]::ReadAllBytes($commandPath))
+        $output = @(& $commandPath --version 2>&1)
         $exitCode = $LASTEXITCODE
         $version = [string]::Join(' ', @($output | ForEach-Object { ([string]$_).Trim() })).Trim()
-        return [pscustomobject][ordered]@{ state = if ($exitCode -eq 0) { 'DETECTED' } else { 'ERROR' }; version = $version }
+        if ((Get-Sha256Bytes -Bytes ([IO.File]::ReadAllBytes($commandPath))) -cne $sha256) { throw "CLI changed while reading its version: $Name" }
+        return [pscustomobject][ordered]@{ state = if ($exitCode -eq 0) { 'DETECTED' } else { 'ERROR' }; version = $version; path = $commandPath; commandType = $commandType; sha256 = $sha256 }
     }
-    catch { return [pscustomobject][ordered]@{ state = 'ERROR'; version = $_.Exception.Message } }
+    catch { return [pscustomobject][ordered]@{ state = 'UNTRUSTED'; version = $_.Exception.Message; path = $null; commandType = $null; sha256 = $null } }
+}
+
+function Test-CliEvidenceEqual {
+    param($Expected, $Actual)
+    foreach ($field in @('state', 'version', 'path', 'commandType', 'sha256')) {
+        if ([string]$Expected.$field -cne [string]$Actual.$field) { return $false }
+    }
+    return $true
 }
 
 function Get-MachineId {
@@ -255,17 +296,142 @@ function Assert-ResultSet {
 function Get-EvidenceSeal {
     param($Evidence)
     $lines = @(
-        "machine=$($Evidence.machineId)", "release=$($Evidence.releaseId)", "commit=$($Evidence.gitCommit)",
+        "schema=$([int]$Evidence.schemaVersion)", "machine=$($Evidence.machineId)", "home=$($Evidence.homeRootDigest)",
+        "release=$($Evidence.releaseId)", "commit=$($Evidence.gitCommit)",
         "catalog=$($Evidence.catalogDigest)", "manifest=$($Evidence.manifestSha256)", "status=$($Evidence.status)"
     )
     foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
         $cli = $Evidence.cli.PSObject.Properties[$vendor].Value
-        $lines += "cli|$vendor|$($cli.state)|$($cli.version)"
+        $lines += "cli|$vendor|$($cli.state)|$($cli.version)|$($cli.path)|$($cli.commandType)|$($cli.sha256)"
         foreach ($check in @($Evidence.vendors.$vendor.PSObject.Properties | Sort-Object Name)) { $lines += "$vendor|$($check.Name)|$($check.Value.status)|$($check.Value.evidence)" }
     }
     foreach ($check in @($Evidence.automated.PSObject.Properties | Sort-Object Name)) { $lines += "automated|$($check.Name)|$($check.Value)" }
     foreach ($check in @($Evidence.transactions.PSObject.Properties | Sort-Object Name)) { $lines += "transaction|$($check.Name)|$($check.Value.status)|$($check.Value.evidence)" }
     return Get-Sha256Text -Text ([string]::Join("`n", $lines))
+}
+
+function Get-EvidenceValidationErrors {
+    param(
+        [Parameter(Mandatory = $true)]$Evidence,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [switch]$PermitSynthetic
+    )
+
+    $errors = @()
+    if ([int]$Evidence.schemaVersion -ne 2) { return @("$Label schemaVersion must be 2; regenerate evidence") }
+    if ([string]$Evidence.status -cne 'FINAL') { $errors += "$Label evidence must be FINAL" }
+    foreach ($field in @('machineId', 'homeRootDigest', 'releaseId', 'gitCommit', 'catalogDigest', 'manifestSha256', 'evidenceDigest')) {
+        if ([string]::IsNullOrWhiteSpace([string]$Evidence.$field)) { $errors += "$Label evidence is missing: $field" }
+    }
+    if (-not [string]::IsNullOrWhiteSpace([string]$Evidence.homeRootDigest) -and [string]$Evidence.homeRootDigest -notmatch '^[a-f0-9]{64}$') { $errors += "$Label homeRootDigest is invalid" }
+    if (-not [string]::IsNullOrWhiteSpace([string]$Evidence.evidenceDigest) -and
+        [string]$Evidence.evidenceDigest -cne (Get-EvidenceSeal -Evidence $Evidence)) {
+        $errors += "$Label evidence seal is invalid"
+    }
+    foreach ($check in @('releaseHashes', 'packageLayout', 'cliCompatibility')) {
+        if ([string]$Evidence.automated.PSObject.Properties[$check].Value -cne 'PASS') { $errors += "$Label automated check is incomplete: $check" }
+    }
+    foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
+        $cli = $Evidence.cli.PSObject.Properties[$vendor].Value
+        if ($null -eq $cli -or [string]$cli.state -cne 'DETECTED' -or [string]::IsNullOrWhiteSpace([string]$cli.version)) {
+            $errors += "$Label required CLI is not detected: $vendor"
+        }
+        elseif ([string]::IsNullOrWhiteSpace([string]$cli.path) -or
+            [string]$cli.commandType -notin @('Application', 'ExternalScript') -or
+            [string]$cli.sha256 -notmatch '^[a-f0-9]{64}$') {
+            $errors += "$Label required CLI identity is invalid: $vendor"
+        }
+        elseif ($vendor -ceq 'antigravity' -and ([string]$cli.commandType -cne 'Application' -or [IO.Path]::GetFileName([string]$cli.path) -cne 'agy.exe')) {
+            $errors += "$Label Antigravity CLI identity is not native agy.exe"
+        }
+        try { Assert-ResultSet -Results $Evidence.vendors.$vendor -Label "$Label.$vendor" -ExpectedKeys $manualKeys -PermitSynthetic:$PermitSynthetic }
+        catch { $errors += $_.Exception.Message }
+    }
+    try { Assert-ResultSet -Results $Evidence.transactions -Label "$Label.transactions" -ExpectedKeys $transactionKeys -PermitSynthetic:$PermitSynthetic }
+    catch { $errors += $_.Exception.Message }
+    return @($errors)
+}
+
+function Get-SingleMachineStateErrors {
+    param(
+        [Parameter(Mandatory = $true)]$Evidence,
+        [Parameter(Mandatory = $true)][string]$HomeRoot,
+        [string]$ReleaseRoot,
+        [string]$MachineLabel,
+        [switch]$PermitDirty
+    )
+
+    $errors = @()
+    $expectedMachineId = Get-MachineId -TestLabel $MachineLabel
+    if ([string]$Evidence.machineId -cne $expectedMachineId) {
+        $errors += 'House PC evidence machine ID differs from the current machine'
+    }
+    $currentHomeRootDigest = Get-HomeRootDigest -Path $HomeRoot
+    if ([string]$Evidence.homeRootDigest -cne $currentHomeRootDigest) {
+        $errors += 'House PC evidence HomeRoot digest differs from the current canonical HomeRoot'
+    }
+
+    $kitRoot = Join-Path $HomeRoot '.yohan-agent-kit'
+    $expectedReleaseRoot = Join-Path $kitRoot "releases\$([string]$Evidence.releaseId)"
+    if ([string]::IsNullOrWhiteSpace($ReleaseRoot)) { $ReleaseRoot = $expectedReleaseRoot }
+    $ReleaseRoot = Get-NormalizedFullPath -Path $ReleaseRoot
+    if (-not [string]::Equals($ReleaseRoot, (Get-NormalizedFullPath -Path $expectedReleaseRoot), [StringComparison]::OrdinalIgnoreCase)) {
+        $errors += 'House PC evidence release is not the installed release under the current HomeRoot'
+        return @($errors)
+    }
+
+    $verified = $null
+    try {
+        Assert-NoReparseAncestors -Root $HomeRoot -Candidate $ReleaseRoot -IncludeLeaf
+        $verified = Assert-ReleasePayload -Root $ReleaseRoot -ExpectedRelease ([string]$Evidence.releaseId) -PermitDirty:$PermitDirty
+        if ([string]$Evidence.gitCommit -cne [string]$verified.data.gitCommit -or
+            [string]$Evidence.catalogDigest -cne [string]$verified.data.catalogDigest -or
+            [string]$Evidence.manifestSha256 -cne [string]$verified.manifestSha256) {
+            $errors += 'House PC evidence release identity differs from the installed release'
+        }
+        $null = Test-PackageLayout -Root $ReleaseRoot
+        $currentCli = Get-CliSnapshot -Manifest $verified.data
+        if (-not $currentCli.compatible) { $errors += 'Current house-PC CLI versions do not satisfy the installed release contract' }
+        foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
+            $actual = $currentCli.cli.PSObject.Properties[$vendor].Value
+            $recorded = $Evidence.cli.PSObject.Properties[$vendor].Value
+            if (-not (Test-CliEvidenceEqual -Expected $recorded -Actual $actual)) {
+                $errors += "Current house-PC CLI identity differs from the evidence: $vendor"
+            }
+        }
+    }
+    catch { $errors += "Installed house-PC release validation failed: $($_.Exception.Message)" }
+
+    try {
+        $activeJsonPath = Join-Path $kitRoot 'active.json'
+        Assert-NoReparseAncestors -Root $HomeRoot -Candidate $activeJsonPath -IncludeLeaf
+        $activeState = Read-JsonFile -Path $activeJsonPath -Label 'Active release state'
+        if ([int]$activeState.schemaVersion -ne 1 -or
+            [string]$activeState.releaseId -cne [string]$Evidence.releaseId -or
+            [string]$activeState.manifestSha256 -cne [string]$Evidence.manifestSha256) {
+            $errors += 'House PC active.json differs from the evidence release'
+        }
+
+        $activePath = Join-Path $kitRoot 'active'
+        Assert-NoReparseAncestors -Root $HomeRoot -Candidate $activePath
+        $activeEntry = Get-Item -LiteralPath $activePath -Force -ErrorAction Stop
+        $linkType = $activeEntry.PSObject.Properties['LinkType']
+        $target = $activeEntry.PSObject.Properties['Target']
+        if (($activeEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -eq 0 -or
+            $null -eq $linkType -or [string]$linkType.Value -cne 'Junction' -or $null -eq $target) {
+            $errors += 'House PC active pointer is not an owned junction'
+        }
+        else {
+            $targetPath = [string](@($target.Value)[0])
+            if (-not [IO.Path]::IsPathRooted($targetPath)) { $targetPath = Join-Path (Split-Path -Parent $activePath) $targetPath }
+            if (-not [string]::Equals((Get-NormalizedFullPath -Path $targetPath), $ReleaseRoot, [StringComparison]::OrdinalIgnoreCase)) {
+                $errors += 'House PC active junction differs from the evidence release'
+            }
+        }
+    }
+    catch { $errors += "House PC active release validation failed: $($_.Exception.Message)" }
+
+    return @($errors)
 }
 
 function Write-HumanResult {
@@ -284,6 +450,7 @@ try {
     if ([IO.File]::Exists((Join-Path $RepositoryRoot '.vhk\HARD_STOP'))) { throw '.vhk/HARD_STOP detected' }
     if ([string]::IsNullOrWhiteSpace($HomeRoot)) { $HomeRoot = [Environment]::GetFolderPath('UserProfile') }
     $HomeRoot = Get-NormalizedFullPath -Path $HomeRoot
+    $homeRootDigest = Get-HomeRootDigest -Path $HomeRoot
     $evidenceRoot = Join-Path $HomeRoot '.yohan-agent-kit\evidence'
     $testRoot = Join-Path $RepositoryRoot 'tests\.work'
     $temporaryTestRoot = Join-Path ([IO.Path]::GetTempPath()) 'yohan-agent-kit-tests'
@@ -306,7 +473,7 @@ try {
         $machineId = Get-MachineId -TestLabel $MachineLabel
         if ([string]::IsNullOrWhiteSpace($EvidencePath)) { $EvidencePath = Join-Path $evidenceRoot "$Release-$machineId-draft.json" }
         $draft = [pscustomobject][ordered]@{
-            schemaVersion = 1; status = 'DRAFT'; machineId = $machineId; releaseId = $Release
+            schemaVersion = 2; status = 'DRAFT'; machineId = $machineId; homeRootDigest = $homeRootDigest; releaseId = $Release
             gitCommit = [string]$verified.data.gitCommit; catalogDigest = [string]$verified.data.catalogDigest; manifestSha256 = [string]$verified.manifestSha256
             cli = $cliSnapshot.cli
             automated = [pscustomobject][ordered]@{ releaseHashes = 'PASS'; packageLayout = 'PASS'; cliCompatibility = if ($cliSnapshot.compatible) { 'PASS' } else { 'FAIL' } }
@@ -328,14 +495,21 @@ try {
         if (-not (Test-PathWithin -Root $evidenceRoot -Candidate $DraftEvidencePath)) { throw 'Draft evidence must be inside the current HomeRoot evidence directory' }
         Assert-NoReparseAncestors -Root $HomeRoot -Candidate $DraftEvidencePath -IncludeLeaf
         $draft = Read-JsonFile -Path $DraftEvidencePath -Label 'Draft evidence'
+        if ([int]$draft.schemaVersion -ne 2) { throw 'Draft evidence schemaVersion must be 2; regenerate evidence' }
         if ([string]$draft.status -cne 'DRAFT') { throw 'Only DRAFT evidence can be finalized' }
         if ([string]$draft.machineId -cne (Get-MachineId -TestLabel $MachineLabel)) { throw 'Draft evidence machine identity differs from the current machine' }
+        if ([string]$draft.homeRootDigest -cne $homeRootDigest) { throw 'Draft evidence HomeRoot digest differs from the current canonical HomeRoot' }
         if ([string]::IsNullOrWhiteSpace($ReleaseRoot)) { $ReleaseRoot = Join-Path $HomeRoot ".yohan-agent-kit\releases\$([string]$draft.releaseId)" }
         $ReleaseRoot = Get-NormalizedFullPath -Path $ReleaseRoot
         $verified = Assert-ReleasePayload -Root $ReleaseRoot -ExpectedRelease ([string]$draft.releaseId) -PermitDirty:$AllowDirtyArtifact
         $null = Test-PackageLayout -Root $ReleaseRoot
         if ([string]$draft.gitCommit -cne [string]$verified.data.gitCommit -or [string]$draft.catalogDigest -cne [string]$verified.data.catalogDigest -or [string]$draft.manifestSha256 -cne [string]$verified.manifestSha256) { throw 'Draft evidence release identity differs from the verified artifact' }
         $cliSnapshot = Get-CliSnapshot -Manifest $verified.data
+        foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
+            $recordedCli = $draft.cli.PSObject.Properties[$vendor].Value
+            $currentCli = $cliSnapshot.cli.PSObject.Properties[$vendor].Value
+            if (-not (Test-CliEvidenceEqual -Expected $recordedCli -Actual $currentCli)) { throw "CLI identity changed since Probe: $vendor" }
+        }
         $draft.cli = $cliSnapshot.cli
         $draft.automated.releaseHashes = 'PASS'
         $draft.automated.packageLayout = 'PASS'
@@ -361,24 +535,36 @@ try {
         Write-JsonFile -Path $EvidencePath -Value $draft -AllowedRoot $HomeRoot
         $result = [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Finalize'; status = 'FinalEvidenceReady'; releaseId = $draft.releaseId; evidencePath = $EvidencePath; evidenceDigest = $draft.evidenceDigest; exitCode = 0 }
     }
+    elseif ($Mode -eq 'Verify') {
+        if ([string]::IsNullOrWhiteSpace($EvidencePath)) { throw 'Verify requires -EvidencePath' }
+        if (-not (Test-PathWithin -Root $evidenceRoot -Candidate $EvidencePath)) { throw 'House PC evidence must be inside the current HomeRoot evidence directory' }
+        Assert-NoReparseAncestors -Root $HomeRoot -Candidate $EvidencePath -IncludeLeaf
+        $evidence = Read-JsonFile -Path $EvidencePath -Label 'House PC evidence'
+        $errors = @(Get-EvidenceValidationErrors -Evidence $evidence -Label 'House PC' -PermitSynthetic:$AllowSyntheticEvidence)
+        if ([int]$evidence.schemaVersion -eq 2) {
+            $errors += @(Get-SingleMachineStateErrors -Evidence $evidence -HomeRoot $HomeRoot -ReleaseRoot $ReleaseRoot -MachineLabel $MachineLabel -PermitDirty:$AllowDirtyArtifact)
+        }
+        $result = [pscustomobject][ordered]@{
+            schemaVersion = 1
+            mode = 'Verify'
+            status = if ($errors.Count) { 'Conflict' } else { 'SingleMachineVerified' }
+            releaseId = [string]$evidence.releaseId
+            machineId = [string]$evidence.machineId
+            evidenceDigest = [string]$evidence.evidenceDigest
+            errors = $errors
+            exitCode = if ($errors.Count) { 3 } else { 0 }
+        }
+    }
     else {
+        if ([string]::IsNullOrWhiteSpace($EvidencePath) -or [string]::IsNullOrWhiteSpace($OtherEvidencePath)) { throw 'Compare requires -EvidencePath and -OtherEvidencePath' }
         $first = Read-JsonFile -Path $EvidencePath -Label 'First machine evidence'
         $second = Read-JsonFile -Path $OtherEvidencePath -Label 'Second machine evidence'
-        $errors = @()
-        if ([string]$first.status -cne 'FINAL' -or [string]$second.status -cne 'FINAL') { $errors += 'Both evidence files must be FINAL' }
+        $errors = @(
+            @(Get-EvidenceValidationErrors -Evidence $first -Label 'First machine' -PermitSynthetic:$AllowSyntheticEvidence)
+            @(Get-EvidenceValidationErrors -Evidence $second -Label 'Second machine' -PermitSynthetic:$AllowSyntheticEvidence)
+        )
         if ([string]$first.machineId -ceq [string]$second.machineId) { $errors += 'Evidence files must come from different machines' }
         foreach ($field in @('releaseId', 'gitCommit', 'catalogDigest', 'manifestSha256')) { if ([string]$first.$field -cne [string]$second.$field) { $errors += "Evidence mismatch: $field" } }
-        if ([string]$first.evidenceDigest -cne (Get-EvidenceSeal -Evidence $first)) { $errors += 'First evidence seal is invalid' }
-        if ([string]$second.evidenceDigest -cne (Get-EvidenceSeal -Evidence $second)) { $errors += 'Second evidence seal is invalid' }
-        foreach ($evidence in @($first, $second)) {
-            foreach ($check in @('releaseHashes', 'packageLayout', 'cliCompatibility')) { if ([string]$evidence.automated.PSObject.Properties[$check].Value -cne 'PASS') { $errors += "$($evidence.machineId) automated check is incomplete: $check" } }
-            foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
-                $cli = $evidence.cli.PSObject.Properties[$vendor].Value
-                if ($null -eq $cli -or [string]$cli.state -cne 'DETECTED' -or [string]::IsNullOrWhiteSpace([string]$cli.version)) { $errors += "$($evidence.machineId) required CLI is not detected: $vendor" }
-                try { Assert-ResultSet -Results $evidence.vendors.$vendor -Label "$($evidence.machineId).$vendor" -ExpectedKeys $manualKeys -PermitSynthetic:$AllowSyntheticEvidence } catch { $errors += $_.Exception.Message }
-            }
-            try { Assert-ResultSet -Results $evidence.transactions -Label "$($evidence.machineId).transactions" -ExpectedKeys $transactionKeys -PermitSynthetic:$AllowSyntheticEvidence } catch { $errors += $_.Exception.Message }
-        }
         $result = [pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Compare'; status = if ($errors.Count) { 'Conflict' } else { 'Compatible' }; releaseId = [string]$first.releaseId; machineIds = @([string]$first.machineId, [string]$second.machineId); errors = $errors; exitCode = if ($errors.Count) { 3 } else { 0 } }
     }
     $exitCode = [int]$result.exitCode

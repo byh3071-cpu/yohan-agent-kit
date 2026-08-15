@@ -16,6 +16,7 @@ $script:assertionCount = 0
 function Assert-True { param([bool]$Condition, [string]$Message); $script:assertionCount++; if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Expected, $Actual, [string]$Message); $script:assertionCount++; if ([string]$Expected -cne [string]$Actual) { throw "Assertion failed: $Message. Expected=[$Expected] Actual=[$Actual]" } }
 function Read-JsonUtf8 { param([string]$Path); return [string]([IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8)) | ConvertFrom-Json }
+function Get-TestSha256File { param([string]$Path); $sha = [Security.Cryptography.SHA256]::Create(); $stream = [IO.File]::OpenRead($Path); try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() } finally { $stream.Dispose(); $sha.Dispose() } }
 
 function Invoke-Builder {
     param([string]$Release, [switch]$PermitDirty, [string]$CustomOutputRoot = $outputRoot)
@@ -108,7 +109,7 @@ try {
     Assert-Equal 2 @($manifest.compatibility.antigravity.discoveryPaths).Count 'Antigravity IDE and CLI discovery paths are both recorded'
     foreach ($file in @($manifest.files)) {
         $path = Join-Path $releaseRoot ([string]$file.path).Replace('/', '\')
-        $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLowerInvariant()
+        $hash = Get-TestSha256File -Path $path
         Assert-Equal $file.sha256 $hash "payload hash $($file.path)"
         Assert-Equal $file.bytes (Get-Item -LiteralPath $path).Length "payload size $($file.path)"
     }

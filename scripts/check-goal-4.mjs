@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 let pass = true
@@ -51,7 +52,7 @@ try {
   const output = execFileSync('powershell.exe', [
     '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
     '-File', 'tests/Scan-AgentAssets.Tests.ps1'
-  ], { cwd: repoRoot, encoding: 'utf8', timeout: 60_000, windowsHide: true }).trim()
+  ], { cwd: repoRoot, encoding: 'utf8', timeout: 60_000, windowsHide: true, env: getWindowsPowerShellEnv(process.env) }).trim()
   gate('read-only home scanner contract', /^PASS:\s+\d+ assertions$/m.test(output), output.split(/\r?\n/).at(-1))
 } catch (error) {
   console.log(`${error.stdout || ''}${error.stderr || ''}`.trim())

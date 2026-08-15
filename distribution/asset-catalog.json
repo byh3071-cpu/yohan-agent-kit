@@ -1,5 +1,5 @@
 {
-  "assetCount": 110,
+  "assetCount": 111,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -439,7 +439,7 @@
       ]
     },
     {
-      "contentDigest": "27c6f47ff16f5897f3ba1e2453a01b5df88161e124e651af84b9b197cad53202",
+      "contentDigest": "210528027118d9e50b5752db3fef8a56815c8a2b0152dfd66153e4c98ebeda16",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1183,7 +1183,7 @@
       ]
     },
     {
-      "contentDigest": "ade9db116e5222e67d87a3478f9bc7bc5017015beb90afe31d1827340e3d0329",
+      "contentDigest": "afb951ef4d1cdf279ccc312dd9f732b12d80bf692fe9542f87748cf0805ed866",
       "evidenceRefs": [
         "scripts/check-goal-1.mjs"
       ],
@@ -1204,7 +1204,7 @@
       ]
     },
     {
-      "contentDigest": "bb3e0c2811dbd54c7e7862d72a7b5422ce1121ba27a1a0d70d779c12c2ba4b09",
+      "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
       ],
@@ -1225,7 +1225,7 @@
       ]
     },
     {
-      "contentDigest": "2ee3797c5f26c82061e3525f1b40ae0224c1bf0fb947163ca7aa184ff665b4ee",
+      "contentDigest": "974f7ad6440e8f9911a7566f9e43893f287887f1fda04a73f24dd20f182dfb1e",
       "evidenceRefs": [
         "scripts/check-goal-3.mjs"
       ],
@@ -1246,7 +1246,7 @@
       ]
     },
     {
-      "contentDigest": "524abbe7458de53485da68607a60a7cea56db39b8f06aad187bf6a9e52eeb75d",
+      "contentDigest": "eb5642336f0785e2ede434364abe958820ae885e0108fefe261fda711f22968d",
       "evidenceRefs": [
         "scripts/check-goal-4.mjs"
       ],
@@ -1288,7 +1288,7 @@
       ]
     },
     {
-      "contentDigest": "681acaa2660597e7897be10be31764f383a06311ba23bb11ac6d7bf1bd533977",
+      "contentDigest": "e167e28b21d1e9543d227dac0691849948cc0f1fefe3872136b54749f5644ba3",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1309,7 +1309,7 @@
       ]
     },
     {
-      "contentDigest": "abb65ca905caf14081c4ff384968d12b6ff5d2e71c54d089d8485d65f96f9d36",
+      "contentDigest": "f885d3c5895e14e58b34239f27111a27396a9b772b4705ab10e894c2202136dc",
       "evidenceRefs": [
         "goals/7-knowledge-intake.md"
       ],
@@ -1330,7 +1330,7 @@
       ]
     },
     {
-      "contentDigest": "1b95e01bf3627a58ca03c4d5817c0e1ae741e41ee0595c6243c961c01c6d42f9",
+      "contentDigest": "5822b875fce8650a625ec59c0b1d4a912910fd98682c10aff7268afb4258bae3",
       "evidenceRefs": [
         "goals/8-two-machine-four-vendor-validation.md"
       ],
@@ -1372,7 +1372,7 @@
       ]
     },
     {
-      "contentDigest": "96476a82b1b0a60677df20906721a6a83922821783caa3a5d42f06fd1b335266",
+      "contentDigest": "b36d5ca33fbecbee935a9657316df17c247e9d67cc59e663c27fa98a8383bc0b",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1393,7 +1393,7 @@
       ]
     },
     {
-      "contentDigest": "0d4bf8d0778fb9fec8a6d0b0e2c3533ae7b8bc8344297499d8c4583a44d99d9d",
+      "contentDigest": "58c4c19b477a367b64c4d4ebef1431e0ac1db26796ef13a2e158eb58572323ac",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -1414,7 +1414,7 @@
       ]
     },
     {
-      "contentDigest": "63046edd7b156c9d451c39f04091c8dadaeeffa8955db1091bf27bf616540032",
+      "contentDigest": "30c44dc03b2018ba43ac15dcfafc56829ccdac0a00e023e381b9dd87a67a3b86",
       "evidenceRefs": [
         "scripts/Manage-ProductDesignContext.ps1"
       ],
@@ -1435,7 +1435,7 @@
       ]
     },
     {
-      "contentDigest": "36f33fa3d4d0f4d61e11f92b11745d4e8fd07605d16def405263199dc1e5326f",
+      "contentDigest": "fc1bc502f283710e18719459396252259727b37bf712b4bd0be7c9e31e0f0169",
       "evidenceRefs": [
         "scripts/New-SkillManifest.ps1"
       ],
@@ -1498,7 +1498,7 @@
       ]
     },
     {
-      "contentDigest": "b479aaec2c47b38a5a8725f76abe966fbdc21d88e25029d3e4d25eec4b3a048a",
+      "contentDigest": "cb35ef22ca4c957e106785c912ddfa2ddd520984dd8e2e30cb1f77f750096576",
       "evidenceRefs": [
         "scripts/Scan-AgentAssets.ps1"
       ],
@@ -1519,7 +1519,7 @@
       ]
     },
     {
-      "contentDigest": "c8cb4ff939bbdeb4be0d678a5dc56014fc419eb18d22aa16afe9e1fdd1145933",
+      "contentDigest": "0ad8deec2e7641d91898cf9c83e9314bc3fabdbe416c4cbde78423f208bd1e8b",
       "evidenceRefs": [
         "goals/8-two-machine-four-vendor-validation.md"
       ],
@@ -1540,7 +1540,7 @@
       ]
     },
     {
-      "contentDigest": "7148cd8a2ad1ec589d1ce510103fadd0229c58c7b7c9e3858eb0cab234cfe302",
+      "contentDigest": "aef0caedbc3a841b8a687bc4b04af688ac9c8ae0e555f82c234f405c0b06c03f",
       "evidenceRefs": [
         "scripts/Test-DesignToHtmlEnvironment.ps1"
       ],
@@ -1595,6 +1595,27 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/verify-design-context-html.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "a5847b05fb8a1ce95df4605376bd7ee41ae77f30c0797a067d3af0765e1e40b8",
+      "evidenceRefs": [
+        "goals/6-versioned-release-store.md"
+      ],
+      "id": "script.windows-powershell-env",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/windows-powershell-env.mjs",
       "vendors": [
         "claude-code",
         "codex",
@@ -2226,9 +2247,9 @@
       ]
     }
   ],
-  "catalogDigest": "9c41562884715cd45d7d0f9f83a547cba8ee835abc831b5c45ff855336ef3d9f",
+  "catalogDigest": "d1f9ce11da233b8c77f3ad69f4a8e85e036194bf86fe57485b56a4d940b2b53c",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "b75feb68966379983ae5bab2669dee99c31a9d54a74dabdb392fd526eddcef78",
+  "registryDigest": "e6d08bc1d3ba1a5388005591421a52f75f415963563f4a21f9ecf60b0b61c3a7",
   "schemaVersion": 1
 }

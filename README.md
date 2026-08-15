@@ -23,7 +23,7 @@ GitHub 정본은 `byh3071-cpu/yohan-agent-kit`이다. 첫 호환 릴리스 동�
 | `design-to-html` | 승인한 시각 원본을 반응형 HTML로 구현하고 같은 상태 디자인 QA까지 검증 |
 | `goal-cycle` | 승인된 결정 아래 조사→스펙→설계→티켓→구현→검증→검수→품질확인→PR→관찰·개선 |
 
-자동 호출은 모델 판단이므로 100% 강제되지 않는다. 확실한 호출은 **“adr-cycle로 …”**, **“design-to-html로 …”**, **“goal-cycle로 …”**처럼 벤더 공통 자연어를 사용한다. 두 PC 설치·검증 순서는 [HTML 디자인 환경 인계](docs/DESIGN_TO_HTML_HANDOFF.md)를 따른다.
+자동 호출은 모델 판단이므로 100% 강제되지 않는다. 확실한 호출은 **“adr-cycle로 …”**, **“design-to-html로 …”**, **“goal-cycle로 …”**처럼 벤더 공통 자연어를 사용한다. 새 PC 설치·검증 순서는 [HTML 디자인 환경 인계](docs/DESIGN_TO_HTML_HANDOFF.md)를 따른다.
 
 ### 읽기 전용 검사
 
@@ -62,16 +62,17 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 ## 버전 고정 Agent Kit 릴리스
 
-개별 Skill junction과 별도로, 검증된 commit에서 다섯 패키지(Agent Plugins·Claude Code·Codex·Cursor·Antigravity)를 만들고 동일 release ID로 두 PC에 활성화한다.
+개별 Skill junction과 별도로, 검증된 commit에서 다섯 패키지(Agent Plugins·Claude Code·Codex·Cursor·Antigravity)를 만들고 동일 release ID로 활성화한다. v0.1의 필수 게이트는 집 PC 단일 머신 final evidence이며, 노트북 비교는 첫 실제 사용 시 수행하는 후속 검증이다. Antigravity 공유 플러그인은 단순 junction이 아니라 공식 `agy plugin install`로 등록하며, release manager가 물리 디렉터리의 전체 digest와 `agy plugin list` 등록 상태를 함께 검증한다. Check가 출력한 `AntigravityCommandDigest`는 해석된 네이티브 `agy.exe`의 경로·명령 형식·파일 SHA-256을 묶는다. Antigravity를 바꾸는 Install·Update·Restore에는 `PlanDigest`와 함께 바로 앞 Check의 이 값을 전달해야 한다.
 
 ```powershell
 node .\scripts\Build-AgentKit.mjs --release v0.1.0-<short-sha> --output-root dist\releases
 .\scripts\Manage-AgentKit.ps1 -Mode Check -Release <id> -Targets All
 .\scripts\Manage-AgentKit.ps1 -Mode Install -Release <id> -Targets All `
-  -PlanDigest <digest> -ApproveGlobalHomeWrite
+  -PlanDigest <digest> -AntigravityCommandDigest <agy-digest> `
+  -ApproveGlobalHomeWrite
 ```
 
-`dist/`는 생성 결과이고 정본이 아니다. 신규 노하우는 자동 push하지 않으며 로컬 Inbox에서 검사·검토한 뒤 승인된 Draft PR로 승격한다. 자세한 계약은 [릴리스 저장소](docs/AGENT_KIT_RELEASES.md), [노하우 Intake](docs/AGENT_KIT_INTAKE.md), [두 PC 검증](docs/AGENT_KIT_TWO_MACHINE_RUNBOOK.md)을 따른다.
+`dist/`는 생성 결과이고 정본이 아니다. 신규 노하우는 자동 push하지 않으며 로컬 Inbox에서 검사·검토한 뒤 승인된 Draft PR로 승격한다. 자세한 계약은 [릴리스 저장소](docs/AGENT_KIT_RELEASES.md), [노하우 Intake](docs/AGENT_KIT_INTAKE.md), [집 PC·네 벤더 검증](docs/AGENT_KIT_TWO_MACHINE_RUNBOOK.md)을 따른다.
 
 ## Claude Code 플러그인을 새 머신에 설치
 GitHub 에 push 된 뒤:
@@ -129,7 +130,7 @@ adapters/                              # Claude/Codex/Cursor/Antigravity 어댑�
 scripts/Build-AgentKit.mjs             # 불변 release artifact 생성
 scripts/Manage-AgentKit.ps1            # release Check · Install · Update · Restore
 scripts/Manage-AgentIntake.ps1         # 로컬 Inbox 후보 수집·검토
-scripts/Test-AgentKitCompatibility.ps1 # 두 PC·네 벤더 증거 봉인·비교
+scripts/Test-AgentKitCompatibility.ps1 # 집 PC 증거 봉인·검증, 선택적 멀티 머신 비교
 plugins/
   yohan-core/                          # 공통 코어 "두뇌"
     .claude-plugin/plugin.json

@@ -16,6 +16,7 @@ $script:assertionCount = 0
 
 function Assert-True { param([bool]$Condition, [string]$Message); $script:assertionCount++; if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Expected, $Actual, [string]$Message); $script:assertionCount++; if ([string]$Expected -cne [string]$Actual) { throw "Assertion failed: $Message. Expected=[$Expected] Actual=[$Actual]" } }
+function Get-TestSha256File { param([string]$Path); $sha = [Security.Cryptography.SHA256]::Create(); $stream = [IO.File]::OpenRead($Path); try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() } finally { $stream.Dispose(); $sha.Dispose() } }
 
 function Invoke-Intake {
     param([string[]]$Arguments)
@@ -53,13 +54,13 @@ try {
 
     $candidateHardLinkOutside = Join-Path $fixtureRoot 'candidate-hardlink-outside.json'
     [IO.File]::WriteAllBytes($candidateHardLinkOutside, [IO.File]::ReadAllBytes($candidatePath))
-    $candidateHardLinkOutsideHash = (Get-FileHash -LiteralPath $candidateHardLinkOutside -Algorithm SHA256).Hash
+    $candidateHardLinkOutsideHash = Get-TestSha256File -Path $candidateHardLinkOutside
     [IO.File]::Delete($candidatePath)
     $null = New-Item -ItemType HardLink -Path $candidatePath -Target $candidateHardLinkOutside
     $hardLinkCheck = Invoke-Intake -Arguments @('-Mode', 'Check', '-CandidateId', $candidateId)
     Assert-Equal 1 $hardLinkCheck.ExitCode 'candidate metadata hard link is rejected'
     Assert-True (@($hardLinkCheck.Data.blockers | Where-Object { $_ -match 'linked entry' }).Count -eq 1) 'candidate hard-link rejection reason'
-    Assert-Equal $candidateHardLinkOutsideHash (Get-FileHash -LiteralPath $candidateHardLinkOutside -Algorithm SHA256).Hash 'candidate hard link cannot modify outside bytes'
+    Assert-Equal $candidateHardLinkOutsideHash (Get-TestSha256File -Path $candidateHardLinkOutside) 'candidate hard link cannot modify outside bytes'
     [IO.File]::Delete($candidatePath)
     [IO.File]::WriteAllBytes($candidatePath, [IO.File]::ReadAllBytes($candidateHardLinkOutside))
 
@@ -85,7 +86,7 @@ try {
 
     $secretSkill = Join-Path $sourceRoot 'secret-skill'
     $null = New-Item -ItemType Directory -Path $secretSkill -Force
-    [IO.File]::WriteAllText((Join-Path $secretSkill 'SKILL.md'), "---`nname: secret-skill`ndescription: test`n---`napi_key = 'sk-abcdefghijklmnopqrstuvwxyz123456'`n")
+    [IO.File]::WriteAllText((Join-Path $secretSkill 'SKILL.md'), "---`nname: secret-skill`ndescription: test`n---`npassword = 'DUMMY_TEST_VALUE_00000000'`n")
     $secret = Invoke-Intake -Arguments @('-Mode', 'Scan', '-SourcePath', $secretSkill, '-Kind', 'skill', '-CanonicalId', 'skill.secret-test', '-Provenance', 'external:https://example.invalid', '-License', 'UNKNOWN', '-ApproveInboxWrite')
     Assert-Equal 3 $secret.ExitCode 'secret and unknown license candidate is blocked'
     Assert-True (@($secret.Data.blockers | Where-Object { $_ -match '^secret-pattern:' }).Count -eq 1) 'secret blocker recorded without value'

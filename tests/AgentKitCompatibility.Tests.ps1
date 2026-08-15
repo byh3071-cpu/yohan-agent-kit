@@ -17,6 +17,12 @@ $script:assertionCount = 0
 
 function Assert-True { param([bool]$Condition, [string]$Message); $script:assertionCount++; if (-not $Condition) { throw "Assertion failed: $Message" } }
 function Assert-Equal { param($Expected, $Actual, [string]$Message); $script:assertionCount++; if ([string]$Expected -cne [string]$Actual) { throw "Assertion failed: $Message. Expected=[$Expected] Actual=[$Actual]" } }
+function Get-TestSha256File {
+    param([string]$Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($sha.ComputeHash([IO.File]::ReadAllBytes($Path)))).Replace('-', '').ToLowerInvariant() }
+    finally { $sha.Dispose() }
+}
 
 function Invoke-Compatibility {
     param([string[]]$Arguments, [string]$FixtureHome, [bool]$PermitSynthetic = $true)
@@ -46,6 +52,7 @@ try {
     Assert-Equal 'DraftEvidenceReady' $probe1.Data.status 'first draft status'
     $draft1 = [string]$probe1.Data.evidencePath
     $draftData = Get-Content -LiteralPath $draft1 -Raw | ConvertFrom-Json
+    Assert-Equal 2 $draftData.schemaVersion 'new evidence uses the fail-closed v2 schema'
     Assert-Equal 'DRAFT' $draftData.status 'draft evidence cannot claim completion'
     Assert-Equal 'NOT_RUN' $draftData.vendors.'claude-code'.explicitSkill.status 'manual session starts NOT_RUN'
     Assert-Equal 'NOT_RUN' $draftData.vendors.antigravity.subagent.status 'Antigravity CLI subagent requires a real session'
@@ -84,6 +91,74 @@ try {
     Assert-Equal 'FinalEvidenceReady' $final1.Data.status 'first final evidence status'
     Assert-True ([string]$final1.Data.evidenceDigest -match '^[a-f0-9]{64}$') 'first evidence has a SHA-256 seal'
 
+    $kitRoot1 = Join-Path $home1 '.yohan-agent-kit'
+    $installedReleaseRoot1 = Join-Path $kitRoot1 "releases\$release"
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $installedReleaseRoot1) -Force
+    Copy-Item -LiteralPath $releaseRoot -Destination $installedReleaseRoot1 -Recurse
+    $manifestSha256 = Get-TestSha256File -Path (Join-Path $installedReleaseRoot1 'release-manifest.json')
+    $activeStatePath = Join-Path $kitRoot1 'active.json'
+    [IO.File]::WriteAllText($activeStatePath, (ConvertTo-Json ([ordered]@{ schemaVersion = 1; releaseId = $release; manifestSha256 = $manifestSha256 })), (New-Object Text.UTF8Encoding($false)))
+    $null = New-Item -ItemType Junction -Path (Join-Path $kitRoot1 'active') -Target $installedReleaseRoot1
+
+    $singleMachine = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', [string]$final1.Data.evidencePath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    Assert-Equal 0 $singleMachine.ExitCode 'single-machine evidence verification succeeds'
+    Assert-Equal 'SingleMachineVerified' $singleMachine.Data.status 'house PC evidence can satisfy the release gate by itself'
+    Assert-Equal $release $singleMachine.Data.releaseId 'single-machine verification preserves release identity'
+
+    $replayHome = Join-Path $fixtureRoot 'machine-a-replay'
+    $replayKitRoot = Join-Path $replayHome '.yohan-agent-kit'
+    $replayReleaseRoot = Join-Path $replayKitRoot "releases\$release"
+    $replayEvidenceRoot = Join-Path $replayKitRoot 'evidence'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $replayReleaseRoot),$replayEvidenceRoot -Force
+    Copy-Item -LiteralPath $installedReleaseRoot1 -Destination $replayReleaseRoot -Recurse
+    $replayEvidencePath = Join-Path $replayEvidenceRoot 'replayed-final.json'
+    [IO.File]::Copy([string]$final1.Data.evidencePath, $replayEvidencePath, $false)
+    [IO.File]::Copy($activeStatePath, (Join-Path $replayKitRoot 'active.json'), $false)
+    $null = New-Item -ItemType Junction -Path (Join-Path $replayKitRoot 'active') -Target $replayReleaseRoot
+    $replayedHome = Invoke-Compatibility -FixtureHome $replayHome -Arguments @('-Mode', 'Verify', '-EvidencePath', $replayEvidencePath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    Assert-Equal 3 $replayedHome.ExitCode 'single-machine verification rejects a cloned HomeRoot replay'
+    Assert-True (@($replayedHome.Data.errors | Where-Object { $_ -match 'HomeRoot digest' }).Count -eq 1) 'cloned HomeRoot replay rejection reason'
+
+    $legacyEvidencePath = Join-Path $home1 '.yohan-agent-kit\evidence\legacy-v1-final.json'
+    $legacyEvidence = Get-Content -LiteralPath ([string]$final1.Data.evidencePath) -Raw | ConvertFrom-Json
+    $legacyEvidence.schemaVersion = 1
+    $legacyEvidence.PSObject.Properties.Remove('homeRootDigest')
+    foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
+        $legacyCli = $legacyEvidence.cli.PSObject.Properties[$vendor].Value
+        $legacyCli.PSObject.Properties.Remove('path')
+        $legacyCli.PSObject.Properties.Remove('commandType')
+        $legacyCli.PSObject.Properties.Remove('sha256')
+    }
+    [IO.File]::WriteAllText($legacyEvidencePath, (ConvertTo-Json $legacyEvidence -Depth 32), (New-Object Text.UTF8Encoding($false)))
+    $legacyVerify = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', $legacyEvidencePath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    Assert-Equal 3 $legacyVerify.ExitCode 'single-machine verification rejects legacy evidence schema'
+    Assert-True (@($legacyVerify.Data.errors | Where-Object { $_ -match 'schemaVersion must be 2' }).Count -eq 1) 'legacy evidence regeneration reason'
+
+    $fakeCliBin = Join-Path $fixtureRoot 'fake-cli-bin'
+    $null = New-Item -ItemType Directory -Path $fakeCliBin -Force
+    $fakeAgy = Join-Path $fakeCliBin 'agy.cmd'
+    $finalEvidence = Get-Content -LiteralPath ([string]$final1.Data.evidencePath) -Raw | ConvertFrom-Json
+    [IO.File]::WriteAllText($fakeAgy, "@echo off`r`necho $([string]$finalEvidence.cli.antigravity.version)`r`n", (New-Object Text.ASCIIEncoding))
+    $priorPath = $env:PATH
+    try {
+        $env:PATH = "$fakeCliBin;$priorPath"
+        $shadowedCli = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', [string]$final1.Data.evidencePath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    }
+    finally { $env:PATH = $priorPath }
+    Assert-Equal 3 $shadowedCli.ExitCode 'single-machine verification rejects same-version PATH shadow CLI'
+    Assert-True (@($shadowedCli.Data.errors | Where-Object { $_ -match 'CLI' }).Count -ge 1) 'PATH shadow CLI rejection reason'
+
+    $wrongMachine = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', [string]$final1.Data.evidencePath, '-MachineLabel', 'machine-b', '-AllowDirtyArtifact')
+    Assert-Equal 3 $wrongMachine.ExitCode 'single-machine verification rejects evidence from another machine identity'
+    Assert-True (@($wrongMachine.Data.errors | Where-Object { $_ -match 'current machine' }).Count -eq 1) 'wrong-machine rejection reason'
+
+    $activeStateBytes = [IO.File]::ReadAllBytes($activeStatePath)
+    [IO.File]::WriteAllText($activeStatePath, (ConvertTo-Json ([ordered]@{ schemaVersion = 1; releaseId = 'stale-release'; manifestSha256 = $manifestSha256 })), (New-Object Text.UTF8Encoding($false)))
+    $staleActive = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', [string]$final1.Data.evidencePath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    Assert-Equal 3 $staleActive.ExitCode 'single-machine verification rejects a stale active release state'
+    Assert-True (@($staleActive.Data.errors | Where-Object { $_ -match 'active.json' }).Count -eq 1) 'stale active release rejection reason'
+    [IO.File]::WriteAllBytes($activeStatePath, $activeStateBytes)
+
     $probe2 = Invoke-Compatibility -FixtureHome $home2 -Arguments @('-Mode', 'Probe', '-Release', $release, '-ReleaseRoot', $releaseRoot, '-AllowDirtyArtifact', '-MachineLabel', 'machine-b', '-ApproveEvidenceWrite')
     $final2 = Invoke-Compatibility -FixtureHome $home2 -Arguments @('-Mode', 'Finalize', '-DraftEvidencePath', [string]$probe2.Data.evidencePath, '-ReleaseRoot', $releaseRoot, '-MachineLabel', 'machine-b', '-AllowDirtyArtifact', '-SessionResultsPath', $sessions, '-TransactionResultsPath', $transactions, '-ApproveEvidenceWrite')
     Assert-Equal 0 $final2.ExitCode 'second evidence finalizes'
@@ -94,10 +169,13 @@ try {
     Assert-True ([string]$compare.Data.machineIds[0] -cne [string]$compare.Data.machineIds[1]) 'machine IDs differ'
     Assert-Equal $release $compare.Data.releaseId 'same release identity required'
 
-    $tamperedPath = Join-Path $home2 '.yohan-agent-kit\evidence\tampered-final.json'
+    $tamperedPath = Join-Path $home1 '.yohan-agent-kit\evidence\tampered-final.json'
     $tampered = Get-Content -LiteralPath ([string]$final2.Data.evidencePath) -Raw | ConvertFrom-Json
     $tampered.catalogDigest = ('f' * 64)
     [IO.File]::WriteAllText($tamperedPath, (ConvertTo-Json $tampered -Depth 32), (New-Object Text.UTF8Encoding($false)))
+    $tamperedVerify = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Verify', '-EvidencePath', $tamperedPath, '-MachineLabel', 'machine-a', '-AllowDirtyArtifact')
+    Assert-Equal 3 $tamperedVerify.ExitCode 'single-machine verification rejects a tampered seal'
+    Assert-True (@($tamperedVerify.Data.errors | Where-Object { $_ -match 'seal' }).Count -eq 1) 'single-machine tamper reason'
     $tamperedCompare = Invoke-Compatibility -FixtureHome $home1 -Arguments @('-Mode', 'Compare', '-EvidencePath', [string]$final1.Data.evidencePath, '-OtherEvidencePath', $tamperedPath)
     Assert-Equal 3 $tamperedCompare.ExitCode 'tampered evidence comparison conflicts'
     Assert-True (@($tamperedCompare.Data.errors | Where-Object { $_ -match 'catalogDigest|seal' }).Count -ge 1) 'tampered evidence reason'

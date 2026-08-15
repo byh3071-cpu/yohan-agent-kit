@@ -21,6 +21,14 @@ function Get-Sha256Text {
     finally { $algorithm.Dispose() }
 }
 
+function Get-Sha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
+    finally { $stream.Dispose(); $algorithm.Dispose() }
+}
+
 function ConvertTo-HomeUri {
     param([Parameter(Mandatory = $true)][string]$Path)
     $full = [IO.Path]::GetFullPath($Path)
@@ -49,7 +57,7 @@ function Get-ContentDigest {
     param([Parameter(Mandatory = $true)]$Item, [Parameter(Mandatory = $true)][string]$Kind)
     try {
         $candidate = if ($Item.PSIsContainer -and $Kind -eq 'skill') { Join-Path $Item.FullName 'SKILL.md' } elseif (-not $Item.PSIsContainer) { $Item.FullName } else { $null }
-        if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Leaf)) { return (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash.ToLowerInvariant() }
+        if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Leaf)) { return Get-Sha256File -Path $candidate }
     }
     catch { return $null }
     return $null

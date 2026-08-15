@@ -27,7 +27,7 @@
     },
     "claude-code": {
       "manifest": ".claude-plugin/marketplace.json",
-      "testedVersion": "2.1.229",
+      "testedVersion": "2.1.233",
       "discoveryPath": null,
       "components": [
         "skills",

@@ -75,7 +75,7 @@ function Get-TreeSignature {
     $root = (Resolve-Path -LiteralPath $Directory).Path
     $rows = @(Get-ChildItem -LiteralPath $root -File -Recurse -Force | ForEach-Object {
         $relative = $_.FullName.Substring($root.Length).TrimStart('\').Replace('\', '/')
-        "$relative|$($_.Length)|$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash)"
+        "$relative|$($_.Length)|$(Get-TestSha256File -Path $_.FullName)"
     } | Sort-Object)
     return [string]::Join("`n", $rows)
 }
@@ -88,6 +88,15 @@ function Get-TestSha256Text {
         return ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Text)))).Replace('-', '')
     }
     finally { $sha.Dispose() }
+}
+
+function Get-TestSha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
 }
 
 function Get-TestTransactionInstallSeal {
@@ -223,14 +232,14 @@ try {
     $null = New-Item -ItemType Directory -Path $conflictPath -Force
     $conflictFile = Join-Path $conflictPath 'SKILL.md'
     Write-Utf8NoBom -Path $conflictFile -Text "---`nname: goal-cycle`ndescription: drift`n---`n"
-    $beforeConflictHash = (Get-FileHash -LiteralPath $conflictFile -Algorithm SHA256).Hash
+    $beforeConflictHash = Get-TestSha256File -Path $conflictFile
     $conflict = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $conflictHome)
     Assert-Equal -Expected 3 -Actual $conflict.ExitCode -Message 'Drift must fail Check'
     Assert-Equal -Expected 'Conflict' -Actual $conflict.Data.status -Message 'Drift status'
     Assert-True -Condition (@($conflict.Data.errors | Where-Object { $_ -match 'Manifest mismatch' }).Count -gt 0) -Message 'Drift paths must be reported'
     $blockedInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'goal-cycle', '-HomeRoot', $conflictHome, '-PlanDigest', [string]$conflict.Data.planDigest, '-ApproveGlobalHomeWrite')
     Assert-Equal -Expected 3 -Actual $blockedInstall.ExitCode -Message 'Conflict must block Install'
-    Assert-Equal -Expected $beforeConflictHash -Actual (Get-FileHash -LiteralPath $conflictFile -Algorithm SHA256).Hash -Message 'Conflict content must remain unchanged'
+    Assert-Equal -Expected $beforeConflictHash -Actual (Get-TestSha256File -Path $conflictFile) -Message 'Conflict content must remain unchanged'
     Assert-True -Condition (-not [IO.Directory]::Exists((Join-Path $conflictHome '.agents'))) -Message 'Blocked Install must not create other targets'
 
     $fallbackHome = Join-Path $fixtureRoot 'fallback-home'
@@ -412,11 +421,11 @@ try {
     $indexPathText = [string](& $gitExecutable -C $repoRoot rev-parse --git-path index)
     Assert-Equal -Expected 0 -Actual $LASTEXITCODE -Message 'Git index path lookup'
     $indexPath = if ([IO.Path]::IsPathRooted($indexPathText)) { [IO.Path]::GetFullPath($indexPathText) } else { [IO.Path]::GetFullPath((Join-Path $repoRoot $indexPathText)) }
-    $indexHashBefore = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash
+    $indexHashBefore = Get-TestSha256File -Path $indexPath
     $indexTicksBefore = (Get-Item -LiteralPath $indexPath -Force).LastWriteTimeUtc.Ticks
     $indexCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'adr-cycle', '-HomeRoot', (Join-Path $fixtureRoot 'index-readonly-home'))
     Assert-Equal -Expected 2 -Actual $indexCheck.ExitCode -Message 'Index read-only fixture is installable'
-    Assert-Equal -Expected $indexHashBefore -Actual (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash -Message 'Check must not rewrite Git index bytes'
+    Assert-Equal -Expected $indexHashBefore -Actual (Get-TestSha256File -Path $indexPath) -Message 'Check must not rewrite Git index bytes'
     Assert-Equal -Expected $indexTicksBefore -Actual (Get-Item -LiteralPath $indexPath -Force).LastWriteTimeUtc.Ticks -Message 'Check must not refresh Git index timestamp'
 
     $recursiveGitBin = Join-Path $fixtureRoot 'recursive-git-wrapper-bin'

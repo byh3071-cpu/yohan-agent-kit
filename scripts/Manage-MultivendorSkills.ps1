@@ -71,16 +71,27 @@ function Assert-PathWithin {
 
 function Assert-NoReparseAncestors {
     param(
+        [Parameter(Mandatory = $true)][string]$AllowedRoot,
         [Parameter(Mandatory = $true)][string]$Candidate,
         [switch]$IncludeLeaf
     )
 
+    $root = Get-NormalizedFullPath -Path $AllowedRoot
     $full = Get-NormalizedFullPath -Path $Candidate
-    $pathRoot = [IO.Path]::GetPathRoot($full)
-    $relative = $full.Substring($pathRoot.Length).TrimStart('\', '/')
+    Assert-PathWithin -Root $root -Candidate $full -Label 'Reparse-point check'
+
+    if ([IO.Directory]::Exists($root)) {
+        $rootEntry = Get-Item -LiteralPath $root -Force
+        if (($rootEntry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "Allowed root is a reparse point: $root"
+        }
+        if (-not $rootEntry.PSIsContainer) { throw "Allowed root is not a directory: $root" }
+    }
+
+    $relative = $full.Substring($root.Length).TrimStart('\', '/')
     $segments = @($relative -split '[\\/]' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     $limit = if ($IncludeLeaf) { $segments.Count } else { [Math]::Max(0, $segments.Count - 1) }
-    $current = $pathRoot
+    $current = $root
 
     for ($index = 0; $index -lt $limit; $index++) {
         $parent = $current
@@ -107,7 +118,7 @@ function Assert-SafeDestinationPath {
     )
 
     Assert-PathWithin -Root $AllowedRoot -Candidate $Candidate -Label $Label
-    Assert-NoReparseAncestors -Candidate $Candidate -IncludeLeaf:$IncludeLeaf
+    Assert-NoReparseAncestors -AllowedRoot $AllowedRoot -Candidate $Candidate -IncludeLeaf:$IncludeLeaf
 }
 
 function Assert-SafeFilePath {
@@ -158,6 +169,15 @@ function Get-Sha256Text {
     finally {
         $sha.Dispose()
     }
+}
+
+function Get-Sha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
 }
 
 function ConvertTo-AsciiJson {
@@ -228,7 +248,7 @@ function Get-DirectoryManifest {
         $rows += [pscustomobject][ordered]@{
             path = $relative
             bytes = [int64]$file.Length
-            sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+            sha256 = Get-Sha256File -Path $file.FullName
         }
     }
 
@@ -873,7 +893,7 @@ function Test-AgyEvidence {
             if ($testedAt -gt $now.AddMinutes(5)) { $errors += 'AGY evidence testedAt is in the future' }
             elseif (($now - $testedAt).TotalHours -gt 24) { $errors += 'AGY evidence is older than 24 hours' }
         }
-        return [pscustomobject]@{ valid = ($errors.Count -eq 0); errors = $errors; digest = (Get-FileHash -LiteralPath $evidencePath -Algorithm SHA256).Hash }
+        return [pscustomobject]@{ valid = ($errors.Count -eq 0); errors = $errors; digest = Get-Sha256File -Path $evidencePath }
     }
     catch {
         return [pscustomobject]@{ valid = $false; errors = @("Unable to read AGY evidence:$($_.Exception.Message)"); digest = $null }
