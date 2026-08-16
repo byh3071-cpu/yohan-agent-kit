@@ -35,8 +35,12 @@ function Invoke-Builder {
     return [pscustomobject]@{ ExitCode = $exitCode; Text = $text; Data = $data }
 }
 
+$dirtyProbe = Join-Path $repoRoot (".agent-kit-test-dirty-{0}-{1}" -f $PID, [Guid]::NewGuid().ToString('N'))
+$testExitCode = 1
+
 try {
     $release = 'test-build-a'
+    [IO.File]::WriteAllText($dirtyProbe, "test-only`n", (New-Object Text.UTF8Encoding($false)))
     $built = Invoke-Builder -Release $release -PermitDirty
     Assert-Equal 0 $built.ExitCode 'dirty test build with bounded output succeeds'
     Assert-Equal 'Built' $built.Data.status 'builder result status'
@@ -145,11 +149,17 @@ try {
 
     Write-Output "PASS: $script:assertionCount assertions"
     Write-Output "Fixture retained: $fixtureRoot"
-    exit 0
+    $testExitCode = 0
 }
 catch {
     Write-Output "ERROR: $($_.Exception.Message)"
     Write-Output "FAIL after $script:assertionCount assertions"
     Write-Output "Fixture retained: $fixtureRoot"
-    exit 1
 }
+finally {
+    if ([IO.File]::Exists($dirtyProbe)) {
+        Remove-Item -LiteralPath $dirtyProbe -Force -ErrorAction Stop
+    }
+}
+
+exit $testExitCode
