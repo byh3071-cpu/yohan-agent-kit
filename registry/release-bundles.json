@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "kitVersion": "0.1.0",
+  "kitVersion": "0.1.1",
   "repository": "https://github.com/byh3071-cpu/yohan-agent-kit",
   "portablePlugin": "yohan-agent-kit",
   "releaseLifecycles": [

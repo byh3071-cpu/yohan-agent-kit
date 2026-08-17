@@ -8,6 +8,9 @@ import {
 import { basename, dirname, join, parse, relative, resolve, sep } from 'node:path'
 import { tmpdir } from 'node:os'
 import { fileURLToPath } from 'node:url'
+import {
+  renderAntigravityAgent, renderAntigravityRule, renderAntigravitySkill
+} from './antigravity-adapter.mjs'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const gitExecutable = process.platform === 'win32' ? 'git.exe' : 'git'
@@ -174,6 +177,47 @@ try {
     }
   }
 
+  function assertRegularTrackedFile(sourcePath) {
+    const normalizedPath = normalize(sourcePath)
+    const source = join(repoRoot, normalizedPath)
+    if (!gitFiles.includes(normalizedPath)) fail(`Release source is not visible to Git: ${normalizedPath}`)
+    const entry = lstatSync(source)
+    if (!entry.isFile() || entry.isSymbolicLink()) fail(`Release source must be a regular file: ${normalizedPath}`)
+    return source
+  }
+
+  function copyAntigravityAsset(asset, destination) {
+    const label = `Antigravity ${asset.kind} ${asset.id}`
+    if (asset.kind === 'agent' || asset.kind === 'rule') {
+      const source = assertRegularTrackedFile(asset.sourcePath)
+      const markdown = readFileSync(source, 'utf8')
+      const rendered = asset.kind === 'agent'
+        ? renderAntigravityAgent(markdown, label)
+        : renderAntigravityRule(markdown, label)
+      writeBytes(destination, Buffer.from(rendered, 'utf8'))
+      return
+    }
+    if (asset.kind === 'skill') {
+      const source = join(repoRoot, asset.sourcePath)
+      const entry = lstatSync(source)
+      if (!entry.isDirectory() || entry.isSymbolicLink()) fail(`${label} source must be a regular directory`)
+      const prefix = `${normalize(asset.sourcePath).replace(/\/$/, '')}/`
+      const files = gitFiles.filter((path) => path.startsWith(prefix))
+      const skillFile = `${prefix}SKILL.md`
+      if (!files.includes(skillFile)) fail(`${label} is missing SKILL.md`)
+      for (const file of files) {
+        const sourceFile = assertRegularTrackedFile(file)
+        const relativeFile = file.slice(prefix.length)
+        const bytes = relativeFile === 'SKILL.md'
+          ? Buffer.from(renderAntigravitySkill(readFileSync(sourceFile, 'utf8'), label), 'utf8')
+          : readFileSync(sourceFile)
+        writeBytes(join(destination, relativeFile), bytes)
+      }
+      return
+    }
+    copyAsset(asset.sourcePath, destination)
+  }
+
   const releaseAssets = registry.assets.filter((asset) => releaseConfig.releaseLifecycles.includes(asset.lifecycle))
   const portableRoot = join(stagingRoot, 'packages/agent-plugins/yohan-agent-kit')
   const claudeRoot = join(stagingRoot, 'packages/claude-code')
@@ -242,7 +286,10 @@ try {
       const component = asset.kind === 'rule' ? 'rules' : `${asset.kind}s`
       if (!supported.has(component)) continue
       const destination = nativeDestination(vendor, asset)
-      if (destination) copyAsset(asset.sourcePath, destination)
+      if (destination) {
+        if (vendor === 'antigravity') copyAntigravityAsset(asset, destination)
+        else copyAsset(asset.sourcePath, destination)
+      }
     }
   }
 

@@ -32,6 +32,8 @@ Git tag / exact commit
 
 Agent Plugins v1은 Skills와 MCP만 표준화하므로 Agents, Commands, Hooks, Rules를 넣지 않는다. 네이티브 Hook은 벤더별 설정이 공통 무상태 `agent-kit-hook.mjs`를 호출한다. Antigravity 공유 경로 `~/.gemini/config/plugins/yohan-agent-kit`은 `agy plugin install`로 등록된 ordinary directory여야 하며, release junction만으로는 성공으로 판정하지 않는다. CLI 호환 경로에는 같은 superset package를 가리키는 junction을 유지한다. CLI의 Skill·일반 Agent는 실제 `agy` 세션으로 검증하고, IDE는 지원하는 구성요소만 읽는다.
 
+공통 원본의 Claude 전용 Agent frontmatter와 YAML scalar는 직접 수정하지 않는다. 빌드 시 Antigravity package에 한해서 Agent 도구명·subagent 정책, Skill의 quoted `name`·`description`, Rule의 최소 `description` frontmatter를 생성한다. 미지원 Agent 도구나 잘못 닫힌·중복된 frontmatter는 release build를 fail-close한다.
+
 Claude Code는 자체 Marketplace가 cache, installed state, scope를 관리한다. release manager가 `~/.claude/plugins/cache`나 `installed_plugins.json`을 직접 수정하지 않는다. 첫 호환 release에서는 Marketplace namespace `yohan-cc-skills`를 유지하고 GitHub source만 `byh3071-cpu/yohan-agent-kit`을 사용한다.
 
 ## 빌드
@@ -40,7 +42,7 @@ release는 clean checkout과 full Git SHA에서 만든다.
 
 ```powershell
 node .\scripts\Build-AgentKit.mjs `
-  --release v0.1.0-<short-sha> `
+  --release v0.1.1-<short-sha> `
   --output-root dist\releases
 ```
 

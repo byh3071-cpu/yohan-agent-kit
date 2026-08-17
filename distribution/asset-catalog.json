@@ -1,5 +1,5 @@
 {
-  "assetCount": 111,
+  "assetCount": 112,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -439,7 +439,7 @@
       ]
     },
     {
-      "contentDigest": "210528027118d9e50b5752db3fef8a56815c8a2b0152dfd66153e4c98ebeda16",
+      "contentDigest": "20cc99e90f7a8d28e93403231bd37278e432c87da3fa9893674c86da99ebc0f7",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1139,7 +1139,25 @@
       ]
     },
     {
-      "contentDigest": "6a22a0010683771eab5f1928465f5896b95929c4d1abd7c2d0d5115cb69e1b1b",
+      "contentDigest": "e548874aeeda20d370d5bd6f516eb6c62ee50df79533bf1ca58a8b8f2006def6",
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ],
+      "id": "script.antigravity-adapter",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "released",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "repo-authored;ADR-024",
+      "requiredEnv": [],
+      "sourcePath": "scripts/antigravity-adapter.mjs",
+      "vendors": [
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "8b6f81aa826064a65d2c87707dcec53c95b6e7a5c9b8fb18e819bf14d6c65769",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -2247,9 +2265,9 @@
       ]
     }
   ],
-  "catalogDigest": "d1f9ce11da233b8c77f3ad69f4a8e85e036194bf86fe57485b56a4d940b2b53c",
+  "catalogDigest": "d850ad43bb26b9e4a25ff481a34007b528535e16b78d12d20708566a050234f4",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "e6d08bc1d3ba1a5388005591421a52f75f415963563f4a21f9ecf60b0b61c3a7",
+  "registryDigest": "a2aaf9ee937eb00eac26791cf90d293205ee0d09cca623f7717041d0b666b644",
   "schemaVersion": 1
 }

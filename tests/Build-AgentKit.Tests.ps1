@@ -92,6 +92,87 @@ try {
     $antigravityManifest = Read-JsonUtf8 -Path (Join-Path $releaseRoot 'packages\antigravity\yohan-agent-kit\plugin.json')
     Assert-Equal 'https://antigravity.google/schemas/v1/plugin.json' $antigravityManifest.'$schema' 'Antigravity native schema'
 
+    $antigravityRoot = Join-Path $releaseRoot 'packages\antigravity\yohan-agent-kit'
+    $antigravityAgents = @(Get-ChildItem -LiteralPath (Join-Path $antigravityRoot 'agents') -File -Filter '*.md')
+    Assert-True ($antigravityAgents.Count -gt 0) 'Antigravity package includes released agents'
+    foreach ($agent in $antigravityAgents) {
+        $text = [IO.File]::ReadAllText($agent.FullName, [Text.Encoding]::UTF8)
+        $header = ($text -split "---", 3)[1]
+        Assert-True ($header -match '(?m)^subagent: true$') "Antigravity agent $($agent.Name) is invokable as a subagent"
+        Assert-True ($header -match '(?m)^mainAgent: false$') "Antigravity agent $($agent.Name) is not a primary agent"
+        Assert-True ($header -match '(?m)^model: inherit$') "Antigravity agent $($agent.Name) inherits its model"
+        Assert-True ($header -match '(?m)^commandExecutionPolicy: sandbox$') "Antigravity agent $($agent.Name) uses sandbox execution"
+        Assert-True ($header -notmatch '(?m)^model: (haiku|sonnet|opus)$') "Antigravity agent $($agent.Name) has no Claude model"
+        Assert-True ($header -notmatch '(?m)^tools: (Read|Grep|Glob|Bash|Edit|Write)') "Antigravity agent $($agent.Name) has no Claude tool list"
+    }
+    $explorerText = [IO.File]::ReadAllText((Join-Path $antigravityRoot 'agents\explorer.md'), [Text.Encoding]::UTF8)
+    $explorerHeader = ($explorerText -split "---", 3)[1]
+    foreach ($tool in @('view_file', 'grep_search', 'run_command')) {
+        Assert-True ($explorerHeader -match "(?m)^  - $([regex]::Escape($tool))$") "Antigravity explorer includes $tool"
+    }
+
+    $antigravitySkills = @(Get-ChildItem -LiteralPath (Join-Path $antigravityRoot 'skills') -Directory)
+    Assert-True ($antigravitySkills.Count -gt 0) 'Antigravity package includes released skills'
+    foreach ($skill in $antigravitySkills) {
+        $skillFile = Join-Path $skill.FullName 'SKILL.md'
+        Assert-True ([IO.File]::Exists($skillFile)) "Antigravity skill $($skill.Name) has SKILL.md"
+        $text = [IO.File]::ReadAllText($skillFile, [Text.Encoding]::UTF8)
+        $header = ($text -split "---", 3)[1]
+        $nameLine = @($header -split "`n" | Where-Object { $_ -match '^name: ' })
+        $descriptionLine = @($header -split "`n" | Where-Object { $_ -match '^description: ' })
+        Assert-Equal 1 $nameLine.Count "Antigravity skill $($skill.Name) has one name"
+        Assert-Equal 1 $descriptionLine.Count "Antigravity skill $($skill.Name) has one description"
+        Assert-True ($nameLine[0] -match '^name: ".+"$') "Antigravity skill $($skill.Name) name is quoted"
+        Assert-True ($descriptionLine[0] -match '^description: ".+"$') "Antigravity skill $($skill.Name) description is quoted"
+    }
+
+    $antigravityRules = @(Get-ChildItem -LiteralPath (Join-Path $antigravityRoot 'rules') -File -Filter '*.md')
+    Assert-Equal 6 $antigravityRules.Count 'Antigravity package includes six released rules'
+    foreach ($rule in $antigravityRules) {
+        $text = [IO.File]::ReadAllText($rule.FullName, [Text.Encoding]::UTF8)
+        Assert-True ($text -match '^---\ndescription: ".+"\n---\n') "Antigravity rule $($rule.Name) has valid minimal frontmatter"
+        Assert-True ($text -match '(?m)^#{1,6}\s+') "Antigravity rule $($rule.Name) preserves its Markdown body"
+    }
+
+    $sourceExplorer = [IO.File]::ReadAllText((Join-Path $repoRoot 'plugins\yohan-core\agents\explorer.md'), [Text.Encoding]::UTF8)
+    Assert-Equal $sourceExplorer ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\claude-code\plugins\yohan-core\agents\explorer.md'), [Text.Encoding]::UTF8)) 'Claude agent remains byte-equivalent to source text'
+    Assert-Equal $sourceExplorer ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\codex\yohan-agent-kit\agents\explorer.md'), [Text.Encoding]::UTF8)) 'Codex agent remains byte-equivalent to source text'
+    Assert-Equal $sourceExplorer ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\cursor\yohan-agent-kit\agents\explorer.md'), [Text.Encoding]::UTF8)) 'Cursor agent remains byte-equivalent to source text'
+    $sourceNewRepo = [IO.File]::ReadAllText((Join-Path $repoRoot 'plugins\workflow\skills\new-repo\SKILL.md'), [Text.Encoding]::UTF8)
+    Assert-Equal $sourceNewRepo ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\claude-code\plugins\workflow\skills\new-repo\SKILL.md'), [Text.Encoding]::UTF8)) 'Claude skill remains byte-equivalent to source text'
+    Assert-Equal $sourceNewRepo ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\codex\yohan-agent-kit\skills\new-repo\SKILL.md'), [Text.Encoding]::UTF8)) 'Codex skill remains byte-equivalent to source text'
+    Assert-Equal $sourceNewRepo ([IO.File]::ReadAllText((Join-Path $releaseRoot 'packages\cursor\yohan-agent-kit\skills\new-repo\SKILL.md'), [Text.Encoding]::UTF8)) 'Cursor skill remains byte-equivalent to source text'
+
+    $adapterUri = ([Uri](Join-Path $repoRoot 'scripts\antigravity-adapter.mjs')).AbsoluteUri
+    $adapterProbe = @"
+import { renderAntigravityAgent, renderAntigravityRule, renderAntigravitySkill } from '$adapterUri';
+const block = renderAntigravitySkill('---\nname: block-skill\ndescription: >\n  first line\n  second line\n---\n\n# Body\n', 'block fixture');
+const existingRule = renderAntigravityRule('---\ndescription: existing rule\n---\n\n# Existing body\n', 'rule fixture');
+const failures = {};
+for (const [name, input] of Object.entries({
+  duplicate: '---\nname: one\nname: two\ndescription: test\n---\n',
+  unclosed: '---\nname: one\ndescription: test\n',
+  missing: '---\nname: one\n---\n'
+})) {
+  try { renderAntigravitySkill(input, name); failures[name] = false; }
+  catch { failures[name] = true; }
+}
+try {
+  renderAntigravityAgent('---\nname: unknown-tool\ndescription: fixture\ntools: ImaginaryTool\n---\n', 'unknown tool fixture');
+  failures.unknownTool = false;
+} catch { failures.unknownTool = true; }
+console.log(JSON.stringify({ block, existingRule, failures }));
+"@
+    $adapterOutput = @(& node --input-type=module --eval $adapterProbe 2>&1)
+    Assert-Equal 0 $LASTEXITCODE 'Antigravity adapter contract probe succeeds'
+    $adapterResult = ($adapterOutput -join [Environment]::NewLine) | ConvertFrom-Json
+    Assert-True ([string]$adapterResult.block -match 'description: "first line second line"') 'folded skill description is normalized to quoted YAML'
+    Assert-True ([bool]$adapterResult.failures.duplicate) 'duplicate frontmatter fails closed'
+    Assert-True ([bool]$adapterResult.failures.unclosed) 'unclosed frontmatter fails closed'
+    Assert-True ([bool]$adapterResult.failures.missing) 'missing required frontmatter fails closed'
+    Assert-True ([bool]$adapterResult.failures.unknownTool) 'unknown Claude agent tool fails closed'
+    Assert-Equal 2 ([regex]::Matches([string]$adapterResult.existingRule, '(?m)^---$').Count) 'existing rule frontmatter is normalized without duplication'
+
     $hookSelfTest = @(& node (Join-Path $releaseRoot 'packages\codex\yohan-agent-kit\scripts\agent-kit-hook.mjs') --self-test 2>&1)
     Assert-Equal 0 $LASTEXITCODE 'common hook script self-test succeeds'
     Assert-Equal 'PASS' (($hookSelfTest -join [Environment]::NewLine) | ConvertFrom-Json).status 'common hook self-test status'

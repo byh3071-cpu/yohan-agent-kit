@@ -1869,6 +1869,23 @@
       ]
     },
     {
+      "id": "script.antigravity-adapter",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/antigravity-adapter.mjs",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "antigravity"
+      ],
+      "lifecycle": "released",
+      "provenance": "repo-authored;ADR-024",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/8-two-machine-four-vendor-validation.md"
+      ]
+    },
+    {
       "id": "script.manage-agent-kit",
       "kind": "script",
       "owner": "yohan-agent-kit",
