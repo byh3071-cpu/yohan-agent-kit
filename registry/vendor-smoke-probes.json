@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "capabilities": [
+    "explicitSkill",
+    "implicitSkill",
+    "negativeRouting",
+    "sharedScript",
+    "subagent",
+    "hookFailureIsolation",
+    "mcpAuthFailureIsolation"
+  ],
+  "vendors": {
+    "claude-code": {
+      "commandCandidates": [
+        "claude.cmd",
+        "claude"
+      ],
+      "pluginPackage": "packages/claude-code/plugins/yohan-agent-kit",
+      "probes": {
+        "explicitSkill": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "plan",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}"
+          ],
+          "prompt": "adr-cycle 스킬을 지금 명시적으로 불러라. 그 스킬의 SKILL.md 파일을 실제로 읽은 뒤, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::explicitSkill::LOADED 만 출력해라. 다른 작업은 하지 마라.",
+          "expect": [
+            "YAK-PROBE::explicitSkill::LOADED",
+            "SKILL_PATH="
+          ],
+          "forbid": [],
+          "releasePathMarker": "SKILL_PATH="
+        },
+        "implicitSkill": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "plan",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}"
+          ],
+          "prompt": "되돌리기 비용이 큰 데이터베이스 선택을 공식 결정 기록으로 남기려고 한다. 어떤 절차를 따라야 하는지 알려줘. 답하기 전에 사용할 스킬을 골랐다면 그 이름을 ROUTED_SKILL=<이름> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::implicitSkill::DONE 만 출력해라.",
+          "expect": [
+            "ROUTED_SKILL=adr-cycle",
+            "YAK-PROBE::implicitSkill::DONE"
+          ],
+          "forbid": []
+        },
+        "negativeRouting": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "plan",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}"
+          ],
+          "prompt": "ADR 이라는 약어가 무슨 뜻인지 한 문장으로만 답해라. 어떤 스킬도 실행하지 말고 어떤 파일도 만들지 마라. 마지막 줄에는 정확히 YAK-PROBE::negativeRouting::DONE 만 출력해라.",
+          "expect": [
+            "YAK-PROBE::negativeRouting::DONE"
+          ],
+          "forbid": [
+            "SKILL_PATH=",
+            "ROUTED_SKILL="
+          ],
+          "assertWorkDirUnchanged": true
+        },
+        "sharedScript": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "acceptEdits",
+            "--allowedTools",
+            "Bash",
+            "Read",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}"
+          ],
+          "prompt": "다음 PowerShell 명령을 정확히 한 번 실행해라: powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"{{PLUGIN_DIR}}/scripts/Test-DesignToHtmlEnvironment.ps1\" -BrainRoot \"{{WORK_DIR}}\" -OutputFormat Json. 그 명령의 표준출력 첫 줄을 한 글자도 바꾸지 말고 SCRIPT_STDOUT=<첫줄> 형식으로 출력하고, 이어서 EXITCODE=<숫자> 를 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::sharedScript::DONE 만 출력해라. 다른 파일은 만들지 마라.",
+          "expect": [
+            "SCRIPT_STDOUT={\"schemaVersion\":1",
+            "\"mode\":\"Check\"",
+            "EXITCODE=",
+            "YAK-PROBE::sharedScript::DONE"
+          ],
+          "forbid": [],
+          "note": "Asserts the release script emitted its own contract output. Exit code is recorded but not asserted: it depends on the disposable BrainRoot, not on whether the script executed."
+        },
+        "subagent": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "acceptEdits",
+            "--allowedTools",
+            "Agent",
+            "Task",
+            "Read",
+            "Glob",
+            "Grep",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}"
+          ],
+          "prompt": "Agent 도구로 general-purpose 서브에이전트를 정확히 하나 띄워서, 그 서브에이전트가 AGENT-OK 라는 문자열만 그대로 돌려주게 해라. 돌려받은 문자열을 SUBAGENT_RESULT=<값> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::subagent::DONE 만 출력해라.",
+          "expect": [
+            "SUBAGENT_RESULT=AGENT-OK",
+            "YAK-PROBE::subagent::DONE"
+          ],
+          "forbid": []
+        },
+        "hookFailureIsolation": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "plan",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}",
+            "--settings",
+            "{{SETTINGS}}"
+          ],
+          "prompt": "adr-cycle 스킬의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::hookFailureIsolation::DONE 만 출력해라.",
+          "expect": [
+            "SKILL_PATH=",
+            "YAK-PROBE::hookFailureIsolation::DONE"
+          ],
+          "forbid": [],
+          "releasePathMarker": "SKILL_PATH=",
+          "materializeSettings": {
+            "hooks": {
+              "SessionStart": [
+                {
+                  "hooks": [
+                    {
+                      "type": "command",
+                      "command": "powershell.exe -NoProfile -NonInteractive -Command \"exit 9\""
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "mcpAuthFailureIsolation": {
+          "args": [
+            "-p",
+            "--output-format",
+            "json",
+            "--no-session-persistence",
+            "--model",
+            "sonnet",
+            "--max-budget-usd",
+            "1.0",
+            "--permission-mode",
+            "plan",
+            "--add-dir",
+            "{{WORK_DIR}}",
+            "--plugin-dir",
+            "{{PLUGIN_DIR}}",
+            "--mcp-config",
+            "{{MCP_CONFIG}}",
+            "--strict-mcp-config"
+          ],
+          "prompt": "adr-cycle 스킬의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::mcpAuthFailureIsolation::DONE 만 출력해라.",
+          "expect": [
+            "SKILL_PATH=",
+            "YAK-PROBE::mcpAuthFailureIsolation::DONE"
+          ],
+          "forbid": [],
+          "releasePathMarker": "SKILL_PATH=",
+          "materializeMcpConfig": {
+            "mcpServers": {
+              "yak-smoke-unauthorized": {
+                "type": "http",
+                "url": "https://127.0.0.1:1/yak-smoke-unauthorized"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

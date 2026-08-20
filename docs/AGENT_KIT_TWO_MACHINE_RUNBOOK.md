@@ -34,7 +34,35 @@ machine ID는 hostname·OS·processor count를 해시한 식별자이며 원문 
 
 Probe는 release 파일 해시, 다섯 package manifest, Agent Plugins v1 component 경계를 자동 검증한다. 벤더 session 결과는 `NOT_RUN`으로 남는다.
 
+Probe가 봉인한 네 CLI identity는 그 CLI가 업데이트되면 어긋난다. Finalize는 `CLI identity changed since Probe`로 거부하므로, 벤더 session을 시작한 뒤 CLI가 자동 업데이트되면 2절부터 다시 한다.
+
 ## 3. 네 벤더 session
+
+### 실행 방식 — 결과를 화면이 아니라 파일에 먼저 남긴다
+
+`Invoke-VendorSmoke.ps1`이 벤더 CLI를 대신 실행한다. 손으로 세션을 열어 결과를 옮겨 적지 않는다.
+
+```powershell
+.\scripts\Invoke-VendorSmoke.ps1 -Vendor claude-code
+```
+
+이 도구가 지키는 계약은 셋이다.
+
+- 벤더 CLI를 띄우기 **전에** `record.json`을 `RUNNING` 상태로 디스크에 쓴다. 세션이 끊겨도 무엇을 돌리던 중이었는지 남는다.
+- 판정은 화면 출력이 아니라 **디스크에서 다시 읽은 transcript**로 계산한다.
+- 벤더 CLI가 최종 요약을 돌려주지 않아도 판정 불가로 멈추지 않고 `NO_OUTPUT`으로 기록한다. `TIMEOUT`·`LAUNCH_ERROR`·`AMBIGUOUS`도 마찬가지다.
+
+`AMBIGUOUS`는 스킬이 로드되긴 했으나 검증 대상 release가 아닌 경로에서 해석됐다는 뜻이다. 집 PC에는 `~/.claude/skills/*`가 작업 트리를 가리키는 junction으로 남아 있어 같은 이름의 스킬이 둘 존재할 수 있다. 이 경우 PASS로 올리지 않는다.
+
+산출물은 `.vhk/smoke/<vendor>/<runId>/`에 남고 Git에 포함하지 않는다.
+
+- `<probe>/prompt.txt`·`<probe>/stdout.txt`·`<probe>/stderr.txt` — 원문
+- `<probe>/record.json` — 명령줄, exit code, 매칭된 표지, 판정 사유
+- `session-results.<vendor>.json` — 4절 `-SessionResultsPath`에 그대로 넣는 파일
+
+probe 정의는 `registry/vendor-smoke-probes.json`에 있다. 벤더를 추가하려면 코드가 아니라 이 파일을 늘린다.
+
+### 각 session에서 확인하는 것
 
 Claude Code, Codex, Cursor, Antigravity의 새 session에서 다음을 각각 실행하고 transcript나 명령·exit code를 기록한다.
 

@@ -28,3 +28,6 @@ tests/.work/
 # Generated Agent Kit releases and machine-local intake/evidence
 dist/
 .yohan-agent-kit/
+
+# Vendor smoke transcripts (machine-local raw evidence)
+.vhk/smoke/
