@@ -1,5 +1,5 @@
 ﻿#requires -Version 5.1
-# log-session.ps1 — Stop 훅: 세션 결과를 Notion EXECUTION LOG에 기록(SoT Key로 멱등)
+# log-session.ps1 — StopFailure 훅: 실패로 끝난 세션만 Notion EXECUTION LOG에 기록(SoT Key로 멱등)
 # env 이름: 생태계 표준 NOTION_EXECUTION_LOG_DB_ID 우선, sync 주입분 NOTION_EXECLOG_DB 폴백.
 # (감사 F23: 훅이 안 set된 짧은 이름만 읽어 매 세션 no-op였음 → 표준 이름 정렬로 해소.)
 $ErrorActionPreference = 'Continue'
@@ -36,13 +36,14 @@ try {
 
 $branch = ''
 try { $branch = (git -C "$cwd" rev-parse --abbrev-ref HEAD 2>$null) } catch {}
-$meta = "Claude Code 세션 종료 (cwd: $cwd" + $(if ($branch) { "; branch: $branch" } else { '' }) + ")"
-$title = "[CC] $(Split-Path $cwd -Leaf) — $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
+$meta = "Claude Code 세션이 실패로 종료됨 (cwd: $cwd" + $(if ($branch) { "; branch: $branch" } else { '' }) + "). 교훈 칸은 사람이 채운다."
+$title = "[CC-FAIL] $(Split-Path $cwd -Leaf) — $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 $props = @{
   '이름'      = @{ title = @(@{ text = @{ content = $title } }) }
   '실행일'    = @{ date = @{ start = (Get-Date -Format 'yyyy-MM-dd') } }
-  '결과'      = @{ select = @{ name = '성공' } }
-  '작업 유형' = @{ select = @{ name = '프로토콜 실행' } }
+  '결과'      = @{ select = @{ name = '실패' } }
+  '작업 유형' = @{ select = @{ name = '에러 대응' } }
+  '상태'      = @{ status = @{ name = '미처리' } }
   '작업 내용' = @{ rich_text = @(@{ text = @{ content = $meta } }) }
   'SoT Key'   = @{ rich_text = @(@{ text = @{ content = $sotKey } }) }
 }
