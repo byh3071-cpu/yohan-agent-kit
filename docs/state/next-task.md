@@ -23,3 +23,4 @@
 - [x] 2026-08-14 Goal 2 design-to-html 멀티벤더 배포 공식 gate 통과·DONE — 5개 suite 488 assertions, 집 PC read-only drift 감사 기록 완료. 전역 Install·Restore는 실행하지 않음.
 - [ ] 2026-08-14 Goal 3 DesignContext resolver·HTML 세로절단 IN_PROGRESS — yohan-brain ADR-023 Accepted와 Goal 20 승인 branch·exact SHA 전달 대기. 계약 확인 전 구현 금지.
 - [x] 2026-08-14 Goal 3 DONE — Brain 계약 `f7615ac2fce83bd93c37801c14640c20dede5980` 고정 resolver·append-only recorder·Context Trust Navigator HTML 세로절단·5개 뷰포트 QA를 완료하고 Draft PR #73 생성. **다음: yohan-brain PR #191 선머지→이 PR 사람 리뷰→ready/merge.**
+- [ ] 2026-08-16 Goal 4 Claude Code 전역 세션 제목 자동화 IN_PROGRESS — 플러그인 훅 구현·회귀 검증 후 커밋·푸시.

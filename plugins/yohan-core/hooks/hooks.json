@@ -6,6 +6,27 @@
         "hooks": [
           { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/context-hint.ps1\"", "timeout": 20 }
         ]
+      },
+      {
+        "matcher": "startup|resume|clear|compact|fork",
+        "hooks": [
+          { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-session-title.ps1\"", "timeout": 5 }
+        ]
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": "rename",
+        "hooks": [
+          { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-session-title.ps1\"", "timeout": 5 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-session-title.ps1\"", "timeout": 5 }
+        ]
       }
     ],
     "PreToolUse": [

@@ -13,7 +13,7 @@
       "name": "yohan-core",
       "source": "./plugins/yohan-core",
       "description": "요한 1인 AI기업 코어 — 글쓰기·교차검증·플랜감사(Cursor/Claude)·비용가드·릴리즈·네이버변환 스킬 + 서브에이전트 + 훅 + yohan-mcp. 모든 레포 공통 두뇌.",
-      "version": "0.3.23"
+      "version": "0.3.24"
     },
     {
       "name": "statusline",
