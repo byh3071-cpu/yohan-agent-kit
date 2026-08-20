@@ -63,7 +63,7 @@
         ]
       }
     ],
-    "Stop": [
+    "StopFailure": [
       {
         "hooks": [
           { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/log-session.ps1\"", "timeout": 60 }
