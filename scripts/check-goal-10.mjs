@@ -8,18 +8,18 @@ import { fileURLToPath } from 'node:url'
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 let pass = true
 const gate = (label, ok, detail = '') => {
-  console.log(`[goal 4] ${label}: ${ok ? 'PASS' : 'FAIL'}${detail ? ` (${detail})` : ''}`)
+  console.log(`[goal 10] ${label}: ${ok ? 'PASS' : 'FAIL'}${detail ? ` (${detail})` : ''}`)
   if (!ok) pass = false
 }
 const read = (path) => readFileSync(join(repoRoot, path), 'utf8').replace(/^\uFEFF/, '')
 
 if (existsSync(join(repoRoot, '.vhk', 'HARD_STOP'))) {
-  console.log('[goal 4] HARD_STOP detected: FAIL')
+  console.log('[goal 10] HARD_STOP detected: FAIL')
   process.exit(1)
 }
 
 const required = [
-  'goals/4-claude-auto-session-title.md',
+  'goals/10-claude-auto-session-title.md',
   'plugins/yohan-core/hooks/auto-session-title.ps1',
   'plugins/yohan-core/hooks/hooks.json',
   'plugins/yohan-core/.claude-plugin/plugin.json',
@@ -28,7 +28,7 @@ const required = [
 ]
 for (const path of required) gate(`required artifact ${path}`, existsSync(join(repoRoot, path)))
 
-const goal = read('goals/4-claude-auto-session-title.md')
+const goal = read('goals/10-claude-auto-session-title.md')
 gate('Goal 4 lifecycle', /status:\s*(?:IN_PROGRESS|DONE)/.test(goal))
 
 if (existsSync(join(repoRoot, 'plugins/yohan-core/hooks/auto-session-title.ps1'))) {
@@ -77,5 +77,5 @@ try {
   gate('git diff --check', false)
 }
 
-console.log(pass ? '[goal 4] gate passes' : '[goal 4] gate failed')
+console.log(pass ? '[goal 10] gate passes' : '[goal 10] gate failed')
 process.exit(pass ? 0 : 1)

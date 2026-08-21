@@ -24,3 +24,4 @@
 - [ ] 2026-08-14 Goal 3 DesignContext resolver·HTML 세로절단 IN_PROGRESS — yohan-brain ADR-023 Accepted와 Goal 20 승인 branch·exact SHA 전달 대기. 계약 확인 전 구현 금지.
 - [x] 2026-08-14 Goal 3 DONE — Brain 계약 `f7615ac2fce83bd93c37801c14640c20dede5980` 고정 resolver·append-only recorder·Context Trust Navigator HTML 세로절단·5개 뷰포트 QA를 완료하고 Draft PR #73 생성. **다음: yohan-brain PR #191 선머지→이 PR 사람 리뷰→ready/merge.**
 - [ ] 2026-08-16 Goal 4 Claude Code 전역 세션 제목 자동화 IN_PROGRESS — 플러그인 훅 구현·회귀 검증 후 커밋·푸시.
+- [ ] 2026-08-21 Goal 번호 충돌 해소 — 세션 제목 자동화 goal 을 `Goal 4` 에서 **`Goal 10`** 으로 옮겼다(파일 `goals/10-claude-auto-session-title.md`, 게이트 `scripts/check-goal-10.mjs`). 위 2026-08-16 줄의 "Goal 4" 는 이 항목을 가리키며 번호만 바뀌었다(append-only 라 원문은 그대로 둔다). 사유: `codex/yohan-agent-kit-goals-6-8` 이 08-14 부터 Goal 4~9 를 쓰고 있었고 그쪽 번호는 날짜 박힌 감사 문서와 원장 11줄에 이미 굳어 고칠 수 없다. 이쪽은 참조 3곳뿐이라 이동 비용이 낮다.
