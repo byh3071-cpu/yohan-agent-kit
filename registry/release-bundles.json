@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kitVersion": "0.1.1",
+  "repository": "https://github.com/byh3071-cpu/yohan-agent-kit",
+  "portablePlugin": "yohan-agent-kit",
+  "releaseLifecycles": [
+    "released"
+  ],
+  "packageScriptIds": [
+    "script.agent-kit-hook",
+    "script.manage-product-design-context",
+    "script.new-skill-manifest",
+    "script.record-design-decision",
+    "script.resolve-design-context",
+    "script.test-design-to-html-environment",
+    "script.verify-design-context-html"
+  ],
+  "targets": {
+    "agent-plugins": {
+      "manifest": "plugin.json",
+      "testedVersion": "1.0.0-working-draft",
+      "discoveryPath": ".agents/plugins/yohan-agent-kit",
+      "components": [
+        "skills",
+        "mcp"
+      ],
+      "compatibleVersionPrefix": "1.0.0-working-draft"
+    },
+    "claude-code": {
+      "manifest": ".claude-plugin/marketplace.json",
+      "testedVersion": "2.1.233",
+      "discoveryPath": null,
+      "components": [
+        "skills",
+        "agents",
+        "commands",
+        "hooks",
+        "mcp",
+        "scripts",
+        "output-styles"
+      ],
+      "compatibleVersionPrefix": "2.1."
+    },
+    "codex": {
+      "manifest": ".codex-plugin/plugin.json",
+      "testedVersion": "0.147.0",
+      "discoveryPath": "plugins/yohan-agent-kit",
+      "components": [
+        "skills",
+        "agents",
+        "commands",
+        "hooks",
+        "mcp",
+        "scripts"
+      ],
+      "compatibleVersionPrefix": "0.147."
+    },
+    "cursor": {
+      "manifest": ".cursor-plugin/plugin.json",
+      "testedVersion": "2026.08.11-e8db854",
+      "discoveryPath": ".cursor/plugins/local/yohan-agent-kit",
+      "components": [
+        "skills",
+        "agents",
+        "commands",
+        "hooks",
+        "rules",
+        "mcp",
+        "scripts"
+      ],
+      "compatibleVersionPrefix": "2026.08."
+    },
+    "antigravity": {
+      "manifest": "plugin.json",
+      "testedVersion": "1.1.13",
+      "discoveryPath": ".gemini/config/plugins/yohan-agent-kit",
+      "additionalDiscoveryPaths": [
+        ".gemini/antigravity-cli/plugins/yohan-agent-kit"
+      ],
+      "components": [
+        "skills",
+        "agents",
+        "rules",
+        "hooks",
+        "mcp",
+        "scripts"
+      ],
+      "compatibleVersionPrefix": "1.1."
+    }
+  }
+}

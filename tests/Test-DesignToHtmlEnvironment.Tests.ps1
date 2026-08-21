@@ -14,6 +14,14 @@ $powerShell = (Get-Command powershell.exe -CommandType Application -ErrorAction 
 $fixtureRoot = Join-Path $PSScriptRoot (".work\design-environment-run-{0}" -f [Guid]::NewGuid().ToString('N'))
 $script:assertionCount = 0
 
+function Get-TestSha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Assert-True {
     param(
         [Parameter(Mandatory = $true)][bool]$Condition,
@@ -143,7 +151,7 @@ function Get-TreeSignature {
                 $pending.Enqueue($item.FullName)
             }
             else {
-                $hash = (Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash
+                $hash = Get-TestSha256File -Path $item.FullName
                 $rows.Add("file|$relative|$($item.Length)|$hash")
             }
         }

@@ -1,4 +1,4 @@
-# 기록 규칙 (yohan-cc-skills)
+# 기록 규칙 (Yohan Agent Kit)
 
 ## 현재 상태
 - **Phase:** **FILL**

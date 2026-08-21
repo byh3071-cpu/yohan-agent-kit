@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "contract": {
     "repo": "yohan-brain",
-    "ref": "f7615ac2fce83bd93c37801c14640c20dede5980",
+    "ref": "37068a625d85bb3955579a04d87cc0f5c503c823",
     "path": "memory/design-intelligence/index.yaml",
-    "dependencyPr": "https://github.com/byh3071-cpu/yohan-brain/pull/191"
+    "dependencyPr": "https://github.com/byh3071-cpu/yohan-brain/pull/194"
   },
   "approvedSource": {
     "repo": "yohan-brain",

@@ -63,7 +63,7 @@ try {
         '-OutputFormat', 'Json'
     )
     Assert-Equal 0 $resolve.ExitCode 'resolver exit code'
-    Assert-Equal 'f7615ac2fce83bd93c37801c14640c20dede5980' ([string]$resolve.Data.designContext.contract.ref) 'pinned contract ref'
+    Assert-Equal '37068a625d85bb3955579a04d87cc0f5c503c823' ([string]$resolve.Data.designContext.contract.ref) 'pinned contract ref'
     Assert-Equal 'current-request,project-git,media,common-taste,golden' ([string]::Join(',', @($resolve.Data.designContext.resolutionOrder))) 'resolution order'
     Assert-Equal 'stage-first-confirmation' ([string]$resolve.Data.designContext.constraints.interactionModel) 'current request wins constraint conflict'
     Assert-Equal 5 @($resolve.Data.designContext.tiers).Count 'all tiers remain explicit'

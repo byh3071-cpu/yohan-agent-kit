@@ -10,7 +10,7 @@ Resolve conflicts in this order; a lower-priority source cannot override a highe
 4. Common taste rules
 5. Golden references
 
-The resolver execution contract is pinned to yohan-brain commit `f7615ac2fce83bd93c37801c14640c20dede5980`. The yohan-brain design context is the metadata/schema/index authority. A Notion view may aid discovery, but it is not a resolution tier and cannot override an approved Git source.
+The resolver execution contract is pinned to yohan-brain commit `37068a625d85bb3955579a04d87cc0f5c503c823`. The yohan-brain design context is the metadata/schema/index authority. A Notion view may aid discovery, but it is not a resolution tier and cannot override an approved Git source.
 
 Use repository-relative paths, Git refs, stable links, or source names in tracked files. Do not record absolute machine paths.
 

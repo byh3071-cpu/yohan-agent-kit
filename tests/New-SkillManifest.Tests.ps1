@@ -11,6 +11,14 @@ $xdgConfigRoot = Join-Path $fixtureRoot '.xdg'
 $script:assertionCount = 0
 $script:failures = @()
 
+function Get-TestSha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Assert-True {
     param(
         [Parameter(Mandatory = $true)][bool]$Condition,
@@ -124,6 +132,7 @@ function Get-ManagerDirectoryManifest {
         'Assert-PathWithin',
         'Get-RelativePathPortable',
         'Get-Sha256Text',
+        'Get-Sha256File',
         'Get-DirectoryManifest'
     )
     $topLevelFunctions = @($ast.EndBlock.Statements | Where-Object { $_ -is [Management.Automation.Language.FunctionDefinitionAst] })
@@ -254,7 +263,7 @@ Run-Test -Name 'clean tracked skill produces the exact deterministic manifest wi
     foreach ($row in @($manifest.files)) {
         $filePath = Join-Path $skillDirectory ([string]$row.path).Replace('/', '\')
         $file = Get-Item -LiteralPath $filePath
-        $hash = (Get-FileHash -LiteralPath $filePath -Algorithm SHA256).Hash.ToUpperInvariant()
+        $hash = Get-TestSha256File -Path $filePath
         Assert-Equal -Expected ([int64]$file.Length) -Actual ([int64]$row.bytes) -Message "Independent byte count: $($row.path)"
         Assert-Equal -Expected $hash -Actual ([string]$row.sha256) -Message "Independent SHA-256: $($row.path)"
     }

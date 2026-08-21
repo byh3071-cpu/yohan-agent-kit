@@ -26,6 +26,15 @@ function Get-Sha256Text {
     }
 }
 
+function Get-Sha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '') }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Get-NormalizedFullPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -327,7 +336,7 @@ try {
         $rows += [pscustomobject][ordered]@{
             path = [string]$entry.relativePath
             bytes = [int64]$entry.file.Length
-            sha256 = (Get-FileHash -LiteralPath $entry.file.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+            sha256 = (Get-Sha256File -Path $entry.file.FullName).ToUpperInvariant()
         }
     }
     $rows = @(Sort-ManifestRows -Rows $rows)

@@ -8,12 +8,13 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { delimiter, join } from 'node:path'
+import { getWindowsPowerShellEnv } from './windows-powershell-env.mjs'
 
 const SHIM = new Set(['pnpm', 'npm', 'npx', 'yarn'])
 // cmd.exe /c 래핑 경로는 따옴표+&|<>^% 조합 인자로 인용 경계를 탈출당할 수 있다(CVE-2024-27980
 // 과 같은 근본원인 클래스, src/lib/exec.ts 실증) — 위험 문자 있으면 거부(fail-closed).
 const CMD_SHELL_METACHARS = /[&|<>^%"\r\n]/
-function run(cmd, args) {
+function run(cmd, args, environment = process.env) {
   let bin = cmd, argv = args
   if (process.platform === 'win32' && SHIM.has(cmd)) {
     const bad = args.find((a) => CMD_SHELL_METACHARS.test(a))
@@ -26,7 +27,7 @@ function run(cmd, args) {
   }
   try {
     // maxBuffer 상향: 큰 빌드/테스트 로그(>1MB)에서 성공해도 ENOBUFS 거짓실패 방지.
-    execFileSync(bin, argv, { stdio: ['pipe', 'pipe', 'pipe'], encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 })
+    execFileSync(bin, argv, { stdio: ['pipe', 'pipe', 'pipe'], encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024, env: environment })
     return true
   } catch (e) {
     const out = (e?.stdout?.toString() ?? '') + (e?.stderr?.toString() ?? '')
@@ -88,10 +89,10 @@ must(existsSync('distribution/manifests/adr-cycle.json'), 'adr-cycle 전체 mani
 must(existsSync('distribution/manifests/goal-cycle.json'), 'goal-cycle 전체 manifest')
 gate('git diff --check', run(resolveWindowsExe('git'), ['diff', '--check']))
 if (!skipDeep) {
-  gate('PowerShell distribution state machine', run('powershell', [
+  gate('PowerShell distribution state machine', run(resolveWindowsExe('powershell'), [
     '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
     '-File', 'tests/Manage-MultivendorSkills.Tests.ps1'
-  ]))
+  ], getWindowsPowerShellEnv(process.env)))
 }
 
 if (pass) { console.log('✅ goal 1 gate passes'); process.exit(0) }

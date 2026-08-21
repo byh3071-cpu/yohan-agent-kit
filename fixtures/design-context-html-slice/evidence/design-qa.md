@@ -2,7 +2,7 @@
 
 ## Source identity and state
 
-- Contract: `yohan-brain@f7615ac2fce83bd93c37801c14640c20dede5980:memory/design-intelligence/index.yaml`
+- Contract: `yohan-brain@37068a625d85bb3955579a04d87cc0f5c503c823:memory/design-intelligence/index.yaml`
 - Approved source: `yohan-brain@7d82b08720ab4b20bd75dd38b969be37120707fc:docs/reference/websites/assets/ai-workspace-context-trust-navigator-432.png`
 - Source SHA-256: `688212d5c2c651db759dd20fd292d4017492925b253057bb301ac8bcca87a7f5`
 - Compared state: 432px, `작업 전` tab, `목표` disclosure expanded

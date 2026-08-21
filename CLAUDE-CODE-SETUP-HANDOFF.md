@@ -12,7 +12,7 @@
 | GitHub 계정 | byh3071-cpu |
 | dev 루트 | `C:\Users\Public\dev` |
 | 비밀값 | **DPAPI 머신 귀속 — AI/채팅 거치지 말 것** |
-| 마켓플레이스 | byh3071-cpu/yohan-cc-skills (이미 존재) |
+| 마켓플레이스 소스 | byh3071-cpu/yohan-agent-kit (Marketplace namespace는 첫 호환 릴리스까지 yohan-cc-skills) |
 
 ## 이미 완료 (재실행·중복 커밋 금지)
 | 커밋 | 내용 |
@@ -39,7 +39,7 @@ powershell -ExecutionPolicy Bypass -File .\Setup-Machine.ps1
 
 ### STEP 2 — 마켓 등록 + 검증
 ```text
-claude plugin marketplace add byh3071-cpu/yohan-cc-skills
+claude plugin marketplace add byh3071-cpu/yohan-agent-kit
 /plugin marketplace update
 /flow "test: README 오타 하나 고쳐보기"
 ```

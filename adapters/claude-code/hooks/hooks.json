@@ -1,0 +1,16 @@
+{
+  "description": "Observational Yohan Agent Kit lifecycle adapter.",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/agent-kit-hook.mjs\" claude-code SessionEnd",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

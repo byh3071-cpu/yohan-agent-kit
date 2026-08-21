@@ -1,0 +1,16 @@
+{
+  "description": "Observational Yohan Agent Kit lifecycle adapter.",
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"./scripts/agent-kit-hook.mjs\" codex SessionEnd",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

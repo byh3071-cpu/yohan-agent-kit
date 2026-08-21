@@ -6,14 +6,14 @@ param(
     [Parameter(Mandatory = $true)][string]$ProjectRoot,
     [Parameter(Mandatory = $true)][string]$CurrentRequestPath,
     [Parameter(Mandatory = $true)][string]$ProjectContextPath,
-    [string]$ContractRef = 'f7615ac2fce83bd93c37801c14640c20dede5980',
+    [string]$ContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823',
     [ValidateSet('Json', 'Human')][string]$OutputFormat = 'Json'
 )
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
-$script:pinnedContractRef = 'f7615ac2fce83bd93c37801c14640c20dede5980'
+$script:pinnedContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823'
 $script:indexPath = 'memory/design-intelligence/index.yaml'
 $script:resolutionOrder = @('current-request', 'project-git', 'media', 'common-taste', 'golden')
 
@@ -169,7 +169,7 @@ try {
     $indexText = Get-StrictUtf8 -Bytes (Invoke-GitBytes -RepositoryRoot $brain -Arguments @('show', "$ContractRef`:$script:indexPath")) -Label 'Design intelligence index'
     foreach ($required in @(
         'metadata_schema_index_evidence: yohan-brain',
-        'resolver_recording_execution: yohan-cc-skills',
+        'resolver_recording_execution: yohan-agent-kit',
         'artifact_and_verification_assets: project-git',
         'stable_auto_promotion: false',
         'stable_promotion_requires_human: true',

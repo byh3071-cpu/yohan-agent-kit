@@ -31,6 +31,14 @@ function Assert-Equal {
     if ($Expected -cne $Actual) { throw $Message }
 }
 
+function Get-TestSha256File {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Get-PowerShellExecutable {
     foreach ($candidate in @(Get-Command powershell.exe -CommandType Application -All -ErrorAction SilentlyContinue)) {
         $source = [string]$candidate.Source
@@ -64,6 +72,13 @@ function Get-Sha256Text([string]$Text) {
     finally { $sha.Dispose() }
 }
 
+function Get-Sha256File([string]$Path) {
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $stream = [IO.File]::OpenRead($Path)
+    try { return ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-', '').ToUpperInvariant() }
+    finally { $stream.Dispose(); $sha.Dispose() }
+}
+
 function Get-Manifest([string]$Directory) {
     $root = [IO.Path]::GetFullPath($Directory).TrimEnd('\', '/')
     $rows = @()
@@ -73,7 +88,7 @@ function Get-Manifest([string]$Directory) {
         $rows += [pscustomobject][ordered]@{
             path = $relative
             bytes = [int64]$file.Length
-            sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+            sha256 = Get-Sha256File $file.FullName
         }
     }
     $rows = @($rows | Sort-Object -Property @{ Expression = { $_.path.ToLowerInvariant() } }, @{ Expression = { $_.path } })
