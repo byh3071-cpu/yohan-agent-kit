@@ -1463,6 +1463,28 @@
       ]
     },
     {
+      "id": "script.invoke-vendor-smoke",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Invoke-VendorSmoke.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Invoke-VendorSmoke.ps1",
+        "registry/vendor-smoke-probes.json",
+        "tests/Invoke-VendorSmoke.Tests.ps1"
+      ]
+    },
+    {
       "id": "script.scan-agent-assets",
       "kind": "script",
       "owner": "yohan-agent-kit",

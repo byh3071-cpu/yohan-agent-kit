@@ -63,6 +63,12 @@ gate('single-machine verification binds evidence to current live state',
   compatibility.includes('House PC evidence release identity differs from the installed release') &&
   compatibility.includes('Current house-PC CLI identity differs from the evidence') &&
   compatibility.includes('Antigravity evidence requires the native agy.exe application'))
+gate('the vendor version contract binds a series, not a patch',
+  compatibility.includes('function Test-VendorVersionCompatible') &&
+  compatibility.includes('compatibleVersionPrefix') &&
+  compatibility.includes("'(^|[^0-9A-Za-z.])' + [regex]::Escape($prefix)") &&
+  Object.values(JSON.parse(readFileSync(join(repoRoot, 'registry/release-bundles.json'), 'utf8')).targets)
+    .every((target) => typeof target.compatibleVersionPrefix === 'string' && target.compatibleVersionPrefix.length > 0))
 gate('wrapper payload-chain attestation remains an explicit P2 follow-up',
   readFileSync(join(repoRoot, 'goals/8-two-machine-four-vendor-validation.md'), 'utf8').includes('Goal 9') &&
   readFileSync(join(repoRoot, 'docs/AGENT_KIT_TWO_MACHINE_RUNBOOK.md'), 'utf8').includes('SingleMachineVerified`는 wrapper 뒤 backend payload-chain 무결성을 증명하지 않는다'))

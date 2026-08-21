@@ -60,6 +60,21 @@ try {
     Assert-Equal 'PASS' $draftData.automated.packageLayout 'package layout automated'
     Assert-Equal 'PASS' $draftData.automated.cliCompatibility 'vendor CLI versions match the release contract'
 
+    # The contract binds a version series, because vendor CLIs auto-update faster than a
+    # sealing window. It must still reject a different series and a false prefix match.
+    $toolSource = [IO.File]::ReadAllText($tool, [Text.Encoding]::UTF8)
+    $ruleMatch = [regex]::Match($toolSource, '(?s)function Test-VendorVersionCompatible \{.*?\r?\n\}')
+    Assert-True $ruleMatch.Success 'version compatibility rule is defined in the tool'
+    . ([ScriptBlock]::Create($ruleMatch.Value))
+    $seriesContract = [pscustomobject]@{ testedVersion = '2.1.233'; compatibleVersionPrefix = '2.1.' }
+    $exactContract = [pscustomobject]@{ testedVersion = '2.1.233' }
+    Assert-Equal $true (Test-VendorVersionCompatible -Reported '2.1.233 (Claude Code)' -Contract $seriesContract) 'the exercised patch stays compatible'
+    Assert-Equal $true (Test-VendorVersionCompatible -Reported '2.1.238 (Claude Code)' -Contract $seriesContract) 'a newer patch in the same series stays compatible'
+    Assert-Equal $false (Test-VendorVersionCompatible -Reported '2.2.0 (Claude Code)' -Contract $seriesContract) 'a different minor series is rejected'
+    Assert-Equal $false (Test-VendorVersionCompatible -Reported '12.1.4 (Claude Code)' -Contract $seriesContract) 'a prefix match inside another number is rejected'
+    Assert-Equal $false (Test-VendorVersionCompatible -Reported '' -Contract $seriesContract) 'an unreported version is rejected'
+    Assert-Equal $false (Test-VendorVersionCompatible -Reported '2.1.238 (Claude Code)' -Contract $exactContract) 'without a prefix the contract still demands the exercised version'
+
     $draftHardLinkOutside = Join-Path $fixtureRoot 'draft-hardlink-outside.json'
     [IO.File]::WriteAllBytes($draftHardLinkOutside, [IO.File]::ReadAllBytes($draft1))
     $draftHardLinkPath = Join-Path $home1 '.yohan-agent-kit\evidence\hardlink-draft.json'

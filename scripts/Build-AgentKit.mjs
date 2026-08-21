@@ -50,7 +50,7 @@ function releaseManifestDigest(core) {
   for (const name of [...core.packages].sort()) lines.push(`package=${name}`)
   for (const vendor of Object.keys(core.compatibility).sort()) {
     const item = core.compatibility[vendor]
-    lines.push(`compat|${vendor}|${item.testedVersion}|${item.manifest}|${item.discoveryPath ?? ''}|${[...(item.discoveryPaths ?? [])].join(',')}|${[...item.components].join(',')}`)
+    lines.push(`compat|${vendor}|${item.testedVersion}|${item.compatibleVersionPrefix ?? item.testedVersion}|${item.manifest}|${item.discoveryPath ?? ''}|${[...(item.discoveryPaths ?? [])].join(',')}|${[...item.components].join(',')}`)
   }
   for (const file of [...core.files].sort((a, b) => a.path.localeCompare(b.path))) lines.push(`file|${file.path}|${file.bytes}|${file.sha256}`)
   lines.push(`rollback|${core.rollback.command}|${core.rollback.backupRoot}`)
@@ -367,6 +367,7 @@ try {
   }))
   const compatibility = Object.fromEntries(Object.entries(releaseConfig.targets).map(([vendor, config]) => [vendor, {
     testedVersion: config.testedVersion,
+    compatibleVersionPrefix: config.compatibleVersionPrefix ?? config.testedVersion,
     components: config.components,
     manifest: config.manifest,
     discoveryPath: config.discoveryPath,

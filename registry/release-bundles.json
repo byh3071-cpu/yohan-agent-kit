@@ -23,7 +23,8 @@
       "components": [
         "skills",
         "mcp"
-      ]
+      ],
+      "compatibleVersionPrefix": "1.0.0-working-draft"
     },
     "claude-code": {
       "manifest": ".claude-plugin/marketplace.json",
@@ -37,7 +38,8 @@
         "mcp",
         "scripts",
         "output-styles"
-      ]
+      ],
+      "compatibleVersionPrefix": "2.1."
     },
     "codex": {
       "manifest": ".codex-plugin/plugin.json",
@@ -50,7 +52,8 @@
         "hooks",
         "mcp",
         "scripts"
-      ]
+      ],
+      "compatibleVersionPrefix": "0.147."
     },
     "cursor": {
       "manifest": ".cursor-plugin/plugin.json",
@@ -64,7 +67,8 @@
         "rules",
         "mcp",
         "scripts"
-      ]
+      ],
+      "compatibleVersionPrefix": "2026.08."
     },
     "antigravity": {
       "manifest": "plugin.json",
@@ -80,7 +84,8 @@
         "hooks",
         "mcp",
         "scripts"
-      ]
+      ],
+      "compatibleVersionPrefix": "1.1."
     }
   }
 }

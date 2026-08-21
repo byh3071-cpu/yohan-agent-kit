@@ -1,5 +1,5 @@
 {
-  "assetCount": 112,
+  "assetCount": 113,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -439,7 +439,7 @@
       ]
     },
     {
-      "contentDigest": "20cc99e90f7a8d28e93403231bd37278e432c87da3fa9893674c86da99ebc0f7",
+      "contentDigest": "9bf676a1157bc919931e789f465d7cc1ea9ae3867514d789bcbb64be2be837cc",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1157,7 +1157,7 @@
       ]
     },
     {
-      "contentDigest": "8b6f81aa826064a65d2c87707dcec53c95b6e7a5c9b8fb18e819bf14d6c65769",
+      "contentDigest": "6bf8f68b9ccc649c6f0a150512e41127ee16fdcc866a3ba7311de60f8f102456",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1348,7 +1348,7 @@
       ]
     },
     {
-      "contentDigest": "5822b875fce8650a625ec59c0b1d4a912910fd98682c10aff7268afb4258bae3",
+      "contentDigest": "168ff544dfac4b3f7b8392f1311cbbec0449ec87e18ed3089817793530931b15",
       "evidenceRefs": [
         "goals/8-two-machine-four-vendor-validation.md"
       ],
@@ -1361,6 +1361,29 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-8.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "67efe14d560a62513b6fe1c74ba6b6023e7062b6f673ad660d4db4e64fc6cda3",
+      "evidenceRefs": [
+        "scripts/Invoke-VendorSmoke.ps1",
+        "registry/vendor-smoke-probes.json",
+        "tests/Invoke-VendorSmoke.Tests.ps1"
+      ],
+      "id": "script.invoke-vendor-smoke",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Invoke-VendorSmoke.ps1",
       "vendors": [
         "claude-code",
         "codex",
@@ -1390,7 +1413,7 @@
       ]
     },
     {
-      "contentDigest": "b36d5ca33fbecbee935a9657316df17c247e9d67cc59e663c27fa98a8383bc0b",
+      "contentDigest": "b276801a444146a75c5aa8ac1a9414b15fbb7b14cca65b42fe980bf46ee9610a",
       "evidenceRefs": [
         "goals/6-versioned-release-store.md"
       ],
@@ -1537,7 +1560,7 @@
       ]
     },
     {
-      "contentDigest": "0ad8deec2e7641d91898cf9c83e9314bc3fabdbe416c4cbde78423f208bd1e8b",
+      "contentDigest": "8cd6075a516633843500ff114239272a09f3cf2dc5e5049860fd1e88b938d18c",
       "evidenceRefs": [
         "goals/8-two-machine-four-vendor-validation.md"
       ],
@@ -2265,9 +2288,9 @@
       ]
     }
   ],
-  "catalogDigest": "d850ad43bb26b9e4a25ff481a34007b528535e16b78d12d20708566a050234f4",
+  "catalogDigest": "e4aa34bb8543ad7ffb2e96ece029c2b5bd851d7ab6c831bb1aef3e46a4b76358",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "a2aaf9ee937eb00eac26791cf90d293205ee0d09cca623f7717041d0b666b644",
+  "registryDigest": "56ce8d4a5d90ca72a1b37a6d25dff04da8c92f3b68a91ca901508ef187cf4949",
   "schemaVersion": 1
 }

@@ -156,7 +156,9 @@ function Get-ReleaseManifestDigest {
     foreach ($name in @($Manifest.packages | Sort-Object)) { $lines += "package=$([string]$name)" }
     foreach ($property in @($Manifest.compatibility.PSObject.Properties | Sort-Object Name)) {
         $item = $property.Value
-        $lines += "compat|$($property.Name)|$([string]$item.testedVersion)|$([string]$item.manifest)|$([string]$item.discoveryPath)|$([string]::Join(',', @($item.discoveryPaths)))|$([string]::Join(',', @($item.components)))"
+        $prefixProperty = $item.PSObject.Properties['compatibleVersionPrefix']
+        $prefix = if ($null -eq $prefixProperty -or [string]::IsNullOrWhiteSpace([string]$prefixProperty.Value)) { [string]$item.testedVersion } else { [string]$prefixProperty.Value }
+        $lines += "compat|$($property.Name)|$([string]$item.testedVersion)|$prefix|$([string]$item.manifest)|$([string]$item.discoveryPath)|$([string]::Join(',', @($item.discoveryPaths)))|$([string]::Join(',', @($item.components)))"
     }
     foreach ($file in @($Manifest.files | Sort-Object path)) { $lines += "file|$([string]$file.path)|$([int64]$file.bytes)|$([string]$file.sha256)" }
     $lines += "rollback|$([string]$Manifest.rollback.command)|$([string]$Manifest.rollback.backupRoot)"

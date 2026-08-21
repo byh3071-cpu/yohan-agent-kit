@@ -36,6 +36,19 @@ Probe는 release 파일 해시, 다섯 package manifest, Agent Plugins v1 compon
 
 Probe가 봉인한 네 CLI identity는 그 CLI가 업데이트되면 어긋난다. Finalize는 `CLI identity changed since Probe`로 거부하므로, 벤더 session을 시작한 뒤 CLI가 자동 업데이트되면 2절부터 다시 한다.
 
+### 버전 계약은 패치가 아니라 계열을 묶는다
+
+Claude Code는 봉인 창보다 빨리 자동 업데이트된다(2026-08-21 실측: 한 세션 안에서 `2.1.233`→`2.1.237`→`2.1.238`). 그래서 계약은 두 값을 분리해 쓴다.
+
+| 필드 | 뜻 |
+|---|---|
+| `testedVersion` | 실제로 돌려본 정확한 버전. 기록으로만 쓴다 |
+| `compatibleVersionPrefix` | 호환 판정 기준 계열. 예: `2.1.` |
+
+판정은 계열 접두사가 **버전 경계에서** 맞을 때만 통과한다. `2.1.`은 `2.1.238`을 받아들이고 `2.2.0`과 `12.1.4`를 거부한다. 접두사가 없으면 예전처럼 정확한 `testedVersion`을 요구한다.
+
+계열이 바뀌면(`2.1.` → `2.2.`) 계약을 갱신하고 그 계열에서 벤더 session을 다시 돌려야 한다.
+
 ## 3. 네 벤더 session
 
 ### 실행 방식 — 결과를 화면이 아니라 파일에 먼저 남긴다

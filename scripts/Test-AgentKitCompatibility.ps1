@@ -117,7 +117,9 @@ function Get-ReleaseManifestDigest {
     foreach ($name in @($Manifest.packages | Sort-Object)) { $lines += "package=$([string]$name)" }
     foreach ($property in @($Manifest.compatibility.PSObject.Properties | Sort-Object Name)) {
         $item = $property.Value
-        $lines += "compat|$($property.Name)|$([string]$item.testedVersion)|$([string]$item.manifest)|$([string]$item.discoveryPath)|$([string]::Join(',', @($item.discoveryPaths)))|$([string]::Join(',', @($item.components)))"
+        $prefixProperty = $item.PSObject.Properties['compatibleVersionPrefix']
+        $prefix = if ($null -eq $prefixProperty -or [string]::IsNullOrWhiteSpace([string]$prefixProperty.Value)) { [string]$item.testedVersion } else { [string]$prefixProperty.Value }
+        $lines += "compat|$($property.Name)|$([string]$item.testedVersion)|$prefix|$([string]$item.manifest)|$([string]$item.discoveryPath)|$([string]::Join(',', @($item.discoveryPaths)))|$([string]::Join(',', @($item.components)))"
     }
     foreach ($file in @($Manifest.files | Sort-Object path)) { $lines += "file|$([string]$file.path)|$([int64]$file.bytes)|$([string]$file.sha256)" }
     $lines += "rollback|$([string]$Manifest.rollback.command)|$([string]$Manifest.rollback.backupRoot)"
@@ -187,6 +189,19 @@ function Get-MachineId {
     return (Get-Sha256Text -Text $material).Substring(0, 24)
 }
 
+function Test-VendorVersionCompatible {
+    # Vendor CLIs auto-update faster than a sealing window, so the contract binds a
+    # version series, not a patch. testedVersion still records what was exercised.
+    param([string]$Reported, $Contract)
+    if ([string]::IsNullOrWhiteSpace($Reported)) { return $false }
+    $prefixProperty = $Contract.PSObject.Properties['compatibleVersionPrefix']
+    $prefix = if ($null -eq $prefixProperty -or [string]::IsNullOrWhiteSpace([string]$prefixProperty.Value)) { [string]$Contract.testedVersion } else { [string]$prefixProperty.Value }
+    if ([string]::IsNullOrWhiteSpace($prefix)) { return $false }
+    # Anchor at a version boundary so "2.1." cannot be satisfied by "12.1.4".
+    $pattern = '(^|[^0-9A-Za-z.])' + [regex]::Escape($prefix)
+    return [regex]::IsMatch($Reported, $pattern)
+}
+
 function Get-CliSnapshot {
     param($Manifest)
     $snapshot = [pscustomobject][ordered]@{
@@ -199,7 +214,8 @@ function Get-CliSnapshot {
     foreach ($vendor in @('claude-code', 'codex', 'cursor', 'antigravity')) {
         $cli = $snapshot.PSObject.Properties[$vendor].Value
         $contract = $Manifest.compatibility.PSObject.Properties[$vendor].Value
-        if ($null -eq $cli -or [string]$cli.state -cne 'DETECTED' -or $null -eq $contract -or [string]::IsNullOrWhiteSpace([string]$contract.testedVersion) -or -not ([string]$cli.version).Contains([string]$contract.testedVersion)) { $compatible = $false }
+        if ($null -eq $cli -or [string]$cli.state -cne 'DETECTED' -or $null -eq $contract -or [string]::IsNullOrWhiteSpace([string]$contract.testedVersion)) { $compatible = $false; continue }
+        if (-not (Test-VendorVersionCompatible -Reported ([string]$cli.version) -Contract $contract)) { $compatible = $false }
     }
     return [pscustomobject][ordered]@{ cli = $snapshot; compatible = $compatible }
 }
