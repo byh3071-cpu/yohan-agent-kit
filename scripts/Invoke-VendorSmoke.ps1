@@ -65,9 +65,25 @@ function Read-JsonFile {
 }
 
 function Read-TextFileIfPresent {
-    param([string]$Path)
+    # A killed vendor CLI can still hold the redirected handle, so read with a
+    # sharing mode that tolerates it. A locked transcript must never abort the run.
+    param([string]$Path, [int]$RetryCount = 5)
     if (-not (Test-Path -LiteralPath $Path)) { return '' }
-    return [IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8)
+    for ($attempt = 0; $attempt -le $RetryCount; $attempt++) {
+        try {
+            $stream = New-Object IO.FileStream($Path, [IO.FileMode]::Open, [IO.FileAccess]::Read, ([IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete))
+            try {
+                $reader = New-Object IO.StreamReader($stream, [Text.Encoding]::UTF8)
+                try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
+            }
+            finally { $stream.Dispose() }
+        }
+        catch {
+            if ($attempt -eq $RetryCount) { return '' }
+            Start-Sleep -Milliseconds 500
+        }
+    }
+    return ''
 }
 
 function Resolve-VendorCommand {
@@ -216,6 +232,7 @@ if ($ListOnly) {
 }
 
 foreach ($name in $requestedProbes) {
+  try {
     $probeSpec = $vendorSpec.probes.PSObject.Properties[$name].Value
     $probeRoot = Join-Path $runRoot $name
     $null = New-Item -ItemType Directory -Path $probeRoot -Force
@@ -386,6 +403,21 @@ foreach ($name in $requestedProbes) {
             evidence          = $evidence
             completedUtc      = (Get-Date).ToUniversalTime().ToString('o')
         })
+  }
+  catch {
+    # One probe blowing up must not discard the verdicts of the others.
+    $reason = [string]$_.Exception.Message
+    Write-JsonFile -Path (Join-Path (Join-Path $runRoot $name) 'record.json') -Value ([pscustomobject][ordered]@{
+            schemaVersion = 1
+            state         = 'COMPLETED'
+            vendor        = $Vendor
+            probe         = $name
+            status        = 'RUNNER_ERROR'
+            reasons       = @($reason)
+            evidence      = "$Vendor $name runner error: $reason"
+            completedUtc  = (Get-Date).ToUniversalTime().ToString('o')
+        })
+  }
 }
 
 # Aggregate strictly from the files on disk.

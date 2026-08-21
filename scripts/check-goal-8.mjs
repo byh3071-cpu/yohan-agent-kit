@@ -45,6 +45,10 @@ gate('the smoke session cwd cannot shadow the release with repo-local assets',
 gate('an unresolved probe placeholder aborts instead of reaching the vendor CLI',
   smokeRunner.includes('throw "Unresolved placeholder') &&
   smokeRunner.includes('-Label "$name prompt"'))
+gate('a killed vendor CLI still yields a recorded verdict',
+  smokeRunner.includes('[IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete') &&
+  smokeRunner.includes("'RUNNER_ERROR'") &&
+  smokeRunner.includes('# One probe blowing up must not discard the verdicts of the others.'))
 const smokeProbes = JSON.parse(readFileSync(join(repoRoot, 'registry/vendor-smoke-probes.json'), 'utf8'))
 const manualKeys = ['explicitSkill', 'implicitSkill', 'negativeRouting', 'sharedScript', 'subagent', 'hookFailureIsolation', 'mcpAuthFailureIsolation']
 gate('vendor smoke probe spec covers the manual capability contract',

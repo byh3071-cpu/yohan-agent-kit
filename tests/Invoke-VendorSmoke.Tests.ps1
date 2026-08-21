@@ -198,8 +198,21 @@ exit 0
     try { $brokenOutput = @(& powershell @brokenBase @brokenArgs 2>&1) } finally { $ErrorActionPreference = $previous }
     $brokenExit = $LASTEXITCODE
     $brokenText = [string]::Join([Environment]::NewLine, @($brokenOutput | ForEach-Object { [string]$_ }))
-    Assert-True ($brokenExit -ne 0) 'unexpanded placeholder aborts the run'
-    Assert-True ((Remove-Whitespace -Value $brokenText).Contains('Unresolvedplaceholder')) 'unexpanded placeholder names the reason'
+    Assert-True ($brokenExit -ne 0) 'unexpanded placeholder never reports a pass'
+    $brokenRecord = ([IO.File]::ReadAllText((Join-Path (Join-Path (Join-Path (Join-Path $outputRoot 'claude-code') 'broken') 'explicitSkill') 'record.json'), [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal 'RUNNER_ERROR' ([string]$brokenRecord.status) 'unexpanded placeholder is a recorded verdict'
+    Assert-True ((Remove-Whitespace -Value ([string]$brokenRecord.evidence)).Contains('Unresolvedplaceholder')) 'unexpanded placeholder names the reason on disk'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path (Join-Path (Join-Path (Join-Path $outputRoot 'claude-code') 'broken') 'explicitSkill') 'prompt.txt'))) 'a broken prompt is never handed to the vendor CLI'
+
+    # A probe failure must not discard the verdicts of the probes around it.
+    $brokenArgsAll = @('-Vendor', 'claude-code', '-HomeRoot', $homeRoot, '-OutputRoot', $outputRoot, '-WorkRoot', $workRoot, '-CommandOverride', $stubCmd, '-RunId', 'brokenmix', '-Probe', 'explicitSkill,negativeRouting')
+    $ErrorActionPreference = 'Continue'
+    try { $null = @(& powershell @brokenBase @brokenArgsAll 2>&1) } finally { $ErrorActionPreference = $previous }
+    $mixRoot = Join-Path (Join-Path $outputRoot 'claude-code') 'brokenmix'
+    $mixBroken = ([IO.File]::ReadAllText((Join-Path (Join-Path $mixRoot 'explicitSkill') 'record.json'), [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    $mixHealthy = ([IO.File]::ReadAllText((Join-Path (Join-Path $mixRoot 'negativeRouting') 'record.json'), [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal 'RUNNER_ERROR' ([string]$mixBroken.status) 'the failing probe is recorded'
+    Assert-Equal 'PASS' ([string]$mixHealthy.status) 'a later probe still runs after an earlier one fails'
 
     Write-Output "PASS: $script:assertionCount assertions"
     Write-Output "Fixture retained: $fixtureRoot"

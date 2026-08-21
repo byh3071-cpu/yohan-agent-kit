@@ -34,13 +34,14 @@
             "--plugin-dir",
             "{{PLUGIN_DIR}}"
           ],
-          "prompt": "adr-cycle 스킬을 지금 명시적으로 불러라. 그 스킬의 SKILL.md 파일을 실제로 읽은 뒤, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::explicitSkill::LOADED 만 출력해라. 다른 작업은 하지 마라.",
+          "prompt": "스킬 yohan-agent-kit:adr-cycle 를 이름 그대로 명시해서 불러라. 홈에 같은 이름의 다른 adr-cycle 이 있어도 반드시 yohan-agent-kit:adr-cycle 쪽을 써라. 그 스킬의 SKILL.md 파일을 실제로 읽은 뒤, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::explicitSkill::LOADED 만 출력해라. 다른 작업은 하지 마라.",
           "expect": [
             "YAK-PROBE::explicitSkill::LOADED",
             "SKILL_PATH="
           ],
           "forbid": [],
-          "releasePathMarker": "SKILL_PATH="
+          "releasePathMarker": "SKILL_PATH=",
+          "note": "릴리스 플러그인 스킬은 plugin 접두사로 홈 사본과 구분된다. 접두사 없는 이름은 홈 junction 사본을 가리킬 수 있어 릴리스에 묶이지 않는다."
         },
         "implicitSkill": {
           "args": [
@@ -64,7 +65,8 @@
             "ROUTED_SKILL=adr-cycle",
             "YAK-PROBE::implicitSkill::DONE"
           ],
-          "forbid": []
+          "forbid": [],
+          "note": "자동 라우팅은 어느 사본이 선택될지 강제할 수 없다. 그래서 이 probe 는 릴리스 경로를 요구하지 않고 라우팅 성립만 확인한다."
         },
         "negativeRouting": {
           "args": [
@@ -172,7 +174,7 @@
             "--settings",
             "{{SETTINGS}}"
           ],
-          "prompt": "adr-cycle 스킬의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::hookFailureIsolation::DONE 만 출력해라.",
+          "prompt": "스킬 yohan-agent-kit:adr-cycle 의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 홈에 같은 이름의 다른 adr-cycle 이 있어도 반드시 yohan-agent-kit:adr-cycle 쪽을 써라. 마지막 줄에는 정확히 YAK-PROBE::hookFailureIsolation::DONE 만 출력해라.",
           "expect": [
             "SKILL_PATH=",
             "YAK-PROBE::hookFailureIsolation::DONE"
@@ -214,7 +216,7 @@
             "{{MCP_CONFIG}}",
             "--strict-mcp-config"
           ],
-          "prompt": "adr-cycle 스킬의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 마지막 줄에는 정확히 YAK-PROBE::mcpAuthFailureIsolation::DONE 만 출력해라.",
+          "prompt": "스킬 yohan-agent-kit:adr-cycle 의 SKILL.md 파일을 읽고, 읽은 파일의 절대경로를 SKILL_PATH=<경로> 형식으로 한 줄 출력해라. 홈에 같은 이름의 다른 adr-cycle 이 있어도 반드시 yohan-agent-kit:adr-cycle 쪽을 써라. 마지막 줄에는 정확히 YAK-PROBE::mcpAuthFailureIsolation::DONE 만 출력해라.",
           "expect": [
             "SKILL_PATH=",
             "YAK-PROBE::mcpAuthFailureIsolation::DONE"

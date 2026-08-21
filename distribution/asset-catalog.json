@@ -1348,7 +1348,7 @@
       ]
     },
     {
-      "contentDigest": "168ff544dfac4b3f7b8392f1311cbbec0449ec87e18ed3089817793530931b15",
+      "contentDigest": "c99a2cf3de240c77482863d7a7181024da09c59326c9bab813488692730b881f",
       "evidenceRefs": [
         "goals/8-two-machine-four-vendor-validation.md"
       ],
@@ -1369,7 +1369,7 @@
       ]
     },
     {
-      "contentDigest": "67efe14d560a62513b6fe1c74ba6b6023e7062b6f673ad660d4db4e64fc6cda3",
+      "contentDigest": "a2f211a00b207691d125f5ee59d3f324cdd3cd7ae3f3bf0303adcc16acd53063",
       "evidenceRefs": [
         "scripts/Invoke-VendorSmoke.ps1",
         "registry/vendor-smoke-probes.json",
@@ -2288,7 +2288,7 @@
       ]
     }
   ],
-  "catalogDigest": "e4aa34bb8543ad7ffb2e96ece029c2b5bd851d7ab6c831bb1aef3e46a4b76358",
+  "catalogDigest": "5568ef3d3752626caf6d08d4dd658fe2b24705c1d54a0f91735a9cc1a2a01ff4",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "56ce8d4a5d90ca72a1b37a6d25dff04da8c92f3b68a91ca901508ef187cf4949",
