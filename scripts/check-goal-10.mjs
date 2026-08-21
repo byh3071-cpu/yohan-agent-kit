@@ -50,7 +50,20 @@ try {
   const pluginVersion = JSON.parse(read('plugins/yohan-core/.claude-plugin/plugin.json')).version
   const marketplace = JSON.parse(read('.claude-plugin/marketplace.json'))
   const listedVersion = marketplace.plugins.find((plugin) => plugin.name === 'yohan-core')?.version
-  gate('plugin cache version bump', pluginVersion === '0.3.24' && listedVersion === pluginVersion, `${pluginVersion}/${listedVersion}`)
+  // 고정핀은 버전을 올릴 때마다 깨진다. 실제로 지키려는 계약은 두 가지다.
+  // (1) marketplace.json 과 plugin.json 이 같은 버전을 말한다 (CLAUDE.md 규칙)
+  // (2) Goal 10 이 세운 하한선 아래로 내려가지 않는다
+  const atLeast = (actual, baseline) => {
+    const a = String(actual).split('.').map(Number)
+    const b = String(baseline).split('.').map(Number)
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      const x = a[i] ?? 0, y = b[i] ?? 0
+      if (Number.isNaN(x) || Number.isNaN(y)) return false
+      if (x !== y) return x > y
+    }
+    return true
+  }
+  gate('plugin manifest version consistency', listedVersion === pluginVersion && atLeast(pluginVersion, '0.3.24'), `${pluginVersion}/${listedVersion}`)
 } catch (error) {
   gate('plugin manifest consistency', false, error.message)
 }
