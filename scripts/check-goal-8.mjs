@@ -49,6 +49,13 @@ gate('a killed vendor CLI still yields a recorded verdict',
   smokeRunner.includes('[IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete') &&
   smokeRunner.includes("'RUNNER_ERROR'") &&
   smokeRunner.includes('# One probe blowing up must not discard the verdicts of the others.'))
+gate('a timed-out vendor CLI is killed as a tree and never blocks the runner',
+  smokeRunner.includes('function Stop-ProcessTree') &&
+  smokeRunner.includes('taskkill.exe /PID $ProcessId /T /F') &&
+  smokeRunner.includes('Stop-ProcessTree -ProcessId $process.Id') &&
+  // The unbounded WaitForExit() must sit behind a HasExited guard, or a failed kill hangs the run.
+  /if \(\$process\.HasExited\) \{\s*\r?\n\s*try \{ \$process\.WaitForExit\(\) \}/.test(smokeRunner) &&
+  smokeRunner.includes('survivedKill'))
 const smokeProbes = JSON.parse(readFileSync(join(repoRoot, 'registry/vendor-smoke-probes.json'), 'utf8'))
 const manualKeys = ['explicitSkill', 'implicitSkill', 'negativeRouting', 'sharedScript', 'subagent', 'hookFailureIsolation', 'mcpAuthFailureIsolation']
 gate('vendor smoke probe spec covers the manual capability contract',

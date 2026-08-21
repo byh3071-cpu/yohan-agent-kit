@@ -102,6 +102,20 @@ function Resolve-VendorCommand {
     throw "Vendor command not found. Tried: $([string]::Join(', ', $Candidates))"
 }
 
+function Stop-ProcessTree {
+    # .NET Framework Process.Kill() has no tree overload, and the vendor command is a
+    # shim: claude.cmd is cmd.exe with node underneath. Killing only the shim leaves the
+    # child alive, still holding the redirected transcript handle and still spending
+    # tokens. taskkill /T reaches the whole tree.
+    param([int]$ProcessId)
+    try { $null = & taskkill.exe /PID $ProcessId /T /F 2>&1 } catch { }
+    try {
+        $remaining = Get-Process -Id $ProcessId -ErrorAction SilentlyContinue
+        if ($null -ne $remaining) { $remaining.Kill() }
+    }
+    catch { }
+}
+
 function Test-PathWithin {
     param([string]$Root, [string]$Candidate)
     $base = [IO.Path]::GetFullPath($Root).TrimEnd('\', '/')
@@ -293,6 +307,7 @@ foreach ($name in $requestedProbes) {
 
     $exitCode = $null
     $timedOut = $false
+    $survived = $false
     $launchError = ''
     # The child needs its own run location to correlate raw evidence; cwd no
     # longer implies it now that the work directory lives outside the repository.
@@ -312,12 +327,19 @@ foreach ($name in $requestedProbes) {
         $process = Start-Process @startArgs
         if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
             $timedOut = $true
-            try { $process.Kill() } catch { }
+            Stop-ProcessTree -ProcessId $process.Id
             $null = $process.WaitForExit(30000)
         }
-        # The parameterless overload flushes exit processing; without it ExitCode stays null.
-        try { $process.WaitForExit() } catch { }
-        try { $exitCode = [int]$process.ExitCode } catch { $exitCode = $null }
+        # The parameterless overload flushes exit processing (without it ExitCode stays
+        # null), but it never returns if the process is still alive. Only call it once
+        # the process is known to be gone, so a failed kill cannot hang the run.
+        if ($process.HasExited) {
+            try { $process.WaitForExit() } catch { }
+            try { $exitCode = [int]$process.ExitCode } catch { $exitCode = $null }
+        }
+        else {
+            $survived = $true
+        }
     }
     catch {
         $launchError = [string]$_.Exception.Message
@@ -359,6 +381,7 @@ foreach ($name in $requestedProbes) {
     $reasons = @()
     if (-not [string]::IsNullOrWhiteSpace($launchError)) { $reasons += "launch failed: $launchError" }
     if ($timedOut) { $reasons += "timed out after $TimeoutSeconds seconds" }
+    if ($survived) { $reasons += 'vendor process survived the tree kill; exit code unavailable' }
     if ($missing.Count -gt 0) { $reasons += "missing expected markers: $([string]::Join(', ', $missing))" }
     if ($violated.Count -gt 0) { $reasons += "forbidden markers present: $([string]::Join(', ', $violated))" }
     if ($createdPaths.Count -gt 0) { $reasons += "work directory changed: $($createdPaths.Count) paths" }
@@ -386,6 +409,7 @@ foreach ($name in $requestedProbes) {
             commandLine       = (ConvertTo-CommandLine -Arguments $arguments)
             exitCode          = $exitCode
             timedOut          = $timedOut
+            survivedKill      = $survived
             promptPath        = $promptPath
             stdoutPath        = $stdoutPath
             stderrPath        = $stderrPath

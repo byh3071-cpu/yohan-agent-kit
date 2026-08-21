@@ -84,6 +84,12 @@ if ([string]$record.state -cne 'RUNNING') {
 }
 $mode = [string]$env:YAK_SMOKE_STUB_MODE
 if ($mode -ceq 'noout') { exit 0 }
+if ($mode -ceq 'hang') {
+    # Spawn a child that outlives this shim, mirroring claude.cmd -> node.
+    Start-Process -FilePath 'powershell.exe' -ArgumentList '-NoProfile','-NonInteractive','-Command','Start-Sleep -Seconds 300' -WindowStyle Hidden | Out-Null
+    Start-Sleep -Seconds 300
+    exit 0
+}
 $skillPath = if ($mode -ceq 'ambiguous') { 'C:\Users\user\.claude\skills\adr-cycle\SKILL.md' } else { Join-Path $env:YAK_SMOKE_STUB_PLUGIN_DIR 'skills\adr-cycle\SKILL.md' }
 $lines = @()
 if ($probe -cne 'negativeRouting') {
@@ -152,6 +158,22 @@ exit 0
     $silentSession = ([IO.File]::ReadAllText([string]$silentRun.Data.sessionResultsPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
     Assert-Equal 'NO_OUTPUT' ([string]$silentSession.'claude-code'.explicitSkill.status) 'silent vendor surfaces in session results'
     Assert-Equal 'NOT_RUN' ([string]$silentSession.'claude-code'.subagent.status) 'unrequested probes stay NOT_RUN'
+
+    # A vendor CLI that never returns must be bounded, killed as a tree, and recorded.
+    # Without a tree kill the surviving child keeps the transcript handle and keeps
+    # spending tokens; without a bounded final wait the runner hangs forever.
+    $env:YAK_SMOKE_STUB_MODE = 'hang'
+    $hangStart = [Diagnostics.Stopwatch]::StartNew()
+    $hangRun = Invoke-Smoke -Arguments @('-Vendor', 'claude-code', '-HomeRoot', $homeRoot, '-OutputRoot', $outputRoot,
+        '-WorkRoot', $workRoot, '-CommandOverride', $stubCmd, '-RunId', 'hang', '-Probe', 'explicitSkill', '-TimeoutSeconds', '5')
+    $hangStart.Stop()
+    Assert-True ($hangStart.Elapsed.TotalSeconds -lt 120) 'a hanging vendor CLI does not hang the runner'
+    Assert-True ($hangRun.ExitCode -ne 0) 'a hanging vendor CLI never reports a pass'
+    $hangRecord = ([IO.File]::ReadAllText((Join-Path (Join-Path (Join-Path (Join-Path $outputRoot 'claude-code') 'hang') 'explicitSkill') 'record.json'), [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal 'COMPLETED' ([string]$hangRecord.state) 'a timed-out probe still finalizes its record'
+    Assert-Equal 'TIMEOUT' ([string]$hangRecord.status) 'a timed-out probe is recorded as TIMEOUT'
+    Assert-Equal $true ([bool]$hangRecord.timedOut) 'the timeout is flagged on the record'
+    Assert-Equal $false ([bool]$hangRecord.survivedKill) 'the vendor process tree is actually gone'
 
     # A skill resolved outside the release under test must not be reported as a pass.
     $env:YAK_SMOKE_STUB_MODE = 'ambiguous'
