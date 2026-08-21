@@ -363,7 +363,7 @@
       ]
     },
     {
-      "contentDigest": "33fc3be603eee61d3e138dbf739a8b86c6b2ada5f129d391bf7a2de395a3ad91",
+      "contentDigest": "4ec0157362bd39f802d903802472a83fceaa9931ae899110c93e692f75a082ff",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -1222,7 +1222,7 @@
       ]
     },
     {
-      "contentDigest": "66d460529442c42223b7e03f04593c365ac17565a51054900687d649b43799be",
+      "contentDigest": "2e1d6e23fa7d3c51dcac29e7843931460109ef4f93d19a51768523a29f6ca9d9",
       "evidenceRefs": [
         "goals/10-claude-auto-session-title.md"
       ],
@@ -2309,7 +2309,7 @@
       ]
     }
   ],
-  "catalogDigest": "5f9868f7cf741df1cadaea0620b58cba3709b6372ddf88bec611bb65930e8f93",
+  "catalogDigest": "c7861ad40b9444ee24fe4be2cd8cd93280b6b779f066458c389bc25a3c8170ac",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "e88cb4d7f2db24c8909223a5b2565ddbee125461f0c8239626ac18ed776e1d43",
