@@ -1,5 +1,5 @@
 {
-  "assetCount": 113,
+  "assetCount": 114,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -363,7 +363,7 @@
       ]
     },
     {
-      "contentDigest": "bc3e394df4ca96f5ec3849429c90c9fb280f6a9063b246d0c6efc3ed81a34c9e",
+      "contentDigest": "33fc3be603eee61d3e138dbf739a8b86c6b2ada5f129d391bf7a2de395a3ad91",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -614,7 +614,7 @@
       ]
     },
     {
-      "contentDigest": "b6f5cef5d73e35caca7909371c5c0c72c5bb0b6908ff51be5dc77c3a3648dfe3",
+      "contentDigest": "17fb798bccb0a0aaa62a22fc4330305bff36ddf7ce3822cc794d5d0e73cecde3",
       "evidenceRefs": [
         "plugins/yohan-core/hooks"
       ],
@@ -734,7 +734,7 @@
       ]
     },
     {
-      "contentDigest": "636a038bbd7e1e2f47da03ef53a935700b48b6aab5f169dd1a4114d0ac579847",
+      "contentDigest": "b6aaedaae9408cb254d042e35cb0c3cdc4f055c20c46e0e0ae2abdeebf099af7",
       "evidenceRefs": [
         "plugins/yohan-core/.mcp.json"
       ],
@@ -812,7 +812,7 @@
       ]
     },
     {
-      "contentDigest": "1ecaef77aae6ecde09de71e3083e17a7a0a4fcca8364d062142c9c060bb18e45",
+      "contentDigest": "07bd50f1c1b62106092f2494f3d750dd742a4f7682fdcb7aecfc55641f3dd916",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1214,6 +1214,27 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-1.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "66d460529442c42223b7e03f04593c365ac17565a51054900687d649b43799be",
+      "evidenceRefs": [
+        "goals/10-claude-auto-session-title.md"
+      ],
+      "id": "script.check-goal-10",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-10.mjs",
       "vendors": [
         "claude-code",
         "codex",
@@ -2288,9 +2309,9 @@
       ]
     }
   ],
-  "catalogDigest": "5568ef3d3752626caf6d08d4dd658fe2b24705c1d54a0f91735a9cc1a2a01ff4",
+  "catalogDigest": "3d20e7acde364f9e05b26ba7a4d4af687ef62de8e71c357f93b9c47547595487",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "56ce8d4a5d90ca72a1b37a6d25dff04da8c92f3b68a91ca901508ef187cf4949",
+  "registryDigest": "e88cb4d7f2db24c8909223a5b2565ddbee125461f0c8239626ac18ed776e1d43",
   "schemaVersion": 1
 }

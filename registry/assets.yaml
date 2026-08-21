@@ -2028,6 +2028,26 @@
       ]
     },
     {
+      "id": "script.check-goal-10",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-10.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/10-claude-auto-session-title.md"
+      ]
+    },
+    {
       "id": "script.windows-powershell-env",
       "kind": "script",
       "owner": "yohan-agent-kit",
