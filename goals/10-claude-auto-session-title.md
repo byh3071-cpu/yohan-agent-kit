@@ -1,13 +1,13 @@
 ---
 vhk_format: 1
 type: goal
-id: 4
+id: 10
 title: Claude Code 전역 세션 제목 자동화
 status: IN_PROGRESS
 priority: P1
 ---
 
-# Goal 4: Claude Code 전역 세션 제목 자동화
+# Goal 10: Claude Code 전역 세션 제목 자동화
 
 ## 배경
 
