@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "dump-gate",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  1103,
+                      "sha256":  "2BE84323F0DD3C9AF17A100C60DF470BACB0C4D649D3B8F5BC611B22F4A6F658"
+                  }
+              ],
+    "digest":  "8118BC2FE3169042518B66E40705BA4EBEBF1087C1F20CDC29954F7717D1BE57"
+}

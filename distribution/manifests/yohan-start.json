@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "yohan-start",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  2135,
+                      "sha256":  "EBAAFA46B567E97822230056498BE3564F9C45BE4B66AE33D44D50F948C616A8"
+                  }
+              ],
+    "digest":  "F11ED4EF862F8E10CFF9FE9AA3F33ADE5FBD839D6161403E7F5D97AE3A96277D"
+}

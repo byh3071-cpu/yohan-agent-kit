@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "research-brief",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  911,
+                      "sha256":  "789AAE31FE503DBEB28017333761EA618ED93484FC3E73C4AA198B01D43BE37C"
+                  }
+              ],
+    "digest":  "2F1A5F81B06610B4C5D5DA058699C7AEF7155FA5A21C8E679B59C0ED8C6016DE"
+}

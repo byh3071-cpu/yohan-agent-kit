@@ -2194,6 +2194,276 @@
       "evidenceRefs": [
         "docs/AGENT_KIT_RELEASES.md"
       ]
+    },
+    {
+      "id": "skill.dump-gate",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/dump-gate",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/dump-gate",
+        "distribution/manifests/dump-gate.json"
+      ]
+    },
+    {
+      "id": "skill.master-orchestrator",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/master-orchestrator",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/master-orchestrator",
+        "distribution/manifests/master-orchestrator.json"
+      ]
+    },
+    {
+      "id": "skill.morning-merge-check",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/morning-merge-check",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/morning-merge-check",
+        "distribution/manifests/morning-merge-check.json"
+      ]
+    },
+    {
+      "id": "skill.notion-inbox-pickup",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/notion-inbox-pickup",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/notion-inbox-pickup",
+        "distribution/manifests/notion-inbox-pickup.json"
+      ]
+    },
+    {
+      "id": "skill.overnight-vhk-auto",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/overnight-vhk-auto",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/overnight-vhk-auto",
+        "distribution/manifests/overnight-vhk-auto.json"
+      ]
+    },
+    {
+      "id": "skill.research-brief",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/research-brief",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/research-brief",
+        "distribution/manifests/research-brief.json"
+      ]
+    },
+    {
+      "id": "skill.secret-pr-guard",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/secret-pr-guard",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/secret-pr-guard",
+        "distribution/manifests/secret-pr-guard.json"
+      ]
+    },
+    {
+      "id": "skill.session-card",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/session-card",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/session-card",
+        "distribution/manifests/session-card.json"
+      ]
+    },
+    {
+      "id": "skill.source-command-routing-review",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/source-command-routing-review",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/source-command-routing-review",
+        "distribution/manifests/source-command-routing-review.json"
+      ]
+    },
+    {
+      "id": "skill.thought-to-prompt",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/thought-to-prompt",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/thought-to-prompt",
+        "distribution/manifests/thought-to-prompt.json"
+      ]
+    },
+    {
+      "id": "skill.vhk-auto",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/vhk-auto",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/vhk-auto",
+        "distribution/manifests/vhk-auto.json"
+      ]
+    },
+    {
+      "id": "skill.yohan-start",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/yohan-start",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:agents-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/yohan-start",
+        "distribution/manifests/yohan-start.json"
+      ]
+    },
+    {
+      "id": "skill.html-doc",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/html-doc",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:claude-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/html-doc",
+        "distribution/manifests/html-doc.json"
+      ]
     }
   ]
 }

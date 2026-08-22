@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "source-command-routing-review",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  2289,
+                      "sha256":  "1447F18B743409762A2A2C47865D5A99BCFB7739AB3427BD9DDA5E89C1397AE5"
+                  }
+              ],
+    "digest":  "389E962E835E6F76B71665CF59EBE5DFD876BE0B4903420DE28862DA2CB4370A"
+}

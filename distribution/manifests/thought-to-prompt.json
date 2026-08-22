@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "thought-to-prompt",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  3257,
+                      "sha256":  "4C3E9F25F357CFC51398300F7555C3C692B2F18FABB2026282296A08B0D11F64"
+                  }
+              ],
+    "digest":  "A24FD26E52414633771572A91AD8CE79F741FA5C92E873AEE58D4FD5CDB30ADE"
+}

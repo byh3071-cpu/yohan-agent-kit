@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "master-orchestrator",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  1653,
+                      "sha256":  "B53F9EFEBCCA01E1486681997AF794F49595C5EB670D654112F25FF9BB2404B0"
+                  }
+              ],
+    "digest":  "7927999BB12F9BECFFA8176309B08334B27DD45B37EEE83AA995D795E2B5C7F6"
+}
