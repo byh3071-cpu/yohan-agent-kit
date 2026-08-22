@@ -3653,6 +3653,111 @@
       "evidenceRefs": [
         "https://github.com/stablyai/orca@057fbfc"
       ]
+    },
+    {
+      "id": "skill.cass",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/cass",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.brainstorm",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/brainstorm",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.research",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/research",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.worktree",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/worktree",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.agent-reach",
+      "kind": "skill",
+      "owner": "panniantong/agent-reach",
+      "sourcePath": "external://github.com/panniantong/agent-reach/agent_reach/skill",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/panniantong/agent-reach@93ae1d1",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/panniantong/agent-reach@93ae1d1"
+      ]
     }
   ]
 }

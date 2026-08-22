@@ -1,5 +1,5 @@
 {
-  "assetCount": 186,
+  "assetCount": 191,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -2044,6 +2044,28 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/panniantong/agent-reach@93ae1d1"
+      ],
+      "id": "skill.agent-reach",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "panniantong/agent-reach",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/panniantong/agent-reach@93ae1d1",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/panniantong/agent-reach/agent_reach/skill",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.agents-sdk",
@@ -2060,6 +2082,50 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.brainstorm",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/brainstorm",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.cass",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/cass",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -2451,6 +2517,28 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.research",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/research",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -3566,6 +3654,28 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.worktree",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/worktree",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.wrangler",
@@ -3840,9 +3950,9 @@
       ]
     }
   ],
-  "catalogDigest": "cf0cab4d87e0c23f930715e3c9b833b25a01e1dd771f6e3813b7e49ede3de9aa",
+  "catalogDigest": "9946e3bff36041018af74b61caf94dda3e8bcb60cff1c50380f42ba4b2679beb",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "36eeae4ab33c0f8c9b9fbbf97000ff9bd4a3a119ff8bcca6874f180cd9ed3a9c",
+  "registryDigest": "296ae3a53d4015b930b548a4f954338e93f0af24468126db4fd063838ff70683",
   "schemaVersion": 1
 }
