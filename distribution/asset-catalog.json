@@ -1,5 +1,5 @@
 {
-  "assetCount": 192,
+  "assetCount": 195,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -853,6 +853,24 @@
         "antigravity",
         "claude-code",
         "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "ffe5636e173cc0b50229a1832c3e8a3f2ad0a1409162c048b06ee41605e3e903",
+      "evidenceRefs": [
+        "distribution/manifests/planning-diagrams.json"
+      ],
+      "id": "manifest.planning-diagrams",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "candidate",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/planning-diagrams.json",
+      "vendors": [
         "cursor"
       ]
     },
@@ -2432,6 +2450,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922"
+      ],
+      "id": "skill.new-workspace",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "danielrosehill/Claude-Ideation-Planning-Plugin",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/danielrosehill/Claude-Ideation-Planning-Plugin/skills/new-workspace",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "0b70925afea2ef386bf999148a5a816047d008255a9cb6dcb5efc814c40f6bf2",
       "evidenceRefs": [
         "skills/notion-inbox-pickup",
@@ -2516,6 +2556,25 @@
         "antigravity",
         "claude-code",
         "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "0ec8fad08a77c7d3c1b040aa0a967adba04d4dee7dc55338fe1992931062cf03",
+      "evidenceRefs": [
+        "skills/planning-diagrams",
+        "distribution/manifests/planning-diagrams.json"
+      ],
+      "id": "skill.planning-diagrams",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "candidate",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "unknown:home-discovered",
+      "requiredEnv": [],
+      "sourcePath": "skills/planning-diagrams",
+      "vendors": [
         "cursor"
       ]
     },
@@ -3972,9 +4031,9 @@
       ]
     }
   ],
-  "catalogDigest": "7fa1cee5fb8119e17b787afb966c6e62e8821ea7d277bc37e4d8b3608c5baa01",
+  "catalogDigest": "05bb39d4415e295d0daaeda7b9deeb4e10ec843de7cfffb74c5e8e1b7f432be3",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "86da862c05d8911d5853624d093d88daeaf10bfe92d206038c6d76526a2a8c81",
+  "registryDigest": "9e2832f1b4716076cc67395a34fc08928c1e607ce68a22ff24b3ab39ca3804f9",
   "schemaVersion": 1
 }
