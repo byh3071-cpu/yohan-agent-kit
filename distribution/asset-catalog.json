@@ -1,5 +1,5 @@
 {
-  "assetCount": 191,
+  "assetCount": 192,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -2564,6 +2564,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.sandbox-stable",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/sandbox-stable",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "a81613760e769912628c0f306dca0de8eb2d7ad40632c8897a5cba3a930de855",
       "evidenceRefs": [
         "skills/secret-pr-guard",
@@ -3950,9 +3972,9 @@
       ]
     }
   ],
-  "catalogDigest": "9946e3bff36041018af74b61caf94dda3e8bcb60cff1c50380f42ba4b2679beb",
+  "catalogDigest": "7fa1cee5fb8119e17b787afb966c6e62e8821ea7d277bc37e4d8b3608c5baa01",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "296ae3a53d4015b930b548a4f954338e93f0af24468126db4fd063838ff70683",
+  "registryDigest": "86da862c05d8911d5853624d093d88daeaf10bfe92d206038c6d76526a2a8c81",
   "schemaVersion": 1
 }
