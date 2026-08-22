@@ -9,24 +9,44 @@
                   },
                   {
                       "path":  "references/context-contract.md",
-                      "bytes":  4541,
-                      "sha256":  "0F55D44710AD26A3714AD98A611E902F43D45BE981497B8EF728BBA00265F3BE"
+                      "bytes":  6175,
+                      "sha256":  "E9A7105BCBA52AB12E24EDFCB346660489EAFA90624A54A8485F52746B3DA964"
+                  },
+                  {
+                      "path":  "references/operating-manual.md",
+                      "bytes":  4825,
+                      "sha256":  "201950D0F95EF188ACA02BF32F40AB7A89A12862AF876F19DBB91DC883C528AD"
+                  },
+                  {
+                      "path":  "references/reference-intake.md",
+                      "bytes":  4733,
+                      "sha256":  "F894EDEE45D41D3B3F4F9F445613CCEA586C9AF2CCE7D66B46C060068608010C"
                   },
                   {
                       "path":  "references/report-contract.md",
-                      "bytes":  4592,
-                      "sha256":  "953CD380D1B4A1DBAF72EF63164E68FD3CF07C761BC8539A5B6763567A66C585"
+                      "bytes":  4772,
+                      "sha256":  "0433F49EDFF83B83A63C922FC8138875CD0CE9DD62F479A3143ADA72DB4E5096"
+                  },
+                  {
+                      "path":  "references/taste-interview.md",
+                      "bytes":  7097,
+                      "sha256":  "E2604B5424B225718850EB40D33B723B6A6F6D757BDB885D171A64B653027DF6"
                   },
                   {
                       "path":  "references/team-contract.md",
-                      "bytes":  4000,
-                      "sha256":  "FB704DE5F90146F190BD4A4278C302851E1FA3E207441C87514FC47F22886B16"
+                      "bytes":  4395,
+                      "sha256":  "B4CB5B46229BF2EE2143C881B7B906118E43B606E83FA50C401C975D7767A5A5"
+                  },
+                  {
+                      "path":  "references/verification-contract.md",
+                      "bytes":  5159,
+                      "sha256":  "D680155E67042C9B7043E3BA4CAF9262195D3970B7A6515E6A160CA5E933144F"
                   },
                   {
                       "path":  "SKILL.md",
-                      "bytes":  5843,
-                      "sha256":  "3ECFFC84C5482A6609629907C1CBD61803704760E61B03DA1EC0AC33ABF5999C"
+                      "bytes":  7421,
+                      "sha256":  "F84FB9E86D2971B6F72B9339689FF00E42A13D3BD7F59353646C483D5515BACC"
                   }
               ],
-    "digest":  "087837A6F1338F91D3C968F962570EDBCA205A4396C81D07E250DA6D1510B058"
+    "digest":  "ECA4C60C2750CBA48BCB6B6AE8ABAAA39C344DE03BD9E0F1398F6E8385E4E6F1"
 }

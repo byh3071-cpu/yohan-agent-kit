@@ -12,16 +12,18 @@ Run a context-led design workstream in which the user remains the design directo
 1. Find the actual owner workspace or repository and read its nearest instructions, active work state, and stop files before making changes.
 2. Find existing product flows, screens, tokens, components, brand assets, research, screenshots, and prior decisions. Prefer project evidence over remembered assumptions.
 3. Resolve the two-layer context contract in [context-contract.md](references/context-contract.md). Reconcile stale or contradictory facts; never silently pick one.
-4. State the design outcome, user, surface, constraints, current evidence, unknowns, and the next human gate.
-5. Choose the smallest team that covers the uncertainty using [team-contract.md](references/team-contract.md).
+4. Resolve the project's taste record, forbidden patterns, and reference set. If none exists, is stale, or covers a different medium, a taste pass precedes visual work — do not substitute the team's own aesthetic.
+5. State the design outcome, user, surface, constraints, current evidence, unknowns, and the next human gate.
+6. Choose the smallest team that covers the uncertainty using [team-contract.md](references/team-contract.md).
 
 Do not store project facts in this skill. The reusable method belongs here; project facts and decisions belong in the owner's versioned source of truth, using Git where the project uses Git.
 
 ## Choose the work mode
 
 - **Discover** — inventory context, identify uncertainty, and produce a design brief. Do not invent a visual direction.
+- **Elicit** — establish or refresh the taste model with the design director through structured comparison, using [taste-interview.md](references/taste-interview.md). Produces confirmed taste rules and forbidden patterns, not artifacts.
 - **Audit** — critique an existing experience against its goals, system, accessibility, and evidence. Separate observed defects from proposals.
-- **Explore** — research references, define information architecture and flows, then create visual directions.
+- **Explore** — collect references under [reference-intake.md](references/reference-intake.md), define information architecture and flows, then create visual directions.
 - **Specify** — turn a human-selected direction into the visual, content, interaction, material, spatial, accessibility, and production rules relevant to its medium.
 - **Handoff** — map an approved design to the actual implementation or production environment and verification plan.
 
@@ -30,20 +32,23 @@ For a faithful reproduction or an already approved source, match that source. Fo
 ## Operate the design loop
 
 1. **Frame** — write or refresh the project DesignContext and cite evidence with freshness.
-2. **Research** — use authoritative primary sources for standards and first-party product sources for patterns. Label facts, inferences, and proposals.
-3. **Reduce** — decide what to keep, merge, hide, defer, or remove before adding new design elements.
-4. **Structure** — define the core job, hierarchy, flow, state model, and approval boundaries.
-5. **Visualize** — create the required artifact at its real viewport, print size, physical scale, or environmental context with realistic content and materials.
-6. **Select** — record the user's chosen, rejected, or deferred direction and why. The team does not self-approve.
-7. **Specify** — define the relevant visual, content, interaction, material, spatial, accessibility, and production rules.
-8. **Handoff** — connect the specification to the real implementation or production environment without replacing established systems.
-9. **Verify** — compare the same target medium, scale or context, and applicable state; run an adversarial critique and record evidence and residual risks.
-10. **Close** — update the project context snapshot and append the decision event. Nominate reusable learning for shared promotion; never auto-promote project facts.
+2. **Elicit** — resolve or establish the taste model with the design director. Show real candidates and let the director choose; do not ask for style in words. Read the choices back as explicit rules and get them confirmed.
+3. **Gather** — collect references against stated project questions under [reference-intake.md](references/reference-intake.md), and use authoritative primary sources for standards. Collect rejected work with equal rigor. Label facts, inferences, and proposals.
+4. **Reduce** — decide what to keep, merge, hide, defer, or remove before adding new design elements.
+5. **Structure** — define the core job, hierarchy, flow, state model, and approval boundaries.
+6. **Visualize** — create the required artifact at its real viewport, print size, physical scale, or environmental context with realistic content and materials. Check it against the recorded forbidden patterns before showing it.
+7. **Select** — record the user's chosen, rejected, or deferred direction and why. The team does not self-approve.
+8. **Specify** — define the relevant visual, content, interaction, material, spatial, accessibility, and production rules.
+9. **Handoff** — connect the specification to the real implementation or production environment without replacing established systems.
+10. **Verify** — measure against [verification-contract.md](references/verification-contract.md) in the real medium and runtime, scan for forbidden patterns, run an adversarial critique, and record readings and residual risks.
+11. **Close** — update the project context snapshot, including the taste record, and append the decision event. Nominate reusable learning for shared promotion; never auto-promote project facts.
 
 ## Gates and boundaries
 
 - The user decides visual direction, density, layout, interaction, and final acceptance.
 - Do not begin production implementation before visual selection unless the user has supplied an already approved target.
+- Do not create visual directions against an empty or stale taste record. Run the taste pass first, or say plainly that directions are being produced without a taste model and that rejection is the expected outcome.
+- Do not present taste inferences the director has not confirmed as if they were approved rules.
 - Do not create a supposedly independent top-level design session as a child worker. Use a separate approved worktree/session and leave a project-owned handoff.
 - Follow local concurrency, worktree, write, privacy, cost, deployment, and release rules.
 - Do not transmit private assets or source material to an external provider without authorization.
@@ -55,4 +60,6 @@ For regulated or safety-critical work, record the governing jurisdiction or fram
 
 For a code-based responsive interactive HTML outcome, hand approved work to an implementation skill such as `design-to-html`. For print, spatial, service, hardware, or other media, hand off to the project-authorized production owner or medium-appropriate implementation method.
 
-Before delivering an artifact or handoff, apply [report-contract.md](references/report-contract.md).
+Before delivering an artifact or handoff, measure against [verification-contract.md](references/verification-contract.md) and apply [report-contract.md](references/report-contract.md).
+
+For a walkthrough of how a full run proceeds and what the design director is asked to do at each gate, see [operating-manual.md](references/operating-manual.md).
