@@ -3401,6 +3401,195 @@
       "evidenceRefs": [
         "scripts/Restore-ExternalSkills.ps1"
       ]
+    },
+    {
+      "id": "skill.durable-objects",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/durable-objects",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.wrangler",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/wrangler",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.adhd",
+      "kind": "skill",
+      "owner": "uditakhourii/adhd",
+      "sourcePath": "external://github.com/uditakhourii/adhd/skills/adhd",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/uditakhourii/adhd@3d9dc48",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/uditakhourii/adhd@3d9dc48"
+      ]
+    },
+    {
+      "id": "skill.computer-use",
+      "kind": "skill",
+      "owner": "stablyai/orca",
+      "sourcePath": "external://github.com/stablyai/orca/skills/computer-use",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ]
+    },
+    {
+      "id": "skill.orchestration",
+      "kind": "skill",
+      "owner": "stablyai/orca",
+      "sourcePath": "external://github.com/stablyai/orca/skills/orchestration",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ]
+    },
+    {
+      "id": "skill.cass-memory",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/cass-memory",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.council-of-five",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/council-of-five",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.stuck",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/stuck",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
+    },
+    {
+      "id": "skill.think",
+      "kind": "skill",
+      "owner": "johnlindquist/claude",
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/think",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ]
     }
   ]
 }

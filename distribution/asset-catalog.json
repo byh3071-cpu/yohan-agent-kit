@@ -1,5 +1,5 @@
 {
-  "assetCount": 174,
+  "assetCount": 183,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -1998,6 +1998,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/uditakhourii/adhd@3d9dc48"
+      ],
+      "id": "skill.adhd",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "uditakhourii/adhd",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/uditakhourii/adhd@3d9dc48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/uditakhourii/adhd/skills/adhd",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "fb0e1f0e02ef638fcec6fbffa8bcdeebdcc89183de2829add318a64d6ec1d6ef",
       "evidenceRefs": [
         "skills/adr-cycle"
@@ -2043,6 +2065,28 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.cass-memory",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/cass-memory",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.cloudflare-email-service",
@@ -2059,6 +2103,50 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ],
+      "id": "skill.computer-use",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "stablyai/orca",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/stablyai/orca/skills/computer-use",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.council-of-five",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/council-of-five",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -2125,6 +2213,28 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.durable-objects",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/durable-objects",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -2256,6 +2366,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ],
+      "id": "skill.orchestration",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "stablyai/orca",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/stablyai/orca/skills/orchestration",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "ec6de25da4c189483e049bf4bec8cee140e1b26f5bdba79560913666bea434db",
       "evidenceRefs": [
         "skills/overnight-vhk-auto",
@@ -2381,6 +2513,50 @@
       "sourcePath": "plugins/statusline/skills/setup-statusline",
       "vendors": [
         "claude-code"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.stuck",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/stuck",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/johnlindquist/claude@eb37d88"
+      ],
+      "id": "skill.think",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "johnlindquist/claude",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/johnlindquist/claude/skills/think",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -3322,6 +3498,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.wrangler",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/wrangler",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "aecd4e9cf5621cf56d61b47f508579e0727781f320ea39c7d06bf8cfc9524d9a",
       "evidenceRefs": [
         "plugins/yohan-core/skills/cc-docs"
@@ -3576,9 +3774,9 @@
       ]
     }
   ],
-  "catalogDigest": "1991f4f0ac603c0bf439cb3525b10f32bfd43255a8b20a64476b18eaa65c8a07",
+  "catalogDigest": "76ebdc7144171cf799a948233c3a0064da7df116acf5231bcf424bc8f1b74576",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "1e379d0d107cccd0cf4d3eb015d3700fc70a5252c60eefe992d9a1d3d35595ad",
+  "registryDigest": "3eae15c30be0ac24e3cc0aa02cf2224b7512b2a0dc4541fbcf9c52f87ec9121e",
   "schemaVersion": 1
 }
