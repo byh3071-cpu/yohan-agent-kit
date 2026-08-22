@@ -3789,9 +3789,9 @@
       "vendors": [
         "cursor"
       ],
-      "lifecycle": "approved",
-      "provenance": "local-authored:cursor-home",
-      "license": "UNLICENSED",
+      "lifecycle": "candidate",
+      "provenance": "unknown:home-discovered",
+      "license": "UNKNOWN",
       "requiredEnv": [],
       "evidenceRefs": [
         "skills/planning-diagrams",
@@ -3807,7 +3807,7 @@
       "vendors": [
         "cursor"
       ],
-      "lifecycle": "approved",
+      "lifecycle": "candidate",
       "provenance": "repo-authored",
       "license": "UNLICENSED",
       "requiredEnv": [],

@@ -864,7 +864,7 @@
       "id": "manifest.planning-diagrams",
       "kind": "manifest",
       "license": "UNLICENSED",
-      "lifecycle": "approved",
+      "lifecycle": "candidate",
       "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
       "provenance": "repo-authored",
@@ -2567,11 +2567,11 @@
       ],
       "id": "skill.planning-diagrams",
       "kind": "skill",
-      "license": "UNLICENSED",
-      "lifecycle": "approved",
+      "license": "UNKNOWN",
+      "lifecycle": "candidate",
       "owner": "yohan-agent-kit",
       "portability": "VENDOR_SPECIFIC",
-      "provenance": "local-authored:cursor-home",
+      "provenance": "unknown:home-discovered",
       "requiredEnv": [],
       "sourcePath": "skills/planning-diagrams",
       "vendors": [
@@ -4031,9 +4031,9 @@
       ]
     }
   ],
-  "catalogDigest": "213def66a41602ed270a2b534e57282118e251dae3ec0d815e22af428373bb75",
+  "catalogDigest": "05bb39d4415e295d0daaeda7b9deeb4e10ec843de7cfffb74c5e8e1b7f432be3",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "ad2f6d7e8003e63b79fd766848eecbbf242b100e4b53928b48f95e8afeba9147",
+  "registryDigest": "9e2832f1b4716076cc67395a34fc08928c1e607ce68a22ff24b3ab39ca3804f9",
   "schemaVersion": 1
 }
