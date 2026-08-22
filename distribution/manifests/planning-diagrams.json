@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "planning-diagrams",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  2400,
+                      "sha256":  "31C5C66DE73573114754D0AA99BFD886E0417043FB250FD5BE0DE4A823F7F30C"
+                  }
+              ],
+    "digest":  "F71BB6289ACEAE06984B2B81652A6C72004766AF437C3D3088598BFF962BE177"
+}

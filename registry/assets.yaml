@@ -3779,6 +3779,62 @@
       "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ]
+    },
+    {
+      "id": "skill.planning-diagrams",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/planning-diagrams",
+      "portability": "VENDOR_SPECIFIC",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "local-authored:cursor-home",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/planning-diagrams",
+        "distribution/manifests/planning-diagrams.json"
+      ]
+    },
+    {
+      "id": "manifest.planning-diagrams",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/planning-diagrams.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/planning-diagrams.json"
+      ]
+    },
+    {
+      "id": "skill.new-workspace",
+      "kind": "skill",
+      "owner": "danielrosehill/Claude-Ideation-Planning-Plugin",
+      "sourcePath": "external://github.com/danielrosehill/Claude-Ideation-Planning-Plugin/skills/new-workspace",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922"
+      ]
     }
   ]
 }
