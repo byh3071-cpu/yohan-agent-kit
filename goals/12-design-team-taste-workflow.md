@@ -3,12 +3,13 @@ vhk_format: 1
 type: goal
 id: 12
 title: 디자인 팀 취향 상담·레퍼런스 수집·수치 검증 계약
-status: IN_PROGRESS
+status: DONE
 priority: P0
 size: L
 execution_provider: native-approved
 automatic_fallback: false
 started: 2026-08-22
+completed: 2026-08-22
 ---
 
 # Goal 12: 디자인 팀 취향 상담·레퍼런스 수집·수치 검증 계약
@@ -62,4 +63,4 @@ Goal 11의 `design-team`은 운영 절차·역할·보고 규격을 갖췄지만
 - `node scripts/check-goal-12.mjs` exit 0 — 56개 항목, manifest·registry·asset catalog, Goal 11 회귀 포함 전부 PASS.
 - 게이트 반증 시험: `taste-interview.md`의 "Vary exactly one axis" 규칙을 제거하자 해당 게이트가 FAIL하고 전체 게이트가 실패했다. 복구 후 재통과. 통과만 하는 게이트가 아님을 확인.
 - 스킬 전체 하드코딩 검사(머신 경로·특정 제품·고정 모델·특정 도구명·미감 선호) PASS.
-- merge 전이므로 status는 IN_PROGRESS로 둔다.
+- PR #92 merge 완료 후 DONE 전환.

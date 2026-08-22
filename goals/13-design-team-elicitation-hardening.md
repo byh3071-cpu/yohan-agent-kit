@@ -3,12 +3,13 @@ vhk_format: 1
 type: goal
 id: 13
 title: 디자인 팀 실전 보강 — 상담·수집·검증의 구멍 8개
-status: IN_PROGRESS
+status: DONE
 priority: P0
 size: M
 execution_provider: native-approved
 automatic_fallback: false
 started: 2026-08-22
+completed: 2026-08-22
 ---
 
 # Goal 13: 디자인 팀 실전 보강
@@ -68,4 +69,4 @@ Goal 11·12로 완성한 `design-team`을 첫 실제 프로젝트(로컬 운영 
 - 게이트 반증 시험: SKILL 게이트의 "레퍼런스 수집 전 시각화 금지" 문구를 무력화하자 해당 게이트가 FAIL하고 전체가 실패했다. 복구 후 재통과.
 - 기존 검사기 오탐 수정: check-goal-11·12 의 제품명 스캔이 단어 경계 없는 `MOVA` 패턴으로 "removal" 을 오탐하고 있었다. 계약에 removal 조항을 추가하면서 드러나 셋 다 단어 경계를 붙인 패턴으로 교정했다. 조항 변경 아님.
 - 프로젝트 사실(적용 대상의 취향 값·레퍼런스·화면 진단)은 스킬에 넣지 않고 프로젝트 소유 인수인계로 분리했다.
-- merge 전이므로 status 는 IN_PROGRESS 로 둔다.
+- PR #93 merge 완료 후 DONE 전환.
