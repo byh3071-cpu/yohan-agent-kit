@@ -5,7 +5,7 @@ param(
     [ValidateSet('Check', 'Install', 'Restore')]
     [string]$Mode = 'Check',
 
-    [ValidateSet('All', 'adr-cycle', 'design-to-html', 'goal-cycle')]
+    [ValidateSet('All', 'adr-cycle', 'design-team', 'design-to-html', 'goal-cycle')]
     [string]$Skill = 'All',
 
     [string]$RepositoryRoot,
@@ -903,7 +903,7 @@ function Test-AgyEvidence {
 function Get-SelectedSkills {
     param([Parameter(Mandatory = $true)][string]$Selection)
 
-    if ($Selection -eq 'All') { return @('adr-cycle', 'design-to-html', 'goal-cycle') }
+    if ($Selection -eq 'All') { return @('adr-cycle', 'design-team', 'design-to-html', 'goal-cycle') }
     return @($Selection)
 }
 
@@ -1616,7 +1616,7 @@ function Get-RestorePlan {
     elseif (-not [string]::IsNullOrWhiteSpace($recoverySeal)) {
         throw "Unexpected recovery seal for transaction status:$transactionStatus"
     }
-    if ([string]$transaction.selection -notin @('All', 'adr-cycle', 'design-to-html', 'goal-cycle')) { throw 'Transaction selection is invalid' }
+    if ([string]$transaction.selection -notin @('All', 'adr-cycle', 'design-team', 'design-to-html', 'goal-cycle')) { throw 'Transaction selection is invalid' }
     if (@($transaction.items).Count -eq 0) { throw 'Transaction has no restorable items' }
 
     $errors = @()
@@ -1631,7 +1631,7 @@ function Get-RestorePlan {
         $itemCreatedJunction = Get-StrictBooleanProperty -Object $item -Name 'createdJunction' -Label "Transaction createdJunction:$skillName/$role"
         $itemAdapterPrepared = if ($transactionSchema -ge 4) { Get-StrictBooleanProperty -Object $item -Name 'adapterPrepared' -Label "Transaction adapterPrepared:$skillName/$role" } else { $false }
         $itemCreatedAdapter = if ($transactionSchema -ge 4) { Get-StrictBooleanProperty -Object $item -Name 'createdAdapter' -Label "Transaction createdAdapter:$skillName/$role" } else { $false }
-        if ($skillName -notin @('adr-cycle', 'design-to-html', 'goal-cycle')) { $errors += "Unsupported transaction skill:$skillName"; continue }
+        if ($skillName -notin @('adr-cycle', 'design-team', 'design-to-html', 'goal-cycle')) { $errors += "Unsupported transaction skill:$skillName"; continue }
         $definitions = @(Get-TargetDefinitions -UserHome $UserHome -SkillName $skillName -FallbackEnabled $includeAgyCliFallback -ContractVersion $transactionSchema)
         $definition = @($definitions | Where-Object { $_.role -ceq $role })
         if ($definition.Count -ne 1) { $errors += "Unsupported transaction role:$skillName/$role"; continue }

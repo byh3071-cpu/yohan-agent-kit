@@ -30,6 +30,8 @@ const required = [
   'skills/design-team/references/team-contract.md',
   'skills/design-team/references/report-contract.md',
   'distribution/manifests/design-team.json',
+  'scripts/Manage-MultivendorSkills.ps1',
+  'tests/Manage-MultivendorSkills.Tests.ps1',
   'docs/audits/design-team-skill-2026-08-22.md'
 ]
 for (const path of required) gate(`required artifact ${path}`, existsSync(join(repoRoot, path)))
@@ -42,6 +44,7 @@ gate('portable ownership', skill.includes('owner workspace or repository') && sk
 gate('three-option human gate', skill.includes('exactly three materially different visual options') && skill.includes("wait for the user's selection"))
 gate('regulated safety boundary', skill.includes('named qualified human approver') && skill.includes('is not regulatory validation or evidence of compliance'))
 gate('medium-specific HTML handoff', skill.includes('code-based responsive interactive HTML outcome') && skill.includes('print, spatial, service, hardware'))
+gate('distribution manager supports design-team', read('scripts/Manage-MultivendorSkills.ps1').includes("'All', 'adr-cycle', 'design-team', 'design-to-html', 'goal-cycle'"))
 
 const skillFiles = []
 const walk = (directory) => {
