@@ -3590,6 +3590,69 @@
       "evidenceRefs": [
         "https://github.com/johnlindquist/claude@eb37d88"
       ]
+    },
+    {
+      "id": "skill.cloudflare",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/cloudflare",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.turnstile-spin",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/turnstile-spin",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.orca-cli",
+      "kind": "skill",
+      "owner": "stablyai/orca",
+      "sourcePath": "external://github.com/stablyai/orca/skills/orca-cli",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "assetCount": 183,
+  "assetCount": 186,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -2089,6 +2089,28 @@
       "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
+      "id": "skill.cloudflare",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/cloudflare",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
       "id": "skill.cloudflare-email-service",
       "kind": "skill",
       "license": "Apache-2.0",
@@ -2363,6 +2385,28 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/stablyai/orca@057fbfc"
+      ],
+      "id": "skill.orca-cli",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "stablyai/orca",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/stablyai/orca@057fbfc",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/stablyai/orca/skills/orca-cli",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -3149,6 +3193,28 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.turnstile-spin",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/turnstile-spin",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "657155ab91deebe05d5f14d00b2f9a0050cc2a6f6b603c1f6b0b5c2a76cef9b4",
       "evidenceRefs": [
         "skills/vhk-auto",
@@ -3774,9 +3840,9 @@
       ]
     }
   ],
-  "catalogDigest": "76ebdc7144171cf799a948233c3a0064da7df116acf5231bcf424bc8f1b74576",
+  "catalogDigest": "cf0cab4d87e0c23f930715e3c9b833b25a01e1dd771f6e3813b7e49ede3de9aa",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "3eae15c30be0ac24e3cc0aa02cf2224b7512b2a0dc4541fbcf9c52f87ec9121e",
+  "registryDigest": "36eeae4ab33c0f8c9b9fbbf97000ff9bd4a3a119ff8bcca6874f180cd9ed3a9c",
   "schemaVersion": 1
 }
