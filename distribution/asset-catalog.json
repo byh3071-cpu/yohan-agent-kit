@@ -1,5 +1,5 @@
 {
-  "assetCount": 201,
+  "assetCount": 202,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -732,7 +732,7 @@
       ]
     },
     {
-      "contentDigest": "b2be3df9e4208e10414935f345f0a8479b6b12db78cd51a1896f08d29a443e36",
+      "contentDigest": "857cddbacb96f35b46e5269d44c5f9f06e5750dadb88864722379651a54b5848",
       "evidenceRefs": [
         "distribution/manifests/design-team.json"
       ],
@@ -1595,7 +1595,7 @@
       ]
     },
     {
-      "contentDigest": "3c3959639a3d96f3e82d27e8843003ce330fc1b7d7c2d20fc272d1c44b07d231",
+      "contentDigest": "de7874dffa08b693012a40d727efeb8f8e736edd590086d2ec133ac968686372",
       "evidenceRefs": [
         "goals/11-design-team.md",
         "scripts/check-goal-11.mjs"
@@ -1618,7 +1618,7 @@
       ]
     },
     {
-      "contentDigest": "2be7f1f44012a1ea4b34add7e92f016844a6a9c14673595229f7a0eefdf8b5d5",
+      "contentDigest": "4f3a3873e2a957f25c1159b3c97fbc9c17fdd3675468e88f494b5e249df233e6",
       "evidenceRefs": [
         "goals/12-design-team-taste-workflow.md",
         "scripts/check-goal-12.mjs"
@@ -1632,6 +1632,29 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-12.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "626ea5f1c2a05c0d21e9dfa775deddab03fea7e80b75a0477ac766f4a39a360e",
+      "evidenceRefs": [
+        "goals/13-design-team-elicitation-hardening.md",
+        "scripts/check-goal-13.mjs"
+      ],
+      "id": "script.check-goal-13",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-13.mjs",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -2388,7 +2411,7 @@
       ]
     },
     {
-      "contentDigest": "35fcdbb41b6579a3e2f48d32f1330d0f392cb3f24d7da5638e49d2cef8ee2d73",
+      "contentDigest": "de715671a0266493699a6d6e0e7c784e32bb19c9bebcbe62ec89279aff6193ae",
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
@@ -4164,9 +4187,9 @@
       ]
     }
   ],
-  "catalogDigest": "d30a0bf5306a019ee18ef36075557100756f5d4354e6f9ab930676ed228ecdf2",
+  "catalogDigest": "04a7ee835257fac2ae0e190fc6e0b46d3fa5faaf606957432ab632a6cfbda4fa",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "1ec91e0c13a997c29602e9945ec8591a3df2e371a886701b7b5ac2b10af2e158",
+  "registryDigest": "d5a021616d5a4ef737ace1765004d5b3bc5906b01553e4e865e759e04071bd98",
   "schemaVersion": 1
 }

@@ -57,7 +57,7 @@ const walk = (directory) => {
 walk(skillRoot)
 const machineSpecific = /(?:[A-Za-z]:[\\/]|\\\\|file:\/\/|Users[\\/])/u
 gate('no machine-specific paths', skillFiles.every((path) => !machineSpecific.test(readFileSync(path, 'utf8'))))
-gate('no product or fixed-model coupling', skillFiles.every((path) => !/(?:yohan-control-tower|MOVA|\bGPT-5\.6\b|\bLuna\b|\bSol\b|\bTerra\b)/iu.test(readFileSync(path, 'utf8'))))
+gate('no product or fixed-model coupling', skillFiles.every((path) => !/(?:yohan-control-tower|\bMOVA\b|\bGPT-5\.6\b|\bLuna\b|\bSol\b|\bTerra\b)/iu.test(readFileSync(path, 'utf8'))))
 
 try {
   const manifest = JSON.parse(read('distribution/manifests/design-team.json'))
