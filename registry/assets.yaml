@@ -3104,6 +3104,303 @@
       "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ]
+    },
+    {
+      "id": "manifest.dump-gate",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/dump-gate.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/dump-gate.json"
+      ]
+    },
+    {
+      "id": "manifest.html-doc",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/html-doc.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "claude-code"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/html-doc.json"
+      ]
+    },
+    {
+      "id": "manifest.master-orchestrator",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/master-orchestrator.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/master-orchestrator.json"
+      ]
+    },
+    {
+      "id": "manifest.morning-merge-check",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/morning-merge-check.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/morning-merge-check.json"
+      ]
+    },
+    {
+      "id": "manifest.notion-inbox-pickup",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/notion-inbox-pickup.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/notion-inbox-pickup.json"
+      ]
+    },
+    {
+      "id": "manifest.overnight-vhk-auto",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/overnight-vhk-auto.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/overnight-vhk-auto.json"
+      ]
+    },
+    {
+      "id": "manifest.research-brief",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/research-brief.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/research-brief.json"
+      ]
+    },
+    {
+      "id": "manifest.secret-pr-guard",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/secret-pr-guard.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/secret-pr-guard.json"
+      ]
+    },
+    {
+      "id": "manifest.session-card",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/session-card.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/session-card.json"
+      ]
+    },
+    {
+      "id": "manifest.source-command-routing-review",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/source-command-routing-review.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/source-command-routing-review.json"
+      ]
+    },
+    {
+      "id": "manifest.thought-to-prompt",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/thought-to-prompt.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/thought-to-prompt.json"
+      ]
+    },
+    {
+      "id": "manifest.vhk-auto",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/vhk-auto.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/vhk-auto.json"
+      ]
+    },
+    {
+      "id": "manifest.yohan-start",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/yohan-start.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/yohan-start.json"
+      ]
+    },
+    {
+      "id": "script.get-agent-asset-drift",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Get-AgentAssetDrift.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Get-AgentAssetDrift.ps1"
+      ]
+    },
+    {
+      "id": "script.restore-external-skills",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Restore-ExternalSkills.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/Restore-ExternalSkills.ps1"
+      ]
     }
   ]
 }

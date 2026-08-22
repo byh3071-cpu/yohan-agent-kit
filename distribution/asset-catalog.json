@@ -1,5 +1,5 @@
 {
-  "assetCount": 114,
+  "assetCount": 174,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -712,6 +712,27 @@
       ]
     },
     {
+      "contentDigest": "e7b223714df76cbd71ed39cc5dde41a4b1e051d37081438a70834aec51cfcd34",
+      "evidenceRefs": [
+        "distribution/manifests/dump-gate.json"
+      ],
+      "id": "manifest.dump-gate",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/dump-gate.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "82b0ee44aea6a653db4d5e5e9fa504af25f92385d85c41fd863393d4c9c15907",
       "evidenceRefs": [
         "distribution/manifests/goal-cycle.json"
@@ -731,6 +752,255 @@
         "codex",
         "cursor",
         "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "caaffb171335a40215447ee3d596ef701a45952f54dcd1da37a4de5989a1548c",
+      "evidenceRefs": [
+        "distribution/manifests/html-doc.json"
+      ],
+      "id": "manifest.html-doc",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/html-doc.json",
+      "vendors": [
+        "claude-code"
+      ]
+    },
+    {
+      "contentDigest": "c06d65ffd469bcaa9b8936c4b1c3855624a226d55299219e53c7bf3fdf1550ac",
+      "evidenceRefs": [
+        "distribution/manifests/master-orchestrator.json"
+      ],
+      "id": "manifest.master-orchestrator",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/master-orchestrator.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "859e78031090d200f737e7e893fd27419291af3da939cc4f7f196ed4a898abb1",
+      "evidenceRefs": [
+        "distribution/manifests/morning-merge-check.json"
+      ],
+      "id": "manifest.morning-merge-check",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/morning-merge-check.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "1baf5fa8ae135bd8be4e0dd8405e6a915f317848e31e055d4581a21c22fd1eba",
+      "evidenceRefs": [
+        "distribution/manifests/notion-inbox-pickup.json"
+      ],
+      "id": "manifest.notion-inbox-pickup",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/notion-inbox-pickup.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "8170fca2ed54994ccb711999c9b4641eef62162599392e22c4faecb13772101d",
+      "evidenceRefs": [
+        "distribution/manifests/overnight-vhk-auto.json"
+      ],
+      "id": "manifest.overnight-vhk-auto",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/overnight-vhk-auto.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "c2a397e3628247a8ebbaae0b007f1a8d4f3ce0bcb2079438d77be9286b75313c",
+      "evidenceRefs": [
+        "distribution/manifests/research-brief.json"
+      ],
+      "id": "manifest.research-brief",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/research-brief.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "ba3141b2a54eb7ad6ef68921e2ea58552c8881d9fc511997650b8acb49c26fc4",
+      "evidenceRefs": [
+        "distribution/manifests/secret-pr-guard.json"
+      ],
+      "id": "manifest.secret-pr-guard",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/secret-pr-guard.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "e1f9cfe797666361dec35be76348476fb45fe450135f3d6ab04db5133f124beb",
+      "evidenceRefs": [
+        "distribution/manifests/session-card.json"
+      ],
+      "id": "manifest.session-card",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/session-card.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "6df54efda1b89db6cb00f762e50c7f2576b4bad887da17924497ab30144fad76",
+      "evidenceRefs": [
+        "distribution/manifests/source-command-routing-review.json"
+      ],
+      "id": "manifest.source-command-routing-review",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/source-command-routing-review.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "7fbde2a6f2f94592c1c059d5010b0fac7e6041f217729679bd5477526f8fdd76",
+      "evidenceRefs": [
+        "distribution/manifests/thought-to-prompt.json"
+      ],
+      "id": "manifest.thought-to-prompt",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/thought-to-prompt.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "cb666e99b5047901d65c2b31ad5ca16abbf580767951e10bd466a6a3fade069c",
+      "evidenceRefs": [
+        "distribution/manifests/vhk-auto.json"
+      ],
+      "id": "manifest.vhk-auto",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/vhk-auto.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "c9ecae754d18f3e99c57afe15a459b1a76f2d9ce0de868093f81374a6882a6e0",
+      "evidenceRefs": [
+        "distribution/manifests/yohan-start.json"
+      ],
+      "id": "manifest.yohan-start",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/yohan-start.json",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
       ]
     },
     {
@@ -1390,6 +1660,27 @@
       ]
     },
     {
+      "contentDigest": "b7ca05b3146e1b32c9291b63c994d58be9191bce3d82bbd1822218d89c14c722",
+      "evidenceRefs": [
+        "scripts/Get-AgentAssetDrift.ps1"
+      ],
+      "id": "script.get-agent-asset-drift",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Get-AgentAssetDrift.ps1",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "e8e5d9e7549f8139122d5d80b2938d5fd7154efa94ecae4c58bec2016e66dfd3",
       "evidenceRefs": [
         "scripts/Invoke-VendorSmoke.ps1",
@@ -1560,6 +1851,27 @@
       ]
     },
     {
+      "contentDigest": "d89e41472cb19e657dd7435ad485d96ca12e9a17c33524c1a64e6df5c1429ecf",
+      "evidenceRefs": [
+        "scripts/Restore-ExternalSkills.ps1"
+      ],
+      "id": "script.restore-external-skills",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/Restore-ExternalSkills.ps1",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "cb35ef22ca4c957e106785c912ddfa2ddd520984dd8e2e30cb1f77f750096576",
       "evidenceRefs": [
         "scripts/Scan-AgentAssets.ps1"
@@ -1708,6 +2020,48 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.agents-sdk",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/agents-sdk",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.cloudflare-email-service",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/cloudflare-email-service",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "14ee8139443ace8ba82614f83eb750b2ac592e71da7dbffd9dc85789784e8036",
       "evidenceRefs": [
         "plugins/critical-thinking/skills/critical-thinking"
@@ -1752,6 +2106,49 @@
       ]
     },
     {
+      "contentDigest": "75b0d1b4b860ee657c37357a197f0f8f975a3c9679b294bd31ab3d545301e13a",
+      "evidenceRefs": [
+        "skills/dump-gate",
+        "distribution/manifests/dump-gate.json"
+      ],
+      "id": "skill.dump-gate",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/dump-gate",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a"
+      ],
+      "id": "skill.find-skills",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "vercel-labs/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/vercel-labs/skills/skills/find-skills",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "97d920812bc2e405614d8e59e804985e5795998c2c82e9e002e0d6c6361e54a2",
       "evidenceRefs": [
         "skills/goal-cycle"
@@ -1774,6 +2171,201 @@
       ]
     },
     {
+      "contentDigest": "c1c243afcd75c40cd0ae2fa9fd1c48d99bfad05f6b3b3b53496dfb9a5a10c16a",
+      "evidenceRefs": [
+        "skills/html-doc",
+        "distribution/manifests/html-doc.json"
+      ],
+      "id": "skill.html-doc",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "VENDOR_SPECIFIC",
+      "provenance": "local-authored:claude-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/html-doc",
+      "vendors": [
+        "claude-code"
+      ]
+    },
+    {
+      "contentDigest": "42dcbc2eeefc6eb8847ec40b7871bff2ccf516c4c952baa47b7938526e1603ac",
+      "evidenceRefs": [
+        "skills/master-orchestrator",
+        "distribution/manifests/master-orchestrator.json"
+      ],
+      "id": "skill.master-orchestrator",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/master-orchestrator",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "0d279b2c5fe2fb451c65bad80b7658fd80e2107b909974e116808f637aaf57d9",
+      "evidenceRefs": [
+        "skills/morning-merge-check",
+        "distribution/manifests/morning-merge-check.json"
+      ],
+      "id": "skill.morning-merge-check",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/morning-merge-check",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "0b70925afea2ef386bf999148a5a816047d008255a9cb6dcb5efc814c40f6bf2",
+      "evidenceRefs": [
+        "skills/notion-inbox-pickup",
+        "distribution/manifests/notion-inbox-pickup.json"
+      ],
+      "id": "skill.notion-inbox-pickup",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/notion-inbox-pickup",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "ec6de25da4c189483e049bf4bec8cee140e1b26f5bdba79560913666bea434db",
+      "evidenceRefs": [
+        "skills/overnight-vhk-auto",
+        "distribution/manifests/overnight-vhk-auto.json"
+      ],
+      "id": "skill.overnight-vhk-auto",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/overnight-vhk-auto",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "d4a0c9c03c624be099f344b24dab3e063ac91ba8cb2806158cb296297d457fe9",
+      "evidenceRefs": [
+        "skills/research-brief",
+        "distribution/manifests/research-brief.json"
+      ],
+      "id": "skill.research-brief",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/research-brief",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "a81613760e769912628c0f306dca0de8eb2d7ad40632c8897a5cba3a930de855",
+      "evidenceRefs": [
+        "skills/secret-pr-guard",
+        "distribution/manifests/secret-pr-guard.json"
+      ],
+      "id": "skill.secret-pr-guard",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/secret-pr-guard",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "fafadf8f5234a9dd6dc3ae44c24a794f379a8482ac3277efd645e1ae2f031ff1",
+      "evidenceRefs": [
+        "skills/session-card",
+        "distribution/manifests/session-card.json"
+      ],
+      "id": "skill.session-card",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/session-card",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "3277f22852ca1232ba8bb21e271f6ba0fd6868ab7eff7d6e1217ed4d6cacc6d0",
+      "evidenceRefs": [
+        "skills/source-command-routing-review",
+        "distribution/manifests/source-command-routing-review.json"
+      ],
+      "id": "skill.source-command-routing-review",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/source-command-routing-review",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "a7992bad34ea69a2c659f91f28a0935f990a4110dc62870ff0db1a8e4913c61f",
       "evidenceRefs": [
         "plugins/statusline/skills/setup-statusline"
@@ -1789,6 +2381,659 @@
       "sourcePath": "plugins/statusline/skills/setup-statusline",
       "vendors": [
         "claude-code"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-bounded-rationality",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-bounded-rationality",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-circle-of-competence",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-circle-of-competence",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-cynefin",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-cynefin",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-effectuation",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-effectuation",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-first-principles",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-first-principles",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-five-whys-plus",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-five-whys-plus",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-jobs-to-be-done",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-jobs-to-be-done",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-kepner-tregoe",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-kepner-tregoe",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-lindy-effect",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-lindy-effect",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-map-territory",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-map-territory",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-margin-of-safety",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-margin-of-safety",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-model-combination",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-model-combination",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-model-router",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-model-router",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-ooda",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-ooda",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-opportunity-cost",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-opportunity-cost",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-pre-mortem",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-pre-mortem",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-probabilistic",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-probabilistic",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-red-team",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-red-team",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-reversibility",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-reversibility",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-scientific-method",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-scientific-method",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-second-order",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-second-order",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-socratic",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-socratic",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-steel-manning",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-steel-manning",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-systems",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-systems",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-theory-of-constraints",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-theory-of-constraints",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-triz",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-triz",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ],
+      "id": "skill.thinking-via-negativa",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-via-negativa",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "6a8c06d1cf23fbddc860c3ff49e433527389fecb00d29af3953f3b3caf7e0028",
+      "evidenceRefs": [
+        "skills/thought-to-prompt",
+        "distribution/manifests/thought-to-prompt.json"
+      ],
+      "id": "skill.thought-to-prompt",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/thought-to-prompt",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": "657155ab91deebe05d5f14d00b2f9a0050cc2a6f6b603c1f6b0b5c2a76cef9b4",
+      "evidenceRefs": [
+        "skills/vhk-auto",
+        "distribution/manifests/vhk-auto.json"
+      ],
+      "id": "skill.vhk-auto",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/vhk-auto",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.web-perf",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/web-perf",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ],
+      "id": "skill.workers-best-practices",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/workers-best-practices",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
       ]
     },
     {
@@ -2287,6 +3532,28 @@
       ]
     },
     {
+      "contentDigest": "8b7680e831d77856534d0572b4f52fbbd60a185311755f0f0fd5c3052e77bb8f",
+      "evidenceRefs": [
+        "skills/yohan-start",
+        "distribution/manifests/yohan-start.json"
+      ],
+      "id": "skill.yohan-start",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "local-authored:agents-home",
+      "requiredEnv": [],
+      "sourcePath": "skills/yohan-start",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "27a89cf7b10fa3b2097efd51b4419c54a123061abeee94282600fe9353752bed",
       "evidenceRefs": [
         "plugins/workflow/skills/research-loop/report-template.html"
@@ -2309,9 +3576,9 @@
       ]
     }
   ],
-  "catalogDigest": "c7861ad40b9444ee24fe4be2cd8cd93280b6b779f066458c389bc25a3c8170ac",
+  "catalogDigest": "1991f4f0ac603c0bf439cb3525b10f32bfd43255a8b20a64476b18eaa65c8a07",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "e88cb4d7f2db24c8909223a5b2565ddbee125461f0c8239626ac18ed776e1d43",
+  "registryDigest": "1e379d0d107cccd0cf4d3eb015d3700fc70a5252c60eefe992d9a1d3d35595ad",
   "schemaVersion": 1
 }
