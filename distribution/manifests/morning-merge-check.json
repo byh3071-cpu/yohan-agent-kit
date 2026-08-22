@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "morning-merge-check",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  586,
+                      "sha256":  "37F435C1FD838EE8001BFFEE83680EE3261F500286BBA69E63D0CF3A8B7C3768"
+                  }
+              ],
+    "digest":  "B2C8FBD1F4971F366D42CDF399C3722EE459CB2AB4430E6A84BF4CA8386BF353"
+}

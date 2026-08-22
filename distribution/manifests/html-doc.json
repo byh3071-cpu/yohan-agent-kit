@@ -1,0 +1,22 @@
+{
+    "schemaVersion":  1,
+    "skill":  "html-doc",
+    "files":  [
+                  {
+                      "path":  "assets/base.css",
+                      "bytes":  6583,
+                      "sha256":  "7183D20AD72241EFEAFE2827D3D10A736E4A7DB7D88FDEB469AE428F583555CC"
+                  },
+                  {
+                      "path":  "assets/skeletons.md",
+                      "bytes":  3570,
+                      "sha256":  "E77B8360283702878F027867AE4A0BAA179F676F652AF0F56246130BC282014D"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  8128,
+                      "sha256":  "4CE488AC6C740F8967207043A501B1C3D426AF4EE8F31402CC6D78C0D5E0A45E"
+                  }
+              ],
+    "digest":  "49EFAF488D50EB431421216C8ACFD0DF82EC36F71BBF43A027187D01BEC6CED7"
+}

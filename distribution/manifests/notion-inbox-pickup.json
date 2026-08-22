@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "notion-inbox-pickup",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  1353,
+                      "sha256":  "42C1BD6BA83658C137ED88DB3EC36E28C6F0B8C4512E5B761D21F10C10033E9C"
+                  }
+              ],
+    "digest":  "B4804CC97A3499BD7D1A441B5596A3BA01F570D5C4296A6F3AC09E30427B21E6"
+}

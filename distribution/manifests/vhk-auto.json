@@ -1,0 +1,12 @@
+{
+    "schemaVersion":  1,
+    "skill":  "vhk-auto",
+    "files":  [
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  5632,
+                      "sha256":  "03422EF49689822B16E318649728C195402E1FCDA807FF9015F2801B106A6CA5"
+                  }
+              ],
+    "digest":  "17E73E1FFA0BEF66BFD91D8BCE0286F5F5CDF219D5A2977E9C94F3DBA2C0DE97"
+}
