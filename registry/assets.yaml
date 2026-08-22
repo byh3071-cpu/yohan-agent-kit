@@ -3758,6 +3758,27 @@
       "evidenceRefs": [
         "https://github.com/panniantong/agent-reach@93ae1d1"
       ]
+    },
+    {
+      "id": "skill.sandbox-stable",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/sandbox-stable",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
     }
   ]
 }
