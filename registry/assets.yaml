@@ -3835,6 +3835,46 @@
       "evidenceRefs": [
         "https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922"
       ]
+    },
+    {
+      "id": "agent.yohan-core.arch-generator",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/arch-generator.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/arch-generator.md"
+      ]
+    },
+    {
+      "id": "agent.yohan-core.arch-validator",
+      "kind": "agent",
+      "owner": "yohan-core",
+      "sourcePath": "plugins/yohan-core/agents/arch-validator.md",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/arch-validator.md"
+      ]
     }
   ]
 }
