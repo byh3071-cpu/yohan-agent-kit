@@ -4,7 +4,7 @@ Compose roles from the problem's uncertainty. Do not hardcode a model, vendor, o
 
 ## Required ownership
 
-- **Design conductor** — owns the user dialogue, context integrity, synthesis, gates, and final handoff.
+- **Design conductor** — owns the user dialogue including taste elicitation, context integrity, synthesis, gates, and final handoff. Only one role holds the director dialogue; parallel workers must not interview the director separately.
 - **Design director** — the user or named human who selects direction and approves acceptance.
 
 One agent may cover all other roles when the task is small. Add separation when independent evidence or critique improves the decision.
@@ -14,8 +14,9 @@ One agent may cover all other roles when the task is small. Add separation when 
 | Role | Add when | Primary output |
 | --- | --- | --- |
 | Context / product researcher | product intent, users, or current state is unclear | evidence-backed DesignContext |
+| Taste elicitor | the director's preferences are unrecorded, stale, or repeatedly missed by the work | confirmed taste rules and forbidden patterns per [taste-interview.md](taste-interview.md) |
 | UX / service designer | flows, roles, approvals, or failure recovery matter | journey, IA, state and boundary model |
-| Reference scout | the design space or pattern choice is uncertain | relevant, attributed pattern set |
+| Reference scout | the design space or pattern choice is uncertain | attributed candidate set answering stated questions, per [reference-intake.md](reference-intake.md) |
 | Visual designer | a visual target must be created | real direction boards and selected visual |
 | Content / information designer | dense, regulated, multilingual, or action-heavy content | hierarchy, terminology, content rules |
 | Domain specialist | safety, legal, medical, finance, hardware, spatial, or other expertise matters | domain constraints and risk review |

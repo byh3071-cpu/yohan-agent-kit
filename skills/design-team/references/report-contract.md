@@ -7,13 +7,14 @@ Use the smallest set of artifacts that preserves the decision. Use stable projec
 | Stage | Required artifact | Gate |
 | --- | --- | --- |
 | Discovery | DesignContext snapshot | material unknowns are explicit |
+| Taste elicitation | confirmed taste rules, forbidden patterns with observable tests, open axes | the director confirms each read-back statement |
 | Research / audit | evidence-backed findings and keep/merge/hide/defer/remove decisions | facts and inferences are separated |
 | Structure | outcome, IA/flow, state model, approval boundaries | core job is understandable without visual polish |
 | Exploration | exactly three real visual options when no visual is approved | human selects, combines, or rejects |
 | Selection | decision-log entry with rationale and rejected directions | human approval |
 | Specification | medium-appropriate visual, content, interaction, material, spatial, accessibility, and production rules | selected direction is producible |
 | Handoff | actual production environment, source/asset/vendor/operational boundaries, verification plan | production may begin |
-| Verification | same-medium and same-context comparison, adversarial review, residual risks | final human acceptance or named quality gate |
+| Verification | measured readings per the verification contract, forbidden-pattern scan, adversarial review, residual risks | final human acceptance or named quality gate |
 
 ## Research report
 

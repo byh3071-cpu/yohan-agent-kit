@@ -40,6 +40,7 @@ Maintain a readable DesignContext snapshot in the owner's approved documentation
 ## Surfaces, media, platforms, dimensions, and environmental context
 ## Current product state
 ## Existing design system and assets
+## Taste, forbidden patterns, and reference set
 ## Information and content contracts
 ## Technical and operational constraints
 ## Approval and safety boundaries
@@ -71,6 +72,49 @@ For each source record:
 - freshness or recheck condition.
 
 Never persist secrets, credentials, private raw customer data, hidden prompts, or unredacted configuration. Record only the minimum safe reference needed to re-resolve context.
+
+## Taste record
+
+This is the project's aesthetic memory. Without it the team restarts from a blank preference every session and produces work the design director rejects without being able to say why. Populate it through [taste-interview.md](taste-interview.md) and [reference-intake.md](reference-intake.md); never fill it from the team's own preferences.
+
+Record three kinds of entry.
+
+**Confirmed taste rule**
+
+```markdown
+- Rule: <plain-language rule>
+- Scope: <surfaces, media, or contexts it governs>
+- Origin: <axis comparison, adopted reference, or prior approved work>
+- Reason: <the director's words, or the team's derivation labeled Inferred>
+- Confirmed: <date and decider>
+- Confidence and revisit trigger:
+```
+
+**Forbidden pattern**
+
+```markdown
+- Pattern: <observable symptom>
+- Test: <how a reviewer detects it without the director present>
+- Why it fails here:
+- Scope:
+- Origin and date:
+```
+
+**Reference**
+
+```markdown
+- Item: <identifier and where the artifact lives>
+- Source, owner, retrieval date:
+- Question it answers:
+- What transfers: <mechanism, not adjective>
+- What blocks transfer:
+- Status: candidate | adopted | rejected | deferred — with reason
+- Rights and access class:
+```
+
+Also keep the open axes: comparisons not yet run, inferences the director has not confirmed, and conditional rules with their conditions. An unconfirmed inference must never be applied as if approved.
+
+Taste entries carry the same states as every other statement, including **Stale**. A reversal is evidence: mark the superseded entry, record what changed, and keep both.
 
 ## Decision log
 
