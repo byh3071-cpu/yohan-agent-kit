@@ -1,5 +1,5 @@
 {
-  "assetCount": 195,
+  "assetCount": 197,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -15,6 +15,48 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "plugins/critical-thinking/agents/skeptic.md",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "ddca991c873343bad578988592909814617ff552215d58bbe4698a431e1c9e03",
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/arch-generator.md"
+      ],
+      "id": "agent.yohan-core.arch-generator",
+      "kind": "agent",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-core",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "plugins/yohan-core/agents/arch-generator.md",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "2cec36c31bc55d99c447fe6a4ec08195f5442281cacc114a4ddff7b52f0b1c7c",
+      "evidenceRefs": [
+        "plugins/yohan-core/agents/arch-validator.md"
+      ],
+      "id": "agent.yohan-core.arch-validator",
+      "kind": "agent",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-core",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "plugins/yohan-core/agents/arch-validator.md",
       "vendors": [
         "claude-code",
         "codex",
@@ -4031,9 +4073,9 @@
       ]
     }
   ],
-  "catalogDigest": "05bb39d4415e295d0daaeda7b9deeb4e10ec843de7cfffb74c5e8e1b7f432be3",
+  "catalogDigest": "a054edb6b03d17bd26ec9d2cd15366afbf2cc83b1ec94c929357390a38b4fe4c",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "9e2832f1b4716076cc67395a34fc08928c1e607ce68a22ff24b3ab39ca3804f9",
+  "registryDigest": "b702d642b9e6db70e1eaf9bccf368fb72791b3e2660a6029f23f88bf979a7aa4",
   "schemaVersion": 1
 }
