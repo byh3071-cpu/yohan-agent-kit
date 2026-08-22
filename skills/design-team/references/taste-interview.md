@@ -50,6 +50,20 @@ Prefer source 3 for axes where the project's own content changes the answer, suc
 
 Match the candidate's fidelity to the axis. Do not ask about color from a grayscale sketch, or about density from a screenshot holding a different amount of content.
 
+## The candidate itself must clear the bar
+
+A comparison is only as good as the artifacts in it. If the candidates are cruder than what the project already ships, the director is choosing between two failures and the answer is noise.
+
+Before showing any pair, check the candidates against the same standards the final work must meet:
+
+- every recorded forbidden pattern — scan the candidates, not just the finished artifact;
+- the project's existing quality floor — if the live product already handles spacing, hierarchy, or state better than your candidate does, the candidate is not ready;
+- construction discipline — spacing and sizing drawn from a declared scale, not hand-entered values.
+
+When you cannot build candidates that clear this bar, do not lower the bar. Use real artifacts from source 1 or 2 instead, and say plainly that fabricated candidates were not good enough to ask from.
+
+Borrow proven skeletons rather than inventing layout for each comparison. Extracting rules from a reference and then designing the arrangement yourself discards the part that took the original team the longest.
+
 ## Step 3 — present pairs
 
 - Two candidates per axis, shown together, never sequentially from memory.
@@ -59,6 +73,48 @@ Match the candidate's fidelity to the axis. Do not ask about color from a graysc
 - Accept four answers: A, B, neither, or conditional. Record a conditional as a rule with its condition, not as a failure.
 - Do not lead, do not disclose which candidate the team prefers, and do not explain a candidate's virtues before the choice.
 - When the director volunteers a reason, capture the exact wording. Do not paraphrase it into design vocabulary.
+
+## Building the comparison sheet
+
+Whatever carries the comparison — a document, a board, a printed set, a screen — is itself an artifact and follows the same rules as any other deliverable.
+
+- Use the authoring skills, templates, and asset libraries the runtime and the project already provide. Hand-rolling the sheet each time reintroduces every mistake those tools exist to prevent, and it is how house rules get skipped.
+- Choose the form by what is being compared. Comparing a screen means the sheet frames real screens at real size; comparing a physical piece means the sheet is physical or shows physical proofs.
+- **Give the choices a way back.** A sheet the director can mark but that returns nothing to the team is a dead end — the choices are lost and the same questions get asked again. Whatever the medium, end with a form the director can hand back: a copyable summary, a returned sheet, a recorded decision. Verify the return path works before sending it, not after.
+- Keep the sheet's own styling out of the way. It should not compete with the candidates it is presenting.
+
+## When both options are rejected
+
+"Neither" is not a failed question. It means the axis was framed wrong — both candidates shared an assumption the director does not accept, and that shared assumption is the real finding.
+
+Do not re-ask the same axis with new decoration. Instead:
+
+1. Name what the two rejected options had in common. That is the hidden assumption.
+2. Build the next pair so one side breaks it.
+3. Say out loud which assumption you are testing, so the director can correct the framing itself.
+
+Two rejections on the same axis after reframing means the axis does not belong in this project. Record it as out of scope and move on.
+
+## Deciding what to remove
+
+Contrast comes from killing things, not from arranging them. A team that does not know which elements matter least will weight everything evenly, and evenly weighted screens read as flat no matter how well constructed.
+
+When the outcome is an existing surface being reduced, run a removal pass before any visual work:
+
+1. List every element currently on the surface — every counter, badge, panel, and control, not just the sections.
+2. Have the director sort them: **used constantly / used occasionally / never used**.
+3. Force one more answer: if only one element could stay, which one.
+4. Everything in "never used" leaves the surface. Everything in "occasionally" moves behind a fold, a tab, or a detail view.
+
+This is a sorting task, not a design discussion — it takes minutes and it replaces guesswork about importance with the director's own ranking. Without it, the team is choosing what to emphasize by intuition, which is exactly the thing this skill exists to prevent.
+
+## When the purpose is unclear
+
+If the surface's job cannot be stated in one sentence, visual options will differ only in arrangement and all of them will feel wrong. That is a symptom of an undefined outcome, not of weak visual work.
+
+Stop and settle the purpose first. Offer competing purposes rather than competing styles: build each option around a different answer to "what is this surface for", and make the difference in *what is present*, not in how it is decorated. Choosing an option then settles the product definition, and what to remove follows from it.
+
+Check the project's own stated intent before proposing purposes. A documented purpose that contradicts the live implementation is itself the finding, and the director needs to see that contradiction rather than a synthesis of both.
 
 ## Step 4 — read back and confirm
 

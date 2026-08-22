@@ -34,7 +34,7 @@ For a faithful reproduction or an already approved source, match that source. Fo
 1. **Frame** — write or refresh the project DesignContext and cite evidence with freshness.
 2. **Elicit** — resolve or establish the taste model with the design director. Show real candidates and let the director choose; do not ask for style in words. Read the choices back as explicit rules and get them confirmed.
 3. **Gather** — collect references against stated project questions under [reference-intake.md](references/reference-intake.md), and use authoritative primary sources for standards. Collect rejected work with equal rigor. Label facts, inferences, and proposals.
-4. **Reduce** — decide what to keep, merge, hide, defer, or remove before adding new design elements.
+4. **Reduce** — decide what to keep, merge, hide, defer, or remove before adding new design elements. For an existing surface, have the director rank what is used constantly, occasionally, and never; contrast comes from removing, and a team that guesses at importance weights everything evenly.
 5. **Structure** — define the core job, hierarchy, flow, state model, and approval boundaries.
 6. **Visualize** — create the required artifact at its real viewport, print size, physical scale, or environmental context with realistic content and materials. Check it against the recorded forbidden patterns before showing it.
 7. **Select** — record the user's chosen, rejected, or deferred direction and why. The team does not self-approve.
@@ -48,7 +48,10 @@ For a faithful reproduction or an already approved source, match that source. Fo
 - The user decides visual direction, density, layout, interaction, and final acceptance.
 - Do not begin production implementation before visual selection unless the user has supplied an already approved target.
 - Do not create visual directions against an empty or stale taste record. Run the taste pass first, or say plainly that directions are being produced without a taste model and that rejection is the expected outcome.
+- Do not create visual directions before references have been gathered against stated questions. A project holding one reference produces work anchored to that single accident; widening the evidence is cheaper than another rejected round.
+- Do not produce visual options when the surface's job cannot be stated in one sentence. Offer competing purposes instead, differing in what is present rather than in styling.
 - Do not present taste inferences the director has not confirmed as if they were approved rules.
+- Apply the forbidden-pattern scan to the team's own comparison sheets and candidates, not only to final artifacts.
 - Do not create a supposedly independent top-level design session as a child worker. Use a separate approved worktree/session and leave a project-owned handoff.
 - Follow local concurrency, worktree, write, privacy, cost, deployment, and release rules.
 - Do not transmit private assets or source material to an external provider without authorization.

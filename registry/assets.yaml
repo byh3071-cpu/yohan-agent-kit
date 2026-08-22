@@ -3450,6 +3450,28 @@
       ]
     },
     {
+      "id": "script.check-goal-13",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-13.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/13-design-team-elicitation-hardening.md",
+        "scripts/check-goal-13.mjs"
+      ]
+    },
+    {
       "id": "script.get-agent-asset-drift",
       "kind": "script",
       "owner": "yohan-agent-kit",

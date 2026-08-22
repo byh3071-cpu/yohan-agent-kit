@@ -68,6 +68,10 @@ Run the project's recorded forbidden patterns as an explicit checklist before hu
 
 This scan is the main defense against work that satisfies every functional requirement and still reads as generic. Run it on the direction board, not only on the final artifact — a generic direction cannot be rescued in production.
 
+**Everything the team shows the director is in scope**, including comparison sheets, elicitation candidates, mockups, and throwaway examples. The team's own working artifacts are where recorded anti-patterns reappear most easily, because they feel too temporary to check. A rejected pattern that shows up in the next thing the director sees costs more trust than the original mistake.
+
+**Calibrate each observable test against the artifact that was actually rejected.** Write the test, run it on the rejected artifact, and confirm it fails. A test derived from the description of a rejection rather than the rejection itself will usually mis-fire — either flagging acceptable work or missing the real thing. Expect to revise the test more than once; a test that has never produced a failure has not been calibrated at all.
+
 ## Adversarial review
 
 After measurement passes, run an independent critique that tries to defeat the work rather than confirm it: the state nobody built, the longest real name, the slowest connection, the smallest supported size, the colorblind reader, the operator under time pressure, the second language.

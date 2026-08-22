@@ -102,7 +102,7 @@ const walk = (directory) => {
 walk(skillRoot)
 const machineSpecific = /(?:[A-Za-z]:[\\/]|\\\\|file:\/\/|Users[\\/])/u
 gate('no machine-specific paths', skillFiles.every((path) => !machineSpecific.test(readFileSync(path, 'utf8'))))
-gate('no product or fixed-model coupling', skillFiles.every((path) => !/(?:yohan-control-tower|MOVA|\bGPT-5\.6\b|\bLuna\b|\bSol\b|\bTerra\b|lazyweb)/iu.test(readFileSync(path, 'utf8'))))
+gate('no product or fixed-model coupling', skillFiles.every((path) => !/(?:yohan-control-tower|\bMOVA\b|\bGPT-5\.6\b|\bLuna\b|\bSol\b|\bTerra\b|lazyweb)/iu.test(readFileSync(path, 'utf8'))))
 gate('no hardcoded aesthetic preference', skillFiles.every((path) => !/(?:use\s+(?:a\s+)?(?:dark|light)\s+theme|prefer\s+(?:sans-serif|serif)|brand\s+color\s+is)/iu.test(readFileSync(path, 'utf8'))))
 
 try {
