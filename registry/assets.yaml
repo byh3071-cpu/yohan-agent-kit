@@ -2464,6 +2464,646 @@
         "skills/html-doc",
         "distribution/manifests/html-doc.json"
       ]
+    },
+    {
+      "id": "skill.agents-sdk",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/agents-sdk",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.cloudflare-email-service",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/cloudflare-email-service",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.find-skills",
+      "kind": "skill",
+      "owner": "vercel-labs/skills",
+      "sourcePath": "external://github.com/vercel-labs/skills/skills/find-skills",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a"
+      ]
+    },
+    {
+      "id": "skill.thinking-bounded-rationality",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-bounded-rationality",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-circle-of-competence",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-circle-of-competence",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-cynefin",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-cynefin",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-effectuation",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-effectuation",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-first-principles",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-first-principles",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-five-whys-plus",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-five-whys-plus",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-jobs-to-be-done",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-jobs-to-be-done",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-kepner-tregoe",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-kepner-tregoe",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-lindy-effect",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-lindy-effect",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-map-territory",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-map-territory",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-margin-of-safety",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-margin-of-safety",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-model-combination",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-model-combination",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-model-router",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-model-router",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-ooda",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-ooda",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-opportunity-cost",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-opportunity-cost",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-pre-mortem",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-pre-mortem",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-probabilistic",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-probabilistic",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-red-team",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-red-team",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-reversibility",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-reversibility",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-scientific-method",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-scientific-method",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-second-order",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-second-order",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-socratic",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-socratic",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-steel-manning",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-steel-manning",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-systems",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-systems",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-theory-of-constraints",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-theory-of-constraints",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-triz",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-triz",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.thinking-via-negativa",
+      "kind": "skill",
+      "owner": "tjboudreaux/cc-thinking-skills",
+      "sourcePath": "external://github.com/tjboudreaux/cc-thinking-skills/skills/thinking-via-negativa",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/tjboudreaux/cc-thinking-skills@7b8fece345dfaa11773be7152ccd194589cb5437"
+      ]
+    },
+    {
+      "id": "skill.web-perf",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/web-perf",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.workers-best-practices",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/workers-best-practices",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
     }
   ]
 }

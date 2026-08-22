@@ -44,6 +44,19 @@ powershell -NoProfile -NonInteractive -File scripts\Get-AgentAssetDrift.ps1 -New
 
 `-NewOnly`는 기준선에 없는 신규만 보고한다. 기준선은 `~/.yohan-agent-kit/asset-drift-baseline.json`이며 `-UpdateBaseline`을 명시할 때만 갱신된다(유일한 쓰기 동작). `-OutputFormat Hook`은 Claude Code 훅 계약에 맞춘 JSON을 내보내며 신규가 없으면 조용히 통과한다. 탐지된 자산을 정본으로 올리는 경로는 [노하우 Intake](docs/AGENT_KIT_INTAKE.md)를 따르고, 승격 상한은 `reviewed`다.
 
+### 외부 스킬 복원
+
+남이 만든 스킬은 파일을 정본으로 복사하지 않는다. 원본 저장소가 정본이고 킷은 **출처·커밋·라이선스만** `registry/assets.yaml`에 `external://` 자산으로 기록한다. 업스트림 갱신 경로를 끊지 않기 위해서다. 새 머신에서는 레지스트리를 읽어 재설치한다.
+
+```powershell
+powershell -NoProfile -NonInteractive -File scripts\Restore-ExternalSkills.ps1
+powershell -NoProfile -NonInteractive -File scripts\Restore-ExternalSkills.ps1 -ApproveInstall
+```
+
+인자 없이 실행하면 출처 저장소별로 묶은 설치 계획만 출력하고 exit code 2를 반환한다(읽기 전용). 실제 설치는 `-ApproveInstall`을 명시할 때만 수행한다. 목록은 하드코딩하지 않고 레지스트리에서 만들므로 등록이 늘면 복원 범위도 함께 늘어난다. `-Owner`로 한 저장소만, `-Agent`로 대상 에이전트를 좁힐 수 있다(기본 `claude-code`).
+
+설치되는 내용은 각 저장소의 **현재 기본 브랜치**이며 레지스트리에 적힌 SHA로 고정되지 않는다. SHA는 등록 시점에 대조한 기록이므로, 업스트림이 바뀌었는지 확인할 좌표로 쓴다.
+
 SessionEnd 훅의 timeout 상한은 다음 읽기 전용 검사로 확인한다. 인자를 생략하면 yohan-core의 hooks.json을 검사하며, 명시 파일은 **-Path**, 여러 플러그인을 찾을 루트는 **-RecursePath**에 전달한다. 재귀 검사는 reparse point를 따라가지 않고 이름이 hooks.json인 파일만 읽는다.
 
 ```powershell
