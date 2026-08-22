@@ -117,6 +117,27 @@
       ]
     },
     {
+      "id": "manifest.design-team",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/design-team.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/design-team.json"
+      ]
+    },
+    {
       "id": "manifest.goal-cycle",
       "kind": "manifest",
       "owner": "yohan-agent-kit",
@@ -245,6 +266,28 @@
       "requiredEnv": [],
       "evidenceRefs": [
         "skills/design-to-html"
+      ]
+    },
+    {
+      "id": "skill.design-team",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/design-team",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/design-team",
+        "docs/audits/design-team-skill-2026-08-22.md"
       ]
     },
     {
@@ -3360,6 +3403,28 @@
       "requiredEnv": [],
       "evidenceRefs": [
         "distribution/manifests/yohan-start.json"
+      ]
+    },
+    {
+      "id": "script.check-goal-11",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-11.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/11-design-team.md",
+        "scripts/check-goal-11.mjs"
       ]
     },
     {

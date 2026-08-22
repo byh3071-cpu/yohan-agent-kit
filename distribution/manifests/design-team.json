@@ -1,0 +1,32 @@
+{
+    "schemaVersion":  1,
+    "skill":  "design-team",
+    "files":  [
+                  {
+                      "path":  "agents/openai.yaml",
+                      "bytes":  366,
+                      "sha256":  "62AA46734D5FD1CEC0B8619A3F8AFC2352B8CFCEEF3487B9EEF39E88BE1B6DE0"
+                  },
+                  {
+                      "path":  "references/context-contract.md",
+                      "bytes":  4541,
+                      "sha256":  "0F55D44710AD26A3714AD98A611E902F43D45BE981497B8EF728BBA00265F3BE"
+                  },
+                  {
+                      "path":  "references/report-contract.md",
+                      "bytes":  4592,
+                      "sha256":  "953CD380D1B4A1DBAF72EF63164E68FD3CF07C761BC8539A5B6763567A66C585"
+                  },
+                  {
+                      "path":  "references/team-contract.md",
+                      "bytes":  4000,
+                      "sha256":  "FB704DE5F90146F190BD4A4278C302851E1FA3E207441C87514FC47F22886B16"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  5843,
+                      "sha256":  "3ECFFC84C5482A6609629907C1CBD61803704760E61B03DA1EC0AC33ABF5999C"
+                  }
+              ],
+    "digest":  "087837A6F1338F91D3C968F962570EDBCA205A4396C81D07E250DA6D1510B058"
+}

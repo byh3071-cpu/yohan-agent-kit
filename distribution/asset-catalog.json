@@ -1,5 +1,5 @@
 {
-  "assetCount": 197,
+  "assetCount": 200,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -723,6 +723,28 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "distribution/manifests/adr-cycle.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "95b3bc81b31402a571a0dd298ec3c307bddc09175e5f32d026b1be7483247793",
+      "evidenceRefs": [
+        "distribution/manifests/design-team.json"
+      ],
+      "id": "manifest.design-team",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/design-team.json",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -1573,6 +1595,29 @@
       ]
     },
     {
+      "contentDigest": "3c3959639a3d96f3e82d27e8843003ce330fc1b7d7c2d20fc272d1c44b07d231",
+      "evidenceRefs": [
+        "goals/11-design-team.md",
+        "scripts/check-goal-11.mjs"
+      ],
+      "id": "script.check-goal-11",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-11.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
@@ -1806,7 +1851,7 @@
       ]
     },
     {
-      "contentDigest": "58c4c19b477a367b64c4d4ebef1431e0ac1db26796ef13a2e158eb58572323ac",
+      "contentDigest": "e33be9b40ed5a3e724b7b15924c41c127eb09d0669c06b64c0d71ca624609c71",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -2311,6 +2356,29 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "plugins/critical-thinking/skills/critical-thinking",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "46a5bd2264761160015d82c6eb80901f9a3b627886d80d1e70698a6f17a91103",
+      "evidenceRefs": [
+        "skills/design-team",
+        "docs/audits/design-team-skill-2026-08-22.md"
+      ],
+      "id": "skill.design-team",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "skills/design-team",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -4073,9 +4141,9 @@
       ]
     }
   ],
-  "catalogDigest": "a054edb6b03d17bd26ec9d2cd15366afbf2cc83b1ec94c929357390a38b4fe4c",
+  "catalogDigest": "abf04977d2c47fa36371179bd5d7106785f6c93d547456a52ee364482af3719d",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "b702d642b9e6db70e1eaf9bccf368fb72791b3e2660a6029f23f88bf979a7aa4",
+  "registryDigest": "26b50c49e71d8283e0201b5ca324e8e3a53693126daa53f7d2ce2d9b59062139",
   "schemaVersion": 1
 }

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Design Team"
+  short_description: "프로젝트 맥락을 기억하며 디자인팀을 동적으로 운영합니다"
+  default_prompt: "이 프로젝트를 $design-team으로 먼저 파악하고, 필요한 역할만 구성해 조사·시안·선택·명세·인수인계를 진행해 주세요."
+policy:
+  allow_implicit_invocation: true
