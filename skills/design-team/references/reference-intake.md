@@ -40,6 +40,19 @@ Record what transfers at the level of a mechanism, not an adjective. "Groups by 
 
 Rejected references stay in the record with their reason. A rejection prevents the same candidate returning next session and is direct evidence of taste.
 
+## Take the structure, not only the rules
+
+Extracting a list of rules from a reference and then arranging the result yourself throws away the part that took the original team longest to get right. Rules describe what a design avoids; the skeleton is what makes it read.
+
+For an adopted reference, capture both:
+
+- **the rule** — what it does and why it transfers;
+- **the skeleton** — the actual arrangement: what occupies the most space, what the size ratio between the largest and smallest element is, where the eye is meant to land first, what is deliberately left empty, and what sits below the fold.
+
+Reproduce the skeleton with the project's own content before adjusting anything. If the result looks wrong with real data, that is a finding about the project's content, not a license to redesign the arrangement from scratch.
+
+A design that satisfies every extracted rule and still reads as flat is the signature of rules taken without structure.
+
 ## Step 4 — human adoption gate
 
 Candidates become adopted taste evidence only by the design director's explicit selection. The team may recommend and must show the reasoning, but never promotes its own recommendation.
@@ -51,6 +64,8 @@ Present candidates for adoption in comparable groups tied to the question they a
 Collect rejected work with the same rigor as admired work, from the same ranked sources. For each, record the observable symptom, why it fails for this project, and its scope. An anti-pattern that cannot be tested by a reviewer without the director present is not finished.
 
 Anti-patterns are the cheapest quality gate the project will ever own, because they are checkable before anything is produced.
+
+**An empty forbidden list makes the scan a no-op.** A project with no recorded anti-patterns will pass every forbidden-pattern check while producing exactly the work the director keeps rejecting. Populate the list in the first session — the fastest source is the director's own rejections during taste elicitation, which cost nothing extra to collect. Until it holds at least the patterns the director has already rejected out loud, treat the scan as unrun and say so rather than reporting a pass.
 
 ## Volume and stopping
 

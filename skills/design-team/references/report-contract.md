@@ -8,7 +8,8 @@ Use the smallest set of artifacts that preserves the decision. Use stable projec
 | --- | --- | --- |
 | Discovery | DesignContext snapshot | material unknowns are explicit |
 | Taste elicitation | confirmed taste rules, forbidden patterns with observable tests, open axes | the director confirms each read-back statement |
-| Research / audit | evidence-backed findings and keep/merge/hide/defer/remove decisions | facts and inferences are separated |
+| Research / audit | evidence-backed findings, adopted skeletons, and keep/merge/hide/defer/remove decisions | facts and inferences are separated |
+| Reduction (existing surface) | element inventory ranked by the director as used constantly / occasionally / never | removals are the director's ranking, not the team's guess |
 | Structure | outcome, IA/flow, state model, approval boundaries | core job is understandable without visual polish |
 | Exploration | exactly three real visual options when no visual is approved | human selects, combines, or rejects |
 | Selection | decision-log entry with rationale and rejected directions | human approval |

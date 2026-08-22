@@ -63,6 +63,9 @@ For regulated or safety-critical work, add the qualified approver your quality s
 | Two direction sets rejected in a row | the taste model is wrong, not the execution | re-run the axes that keep being missed |
 | Options differ only in color | the axes were not materially distinct | send back; the options must differ in structure, hierarchy, or density |
 | "It passed verification but looks bad" | the checks measured compliance, not the forbidden patterns | add what you are seeing as a forbidden pattern with an observable test |
+| Nothing stands out — everything looks equally important | the team never learned what matters least, so it weighted everything evenly | rank the elements yourself: used constantly / occasionally / never. Contrast comes from removing |
+| "Nice, but what is this screen even for?" | the surface's job was never stated, so the options differ only in arrangement | ask for competing purposes instead of competing styles |
+| You made choices and get asked the same questions again | the comparison sheet had no way to return your answers | the sheet must end with something you can hand back |
 | Every session restarts from zero | the record is not being written or read | check the project's context snapshot is being updated at close |
 | Too many questions | axis cap ignored | say stop; remaining axes carry to a later session |
 
