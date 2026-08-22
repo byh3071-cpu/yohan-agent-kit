@@ -33,6 +33,17 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 -Mode Check -Sk
 
 Check는 사용자 홈과 Git index를 바꾸지 않는다. `Installable`이면 exit code 2와 `PlanDigest`를, 충돌이면 exit code 3과 다른 상대 경로를 반환한다. 중단된 Install은 반환된 exact `BackupId`로 복구 계획을 다시 만들 수 있다. 실제 Install·Restore는 사용자 홈 쓰기이므로 실행 직전 별도 사람 승인이 필요하다.
 
+### 정본 밖 자산 탐지
+
+사용자 홈(`.agents`·`.claude`·`.codex`·`.cursor`)에 설치됐지만 `registry/assets.yaml`에 없는 스킬을 찾는다. 읽기 전용이며 미등록이 있으면 exit code 2를 반환한다.
+
+```powershell
+powershell -NoProfile -NonInteractive -File scripts\Get-AgentAssetDrift.ps1
+powershell -NoProfile -NonInteractive -File scripts\Get-AgentAssetDrift.ps1 -NewOnly
+```
+
+`-NewOnly`는 기준선에 없는 신규만 보고한다. 기준선은 `~/.yohan-agent-kit/asset-drift-baseline.json`이며 `-UpdateBaseline`을 명시할 때만 갱신된다(유일한 쓰기 동작). `-OutputFormat Hook`은 Claude Code 훅 계약에 맞춘 JSON을 내보내며 신규가 없으면 조용히 통과한다. 탐지된 자산을 정본으로 올리는 경로는 [노하우 Intake](docs/AGENT_KIT_INTAKE.md)를 따르고, 승격 상한은 `reviewed`다.
+
 SessionEnd 훅의 timeout 상한은 다음 읽기 전용 검사로 확인한다. 인자를 생략하면 yohan-core의 hooks.json을 검사하며, 명시 파일은 **-Path**, 여러 플러그인을 찾을 루트는 **-RecursePath**에 전달한다. 재귀 검사는 reparse point를 따라가지 않고 이름이 hooks.json인 파일만 읽는다.
 
 ```powershell
