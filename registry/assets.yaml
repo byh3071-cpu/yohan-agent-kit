@@ -3428,6 +3428,28 @@
       ]
     },
     {
+      "id": "script.check-goal-12",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-12.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/12-design-team-taste-workflow.md",
+        "scripts/check-goal-12.mjs"
+      ]
+    },
+    {
       "id": "script.get-agent-asset-drift",
       "kind": "script",
       "owner": "yohan-agent-kit",
