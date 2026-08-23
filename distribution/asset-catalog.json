@@ -1,5 +1,5 @@
 {
-  "assetCount": 203,
+  "assetCount": 210,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -732,7 +732,7 @@
       ]
     },
     {
-      "contentDigest": "39f44e2b5fb68fff4a5dc825e42d0c9c074e19044840b95d80b9572239756b48",
+      "contentDigest": "eea86772cb8b18afa6d5a6e2a1a8541ea98cdeeeb4c2d5dcb4d72f3f73187888",
       "evidenceRefs": [
         "distribution/manifests/design-team.json"
       ],
@@ -960,6 +960,50 @@
       ]
     },
     {
+      "contentDigest": "0d1157d987b532d3a2c1076a12706e2ae1b3799548c3ebafac6dad133057557a",
+      "evidenceRefs": [
+        "distribution/manifests/restart-safe-handoff.json"
+      ],
+      "id": "manifest.restart-safe-handoff",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/restart-safe-handoff.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "440ff0e90695f079c308a07e5ed27f136641b96f545c9f165d7b5e59c1a2845f",
+      "evidenceRefs": [
+        "distribution/manifests/runtime-incident-investigator.json"
+      ],
+      "id": "manifest.runtime-incident-investigator",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/runtime-incident-investigator.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "ba3141b2a54eb7ad6ef68921e2ea58552c8881d9fc511997650b8acb49c26fc4",
       "evidenceRefs": [
         "distribution/manifests/secret-pr-guard.json"
@@ -1020,6 +1064,28 @@
         "claude-code",
         "codex",
         "cursor"
+      ]
+    },
+    {
+      "contentDigest": "af8aad88ed8155d386b661d08d81c6ac45c70af5d4da4acd425bdf9138e10859",
+      "evidenceRefs": [
+        "distribution/manifests/supervised-session-conductor.json"
+      ],
+      "id": "manifest.supervised-session-conductor",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/supervised-session-conductor.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
       ]
     },
     {
@@ -1688,6 +1754,30 @@
       ]
     },
     {
+      "contentDigest": "cd2e547370ca92fe3a105e86bc2ec00f69617a60bb6fd6e8c8140a51ed964c5a",
+      "evidenceRefs": [
+        "goals/15-session-operations-skills.md",
+        "docs/audits/session-operations-skills-2026-08-23.md",
+        "scripts/check-goal-15.mjs"
+      ],
+      "id": "script.check-goal-15",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-15.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
@@ -1921,7 +2011,7 @@
       ]
     },
     {
-      "contentDigest": "e33be9b40ed5a3e724b7b15924c41c127eb09d0669c06b64c0d71ca624609c71",
+      "contentDigest": "befeba259ede8301cfbafb0af0b764de5f5c576df86295f949d8dad92775fa48",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -2435,7 +2525,7 @@
       ]
     },
     {
-      "contentDigest": "e54e4f3c50c455186d87c39e5a8f2d03b74ae2984c9684dc3c7cd9ec61cbc4d5",
+      "contentDigest": "6a9e29f73e40107b075f8dce0c5f280256142bcad09b45d5276b647558d14d06",
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
@@ -2803,6 +2893,52 @@
       ]
     },
     {
+      "contentDigest": "5fc4b80a436c7e94b50bf6e9aa40835ea86727567b439189cbcea77bae0f988e",
+      "evidenceRefs": [
+        "skills/restart-safe-handoff",
+        "docs/audits/session-operations-skills-2026-08-23.md"
+      ],
+      "id": "skill.restart-safe-handoff",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "skills/restart-safe-handoff",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "08c6c8dfd7a5a1b49c3cce7c2c54a6901d5f046042139642b881d43a64e6dd8a",
+      "evidenceRefs": [
+        "skills/runtime-incident-investigator",
+        "docs/audits/session-operations-skills-2026-08-23.md"
+      ],
+      "id": "skill.runtime-incident-investigator",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "skills/runtime-incident-investigator",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": null,
       "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
@@ -2922,6 +3058,29 @@
       "provenance": "external:https://github.com/johnlindquist/claude@eb37d88",
       "requiredEnv": [],
       "sourcePath": "external://github.com/johnlindquist/claude/skills/stuck",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "e374fa4f14057a457bedadaf3014bcc102f0b2c879124a23d681d6b5a1def442",
+      "evidenceRefs": [
+        "skills/supervised-session-conductor",
+        "docs/audits/session-operations-skills-2026-08-23.md"
+      ],
+      "id": "skill.supervised-session-conductor",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "skills/supervised-session-conductor",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -4211,9 +4370,9 @@
       ]
     }
   ],
-  "catalogDigest": "03b90bb3ed4627971b6d48f90f5e9aa6475e11ecc8e8b4374e6bf707a5b8727f",
+  "catalogDigest": "ce9a161b6386fa7d0c1d180aa5969939a1c3d0337ab1e112ca52feab18adc23b",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "c7b77e156147215a1f8b2ba27a9c55358ac71c307f09963aa866c0f43509c43d",
+  "registryDigest": "419552fe8c8c6c8fcc988de55a6dd7125e6311a4779c219f3b1b2ffc0cd1367c",
   "schemaVersion": 1
 }

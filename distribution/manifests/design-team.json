@@ -29,8 +29,8 @@
                   },
                   {
                       "path":  "references/session-continuity.md",
-                      "bytes":  7028,
-                      "sha256":  "5175639FD3A5750D6E4BDA5FE138D1D1856F1E0209F20D6998D57C59B0F4FC19"
+                      "bytes":  7487,
+                      "sha256":  "7D553BB8694D8A571BFB13FD37243CA5D553F92D82B0BB50714EB982E59A457A"
                   },
                   {
                       "path":  "references/taste-interview.md",
@@ -53,5 +53,5 @@
                       "sha256":  "96F11839A5CE2F9C6E72A7F80E72F3D616537B5AC455904D9583AE3E7CCB776A"
                   }
               ],
-    "digest":  "C3B3059048BA63AC471E22F8E7817D04D4DF324E567511311CDC106900B09265"
+    "digest":  "68A4937B956ADDACE7B47A3C0782D886FF8F1A0938B961645048351C6733787C"
 }

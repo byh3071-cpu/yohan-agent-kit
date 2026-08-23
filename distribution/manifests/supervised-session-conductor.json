@@ -1,0 +1,22 @@
+{
+    "schemaVersion":  1,
+    "skill":  "supervised-session-conductor",
+    "files":  [
+                  {
+                      "path":  "agents/openai.yaml",
+                      "bytes":  370,
+                      "sha256":  "FF7FF28139A7CA2138A326FB7684361075EA2D48ECDE55B2614E1A2F5F8D70BD"
+                  },
+                  {
+                      "path":  "references/operating-manual.md",
+                      "bytes":  5890,
+                      "sha256":  "B0B66F5F75AF3AB331F1787632E631C69F2087A1D79C09E86115B0BD3495D4E8"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  4145,
+                      "sha256":  "0D198A750B56539A83326FC81DD75D329381C5AF231E1FDD9E548BBC63F0188D"
+                  }
+              ],
+    "digest":  "D9DA0572568C2D1E808212A26904713E922494DB68DD3E4AFB972101E842FF25"
+}
