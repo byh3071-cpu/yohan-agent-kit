@@ -489,7 +489,7 @@ function Assert-UniqueJsonObjectKeys {
     $python = Get-Command python.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1
     $helper = Join-Path $PSScriptRoot 'Assert-UniqueJsonKeys.py'
     if (-not [IO.File]::Exists($helper)) { throw 'Strict JSON key helper is missing' }
-    $arguments = @('-I', '"' + $helper.Replace('"', '\"') + '"')
+    $arguments = @('-I', ('"' + $helper.Replace('"', '\"') + '"'))
     if ($JsonLines) { $arguments += '--json-lines' }
     $start = New-Object Diagnostics.ProcessStartInfo
     $start.FileName = [string]$python.Source
