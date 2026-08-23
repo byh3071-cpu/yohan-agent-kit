@@ -3,12 +3,13 @@ vhk_format: 1
 type: goal
 id: 15
 title: 범용 세션 감독·재시작 인수인계·런타임 사고 조사
-status: IN_PROGRESS
+status: DONE
 priority: P0
 size: L
 execution_provider: native-approved
 automatic_fallback: false
 started: 2026-08-23
+completed: 2026-08-23
 ---
 
 # Goal 15: 범용 세션 감독·재시작 인수인계·런타임 사고 조사
