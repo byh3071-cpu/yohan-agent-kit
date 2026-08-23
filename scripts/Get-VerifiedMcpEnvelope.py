@@ -31,13 +31,19 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--mcp-root", required=True)
     parser.add_argument("--brain-root", required=True)
-    parser.add_argument("--query", required=True)
     return parser.parse_args()
 
 
-async def run(args: argparse.Namespace) -> dict:
-    mcp_root = Path(args.mcp_root).resolve()
-    brain_root = Path(args.brain_root).resolve()
+def read_query() -> str:
+    query = sys.stdin.buffer.read().decode("utf-8-sig")
+    if not query or "\0" in query:
+        raise ValueError("query stdin is empty or invalid")
+    return query
+
+
+async def retrieve(args: argparse.Namespace, query: str) -> dict:
+    mcp_root = Path(args.mcp_root).resolve(strict=True)
+    brain_root = Path(args.brain_root).resolve(strict=True)
     environment = {
         name: os.environ[name]
         for name in SAFE_CHILD_ENVIRONMENT
@@ -45,6 +51,8 @@ async def run(args: argparse.Namespace) -> dict:
     }
     environment.update(
         {
+            # The prefix has a regular file as an ancestor, so no pre-existing
+            # ignored bytecode can exist there. DONTWRITE keeps the run read-only.
             "PYTHONPYCACHEPREFIX": str(
                 mcp_root / "server.py" / ".yohan-retrieval-no-pyc"
             ),
@@ -68,7 +76,7 @@ async def run(args: argparse.Namespace) -> dict:
             result = await session.call_tool(
                 "get_context",
                 {
-                    "query": args.query,
+                    "query": query,
                     "opts": {
                         "top_k": 5,
                         "backends": ["memory"],
@@ -82,7 +90,8 @@ async def run(args: argparse.Namespace) -> dict:
 
 
 def main() -> None:
-    envelope = asyncio.run(run(parse_args()))
+    args = parse_args()
+    envelope = asyncio.run(retrieve(args, read_query()))
     print(json.dumps(envelope, ensure_ascii=True, separators=(",", ":")))
 
 

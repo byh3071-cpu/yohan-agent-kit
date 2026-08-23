@@ -22,11 +22,32 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'RetrievalEvidence.Common.ps1')
+$transactionMutex = $null
 
 function Get-StringArray {
     param($Value)
     if ($null -eq $Value) { return @() }
     return @($Value | ForEach-Object { [string]$_ })
+}
+
+function Get-RetrievalDiagnosticsFromEnvelope {
+    param([Parameter(Mandatory = $true)]$TransportEnvelope, [Parameter(Mandatory = $true)][string]$Label)
+
+    $envelope = $TransportEnvelope
+    if ($null -ne $envelope.PSObject.Properties['content'] -and @($envelope.content).Count -gt 0) {
+        $first = @($envelope.content)[0]
+        if ($null -ne $first.PSObject.Properties['text']) { $envelope = ConvertFrom-StrictJsonText -Text ([string]$first.text) -Label "$Label content text" }
+    }
+    if ($null -eq $envelope.PSObject.Properties['data'] -or $null -eq $envelope.data.PSObject.Properties['retrieval_diagnostics']) { throw "$Label retrieval_diagnostics are missing" }
+    return $envelope.data.retrieval_diagnostics
+}
+
+function Get-StableRetrievalDiagnosticsJson {
+    param([Parameter(Mandatory = $true)]$Diagnostics)
+
+    $clone = ConvertFrom-StrictJsonText -Text ([string]($Diagnostics | ConvertTo-Json -Depth 24 -Compress)) -Label 'Retrieval diagnostics projection'
+    $clone.PSObject.Properties.Remove('latency_ms')
+    return [string]($clone | ConvertTo-Json -Depth 24 -Compress)
 }
 
 try {
@@ -35,10 +56,13 @@ try {
     Assert-SafeFingerprintKeyId -Value $FingerprintKeyId
     if (-not [string]::IsNullOrWhiteSpace($Supersedes)) { Assert-SafeIdentifier -Value $Supersedes -Label 'Supersedes' }
     if (-not [string]::IsNullOrWhiteSpace($OutcomeRef)) { Assert-SafeIdentifier -Value $OutcomeRef -Label 'OutcomeRef' }
+    $transactionMutex = Enter-RetrievalEvidenceMutex -BrainRoot $BrainRoot
     $snapshot = Get-RetrievalContractSnapshot -ContractRepositoryRoot $ContractRepositoryRoot -ContractRef $ContractRef -ExpectedSchemaDigest $ContractSchemaDigest
     if ($SourceRevision -cne $snapshot.McpImplementationRef) { throw 'SourceRevision does not match the activated MCP implementation ref' }
-    $null = Assert-ImplementationBinding -RepositoryRoot $McpRepositoryRoot -PinnedRef $snapshot.McpImplementationRef -ExpectedBundleDigest $snapshot.McpRuntimeBundleDigest -RelativePaths $script:McpRuntimePaths -Label 'MCP' -RequireExactHead
+    $contractRoot = Assert-ExactCleanGitCheckout -RepositoryRoot $ContractRepositoryRoot -ExpectedRef $ContractRef -Label 'Brain contract'
+    $null = Assert-ImplementationBinding -RepositoryRoot $McpRepositoryRoot -PinnedRef $snapshot.McpImplementationRef -ExpectedBundleDigest $snapshot.McpRuntimeBundleDigest -RelativePaths $script:McpRuntimePaths -Label 'MCP' -RequireExactHead -RequireClean
     Assert-MonthlyEventPath -RelativePath $EventLogPath -RecordedAt $RecordedAt -Kind receipts
+    Assert-CanonicalEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot
     Assert-ProductionEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot -RelativePath $EventLogPath
 
     $inputText = [Console]::In.ReadToEnd()
@@ -47,15 +71,15 @@ try {
     Assert-AllowedObjectFields -Value $boundInput -Allowed @('query', 'envelope') -Required @('query', 'envelope') -Label 'Bound receipt input'
     $query = [string]$boundInput.query
     if ([string]::IsNullOrEmpty($query) -or $query.IndexOf([char]0) -ge 0) { throw 'Bound receipt query is invalid' }
-    $envelope = $boundInput.envelope
-    if ($null -ne $envelope.PSObject.Properties['content'] -and @($envelope.content).Count -gt 0) {
-        $first = @($envelope.content)[0]
-        if ($null -ne $first.PSObject.Properties['text']) { $envelope = ConvertFrom-StrictJsonText -Text ([string]$first.text) -Label 'MCP envelope content text' }
-    }
-    if ($null -eq $envelope.PSObject.Properties['data']) { throw 'MCP envelope data is missing' }
-    $data = $envelope.data
-    if ($null -eq $data.PSObject.Properties['retrieval_diagnostics']) { throw 'MCP retrieval_diagnostics are missing' }
-    $diagnostics = $data.retrieval_diagnostics
+    $diagnostics = Get-RetrievalDiagnosticsFromEnvelope -TransportEnvelope $boundInput.envelope -Label 'Supplied MCP envelope'
+    $freshEnvelope = Invoke-FreshMcpEnvelope -McpRepositoryRoot $McpRepositoryRoot -BrainRepositoryRoot $contractRoot -Query $query
+    $freshDiagnostics = Get-RetrievalDiagnosticsFromEnvelope -TransportEnvelope $freshEnvelope -Label 'Fresh MCP stdio envelope'
+    $suppliedCanonical = Get-StableRetrievalDiagnosticsJson -Diagnostics $diagnostics
+    $freshCanonical = Get-StableRetrievalDiagnosticsJson -Diagnostics $freshDiagnostics
+    if ($suppliedCanonical -cne $freshCanonical) { throw 'Supplied MCP diagnostics do not match a fresh clean pinned stdio retrieval' }
+    $diagnostics = $freshDiagnostics
+    $null = Assert-ExactCleanGitCheckout -RepositoryRoot $ContractRepositoryRoot -ExpectedRef $ContractRef -Label 'Brain contract'
+    $null = Assert-ImplementationBinding -RepositoryRoot $McpRepositoryRoot -PinnedRef $snapshot.McpImplementationRef -ExpectedBundleDigest $snapshot.McpRuntimeBundleDigest -RelativePaths $script:McpRuntimePaths -Label 'MCP' -RequireExactHead -RequireClean
     if ([string]$diagnostics.schema -cne 'retrieval-diagnostics/v1' -or [bool]$diagnostics.volatile -ne $true -or [bool]$diagnostics.persisted -ne $false) { throw 'MCP diagnostics must be volatile retrieval-diagnostics/v1 and not persisted' }
     if ($null -eq $diagnostics.index -or [bool]$diagnostics.index.fresh -ne $true) { throw 'MCP index must be fresh before recording a receipt' }
     foreach ($value in @($diagnostics.index.revision, $diagnostics.index.generation_id)) {
@@ -124,6 +148,7 @@ try {
         source_repository = 'yohan-mcp'
         source_revision = $SourceRevision
         source_implementation_digest = $snapshot.McpRuntimeBundleDigest
+        capture_mode = 'fresh-verified-mcp-stdio-v1'
         corpus_contract_version = [string]$diagnostics.index.corpus_contract_version
         corpus_revision = [string]$diagnostics.index.revision
         index_generation_id = [string]$diagnostics.index.generation_id
@@ -136,6 +161,8 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($Supersedes)) { $receipt | Add-Member -NotePropertyName supersedes -NotePropertyValue $Supersedes }
     if (-not [string]::IsNullOrWhiteSpace($OutcomeRef)) { $receipt | Add-Member -NotePropertyName outcome_ref -NotePropertyValue $OutcomeRef }
     $receipt | Add-Member -NotePropertyName append_only -NotePropertyValue $true
+    $receipt | Add-Member -NotePropertyName receipt_attestation_scheme -NotePropertyValue 'hmac-sha256-v1'
+    $receipt | Add-Member -NotePropertyName receipt_attestation -NotePropertyValue (Get-RetrievalReceiptAttestation -Receipt $receipt -KeyEnvironmentVariable $KeyEnvironmentVariable)
 
     $schemaAllowed = @($snapshot.ReceiptSchema.properties.PSObject.Properties.Name)
     $schemaRequired = @($snapshot.ReceiptSchema.required | ForEach-Object { [string]$_ })
@@ -154,6 +181,8 @@ try {
         excluded = $excluded.Count
         persistent_query_copy = $false
         query_binding_verified = $true
+        fresh_mcp_stdio_verified = $true
+        receipt_attestation_verified = $true
     }
     if ($OutputFormat -eq 'Json') { Write-Output ([string]($result | ConvertTo-Json -Compress)) }
     else { Write-Output "Appended $ReceiptId to $EventLogPath" }
@@ -163,3 +192,4 @@ catch {
     [Console]::Error.WriteLine($_.Exception.Message)
     exit 3
 }
+finally { Exit-RetrievalEvidenceMutex -Mutex $transactionMutex }

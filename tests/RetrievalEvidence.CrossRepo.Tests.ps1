@@ -118,7 +118,7 @@ try {
     $null = New-Item -ItemType Directory -Path (Join-Path $fixtureRoot 'evidence\memory\retrieval-evidence\events') -Force
     $evidenceRoot = Join-Path $fixtureRoot 'evidence'
     $query = 'asset location contract ASSETS'
-    $generated = Invoke-ProcessWithInput -FileName $python -Arguments @($generator, '--mcp-root', $McpRoot, '--brain-root', $BrainRoot, '--query', $query)
+    $generated = Invoke-ProcessWithInput -FileName $python -Arguments @('-E', '-P', '-B', $generator, '--mcp-root', $McpRoot, '--brain-root', $BrainRoot, '--query', $query)
     if ($generated.ExitCode -ne 0) { throw "Actual yohan-mcp envelope generation failed: $($generated.Stderr)" }
     Assert-Equal 0 $generated.ExitCode 'actual yohan-mcp envelope generation succeeds'
     try { $transportEnvelope = $generated.Stdout | ConvertFrom-Json }
@@ -140,7 +140,8 @@ try {
     Assert-True ([string]$assetEvidence[0].content_hash -match '^[0-9a-f]{64}$') 'actual ASSETS content hash'
 
     $fixtureKey = 'cross-fixture-hmac-material-32-bytes'
-    $fingerprint = Invoke-PowerShellScript -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'cross-fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $hmacEnvironment = @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $fingerprint = Invoke-PowerShellScript -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'cross-fixture-v1') -Stdin $query -Environment $hmacEnvironment
     Assert-Equal 0 $fingerprint.ExitCode 'cross fixture fingerprint succeeds'
     $receiptLog = 'memory/retrieval-evidence/events/receipts-2026-08.jsonl'
     $outcomeLog = 'memory/retrieval-evidence/events/outcomes-2026-08.jsonl'
@@ -149,7 +150,7 @@ try {
         '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-McpRepositoryRoot', $McpRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
         '-EventLogPath', $receiptLog, '-ReceiptId', 'receipt-actual-mcp',
         '-FingerprintKeyId', 'cross-fixture-v1', '-ResolverVersion', '1.0.0', '-SourceRevision', $McpRef, '-RecordedAt', '2026-08-24T10:00:00+09:00'
-    ) -Stdin $boundInput -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    ) -Stdin $boundInput -Environment $hmacEnvironment
     if ($receipt.ExitCode -ne 0) { throw "Actual MCP receipt append failed: $($receipt.Stderr) $($receipt.Stdout)" }
     Assert-Equal 0 $receipt.ExitCode 'actual MCP receipt append succeeds'
     $receiptData = $receipt.Stdout | ConvertFrom-Json
@@ -163,7 +164,7 @@ try {
         '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
         '-ReceiptLogPath', $receiptLog, '-EventLogPath', $outcomeLog, '-OutcomeId', 'outcome-actual-golden', '-ReceiptId', 'receipt-actual-mcp',
         '-SignalKind', 'golden-eval', '-Verdict', 'helpful', '-EvidenceRefs', $goldenProofRef, '-ActorType', 'tool', '-RecordedAt', '2026-08-24T10:01:00+09:00'
-    )
+    ) -Environment $hmacEnvironment
     if ($outcome.ExitCode -ne 0) { throw "Actual golden outcome append failed: $($outcome.Stderr) $($outcome.Stdout)" }
     Assert-Equal 0 $outcome.ExitCode 'actual golden outcome append succeeds'
 
@@ -171,8 +172,8 @@ try {
         '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
         '-ReceiptLogPath', $receiptLog, '-OutcomeLogPath', $outcomeLog, '-ReceiptId', 'receipt-actual-mcp'
     )
-    $candidateOne = Invoke-PowerShellScript -ScriptPath $candidateScript -Arguments $candidateArgs
-    $candidateTwo = Invoke-PowerShellScript -ScriptPath $candidateScript -Arguments $candidateArgs
+    $candidateOne = Invoke-PowerShellScript -ScriptPath $candidateScript -Arguments $candidateArgs -Environment $hmacEnvironment
+    $candidateTwo = Invoke-PowerShellScript -ScriptPath $candidateScript -Arguments $candidateArgs -Environment $hmacEnvironment
     Assert-Equal 0 $candidateOne.ExitCode 'actual learning candidate succeeds'
     Assert-Equal $candidateOne.Stdout $candidateTwo.Stdout 'actual learning candidate is byte-stable'
     $candidate = $candidateOne.Stdout | ConvertFrom-Json

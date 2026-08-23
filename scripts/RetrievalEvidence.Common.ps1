@@ -8,6 +8,8 @@ $script:RetrievalSchemaPaths = @(
     'memory/retrieval-evidence/schemas/retrieval-receipt.schema.json'
 ) | Sort-Object
 $script:AgentKitRuntimePaths = @(
+    'scripts/Assert-UniqueJsonKeys.py',
+    'scripts/Get-VerifiedMcpEnvelope.py',
     'scripts/Get-RetrievalLearningCandidate.ps1',
     'scripts/New-RetrievalQueryFingerprint.ps1',
     'scripts/Record-RetrievalOutcome.ps1',
@@ -15,9 +17,13 @@ $script:AgentKitRuntimePaths = @(
     'scripts/RetrievalEvidence.Common.ps1'
 ) | Sort-Object
 $script:McpRuntimePaths = @(
+    'adapters/base.py',
     'adapters/memory_adapter.py',
     'core/context_resolver.py',
-    'core/router.py'
+    'core/paths.py',
+    'core/router.py',
+    'core/tools.py',
+    'server.py'
 ) | Sort-Object
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false, $true)
 
@@ -32,17 +38,79 @@ function Get-Sha256Hex {
     finally { $sha.Dispose() }
 }
 
-function Get-HmacQueryFingerprint {
-    param([Parameter(Mandatory = $true)][string]$Query, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
+function Get-HmacSha256Hex {
+    param([Parameter(Mandatory = $true)][string]$Text, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
 
     $key = [Environment]::GetEnvironmentVariable($KeyEnvironmentVariable, [EnvironmentVariableTarget]::Process)
     if ([string]::IsNullOrWhiteSpace($key)) { throw 'Retrieval HMAC key is not configured in the process environment' }
     if ($key.Length -lt 16) { throw 'Retrieval HMAC key is too short' }
     $keyBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($key)
-    $queryBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Query)
+    $textBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Text)
     $hmac = New-Object Security.Cryptography.HMACSHA256(,$keyBytes)
-    try { return ([BitConverter]::ToString($hmac.ComputeHash($queryBytes))).Replace('-', '').ToLowerInvariant() }
+    try { return ([BitConverter]::ToString($hmac.ComputeHash($textBytes))).Replace('-', '').ToLowerInvariant() }
     finally { $hmac.Dispose() }
+}
+
+function Get-HmacQueryFingerprint {
+    param([Parameter(Mandatory = $true)][string]$Query, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
+
+    return Get-HmacSha256Hex -Text $Query -KeyEnvironmentVariable $KeyEnvironmentVariable
+}
+
+function Get-RetrievalReceiptAttestationPayload {
+    param([Parameter(Mandatory = $true)]$Receipt)
+
+    $included = @($Receipt.included | ForEach-Object {
+        $item = [ordered]@{
+            candidate_id = [string]$_.candidate_id
+            evidence_refs = @($_.evidence_refs | ForEach-Object { [ordered]@{ document_id = [string]$_.document_id; content_hash = [string]$_.content_hash; locator = [string]$_.locator } })
+            score = [double]$_.score
+            reasons = @($_.reasons | ForEach-Object { [string]$_ })
+        }
+        if ($null -ne $_.PSObject.Properties['canonical_entity_id']) { $item['canonical_entity_id'] = [string]$_.canonical_entity_id }
+        [pscustomobject]$item
+    })
+    $excluded = @($Receipt.excluded | ForEach-Object { [pscustomobject][ordered]@{ candidate_id = [string]$_.candidate_id; reason = [string]$_.reason } })
+    $projection = [ordered]@{
+        schema_version = [int]$Receipt.schema_version
+        receipt_id = [string]$Receipt.receipt_id
+        query_fingerprint = [string]$Receipt.query_fingerprint
+        fingerprint_scheme = [string]$Receipt.fingerprint_scheme
+        fingerprint_key_id = [string]$Receipt.fingerprint_key_id
+        resolver_version = [string]$Receipt.resolver_version
+        contract_ref = [string]$Receipt.contract_ref
+        contract_schema_digest = [string]$Receipt.contract_schema_digest
+        source_repository = [string]$Receipt.source_repository
+        source_revision = [string]$Receipt.source_revision
+        source_implementation_digest = [string]$Receipt.source_implementation_digest
+        capture_mode = [string]$Receipt.capture_mode
+        corpus_contract_version = [string]$Receipt.corpus_contract_version
+        corpus_revision = [string]$Receipt.corpus_revision
+        index_generation_id = [string]$Receipt.index_generation_id
+        index_revision = [string]$Receipt.index_revision
+        backend_states = [ordered]@{ lexical = [string]$Receipt.backend_states.lexical; vector = [string]$Receipt.backend_states.vector; graph = [string]$Receipt.backend_states.graph }
+        included = $included
+        excluded = $excluded
+        recorded_at = [string]$Receipt.recorded_at
+    }
+    if ($null -ne $Receipt.PSObject.Properties['supersedes']) { $projection['supersedes'] = [string]$Receipt.supersedes }
+    if ($null -ne $Receipt.PSObject.Properties['outcome_ref']) { $projection['outcome_ref'] = [string]$Receipt.outcome_ref }
+    $projection['append_only'] = [bool]$Receipt.append_only
+    return "retrieval-receipt-attestation/v1`n" + [string]([pscustomobject]$projection | ConvertTo-Json -Depth 20 -Compress)
+}
+
+function Get-RetrievalReceiptAttestation {
+    param([Parameter(Mandatory = $true)]$Receipt, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
+
+    return Get-HmacSha256Hex -Text (Get-RetrievalReceiptAttestationPayload -Receipt $Receipt) -KeyEnvironmentVariable $KeyEnvironmentVariable
+}
+
+function Assert-RetrievalReceiptAttestation {
+    param([Parameter(Mandatory = $true)]$Receipt, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
+
+    if ([string]$Receipt.receipt_attestation_scheme -cne 'hmac-sha256-v1' -or [string]$Receipt.receipt_attestation -notmatch '^[0-9a-f]{64}$') { throw 'Receipt attestation is missing or invalid' }
+    $expected = Get-RetrievalReceiptAttestation -Receipt $Receipt -KeyEnvironmentVariable $KeyEnvironmentVariable
+    if ([string]$Receipt.receipt_attestation -cne $expected) { throw 'Receipt attestation does not match the canonical payload' }
 }
 
 function ConvertTo-NormalizedLf {
@@ -194,7 +262,8 @@ function Assert-ImplementationBinding {
         [Parameter(Mandatory = $true)][string]$ExpectedBundleDigest,
         [Parameter(Mandatory = $true)][string[]]$RelativePaths,
         [Parameter(Mandatory = $true)][string]$Label,
-        [switch]$RequireExactHead
+        [switch]$RequireExactHead,
+        [switch]$RequireClean
     )
 
     $root = Get-OrdinaryRoot -Path $RepositoryRoot -Label "$Label repository root"
@@ -212,7 +281,66 @@ function Assert-ImplementationBinding {
     if ($pinnedDigest -cne $ExpectedBundleDigest -or $workingDigest -cne $ExpectedBundleDigest) {
         throw "$Label runtime bundle does not match the activated implementation digest (expected=$ExpectedBundleDigest pinned=$pinnedDigest working=$workingDigest)"
     }
+    if ($RequireClean) {
+        $status = Invoke-GitText -RepositoryRoot $root -Arguments @('status', '--porcelain=v1', '--untracked-files=all') -Label "$Label repository status"
+        if (-not [string]::IsNullOrWhiteSpace($status)) { throw "$Label repository must be clean before retrieval evidence capture" }
+    }
     return [pscustomobject][ordered]@{ Root = $root; Head = $head; BundleDigest = $workingDigest }
+}
+
+function Assert-ExactCleanGitCheckout {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$ExpectedRef,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $root = Get-OrdinaryRoot -Path $RepositoryRoot -Label "$Label repository root"
+    $head = (Invoke-GitText -RepositoryRoot $root -Arguments @('rev-parse', 'HEAD') -Label "$Label HEAD").Trim()
+    if ($head -cne $ExpectedRef) { throw "$Label HEAD must equal the requested contract ref for fresh retrieval capture" }
+    $status = Invoke-GitText -RepositoryRoot $root -Arguments @('status', '--porcelain=v1', '--untracked-files=all') -Label "$Label repository status"
+    if (-not [string]::IsNullOrWhiteSpace($status)) { throw "$Label repository must be clean for fresh retrieval capture" }
+    return $root
+}
+
+function Invoke-FreshMcpEnvelope {
+    param(
+        [Parameter(Mandatory = $true)][string]$McpRepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$BrainRepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$Query
+    )
+
+    $python = Get-Command python.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1
+    $helper = Join-Path $PSScriptRoot 'Get-VerifiedMcpEnvelope.py'
+    if (-not [IO.File]::Exists($helper)) { throw 'Verified MCP envelope helper is missing' }
+    # -E ignores inherited PYTHON* injection, while -P keeps the helper directory
+    # and current directory off sys.path without disabling the installed user site.
+    $arguments = @('-E', '-P', '-B', $helper, '--mcp-root', $McpRepositoryRoot, '--brain-root', $BrainRepositoryRoot)
+    $quoted = @($arguments | ForEach-Object { '"' + ([string]$_).Replace('"', '\"') + '"' })
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = [string]$python.Source
+    $start.Arguments = [string]::Join(' ', $quoted)
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    try {
+        $null = $process.Start()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $queryBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Query)
+        $process.StandardInput.BaseStream.Write($queryBytes, 0, $queryBytes.Length)
+        $process.StandardInput.BaseStream.Close()
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $process.WaitForExit()
+        $stderr = $stderrTask.Result
+        $exitCode = $process.ExitCode
+    }
+    finally { $process.Dispose() }
+    if ($exitCode -ne 0) { throw "Fresh MCP stdio retrieval failed (exit=$exitCode): $($stderr.Trim())" }
+    return ConvertFrom-StrictJsonText -Text $stdout -Label 'Fresh MCP stdio envelope'
 }
 
 function Get-RetrievalContractSnapshot {
@@ -246,7 +374,7 @@ function Get-RetrievalContractSnapshot {
         if ($indexValue -cne [string]$binding[1]) { throw "Retrieval index/contract handshake mismatch: $($binding[0])" }
     }
     $agentKitRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-    $null = Assert-ImplementationBinding -RepositoryRoot $agentKitRoot -PinnedRef $agentKitImplementationRef -ExpectedBundleDigest $agentKitRuntimeDigest -RelativePaths $script:AgentKitRuntimePaths -Label 'Agent Kit'
+    $null = Assert-ImplementationBinding -RepositoryRoot $agentKitRoot -PinnedRef $agentKitImplementationRef -ExpectedBundleDigest $agentKitRuntimeDigest -RelativePaths $script:AgentKitRuntimePaths -Label 'Agent Kit' -RequireClean
     foreach ($required in @(
         'persistent_writes: []',
         'persistence: forbidden',
@@ -265,8 +393,8 @@ function Get-RetrievalContractSnapshot {
         $text = Invoke-GitText -RepositoryRoot $contractRoot -Arguments @('show', "$ContractRef`:$relativePath") -Label $relativePath
         $normalized = ConvertTo-NormalizedLf -Text $text
         $bundle += $relativePath + "`n" + $normalized
-        try { $schema = $text | ConvertFrom-Json }
-        catch { throw "$relativePath is not valid JSON" }
+        try { $schema = ConvertFrom-StrictJsonText -Text $text -Label $relativePath }
+        catch { throw "$relativePath is not valid strict JSON" }
         if ($schema.type -cne 'object' -or [bool]$schema.additionalProperties -ne $false) { throw "$relativePath must be a closed object schema" }
         $schemaByName[[IO.Path]::GetFileName($relativePath)] = $schema
     }
@@ -285,6 +413,9 @@ function Get-RetrievalContractSnapshot {
         AgentKitImplementationRef = $agentKitImplementationRef
         AgentKitRuntimeBundleDigest = $agentKitRuntimeDigest
         TrackedEventLogs = @([Regex]::Matches($indexText, '(?m)^    - (memory/retrieval-evidence/events/(?:receipts|outcomes|candidates)-\d{4}-\d{2}\.jsonl)\s*$') | ForEach-Object { [string]$_.Groups[1].Value })
+        RegisteredGoldenProofs = @([Regex]::Matches($indexText, '(?m)^    - id: ([a-z0-9][a-z0-9-]{0,127})\r?\n      path: (memory/retrieval-evidence/proofs/golden-eval/[a-z0-9._-]+\.json)\r?\n      content_hash: ([0-9a-f]{64})\s*$') | ForEach-Object {
+            [pscustomobject][ordered]@{ Id = [string]$_.Groups[1].Value; Path = [string]$_.Groups[2].Value; ContentHash = [string]$_.Groups[3].Value }
+        })
     }
 }
 
@@ -307,10 +438,13 @@ function Resolve-OutcomeProof {
     $contentHash = [string]$match.Groups[4].Value
     $expectedScheme = if ($SignalKind -eq 'human-explicit') { 'human-approval' } else { $SignalKind }
     if ($scheme -cne $expectedScheme) { throw 'Outcome evidence ref scheme does not match SignalKind' }
+    if ($scheme -cne 'golden-eval') { throw "$scheme outcome proofs are inactive until a trusted issuer is configured" }
     $root = [string]$ContractSnapshot.ContractRepositoryRoot
     $null = Invoke-GitText -RepositoryRoot $root -Arguments @('merge-base', '--is-ancestor', [string]$Receipt.contract_ref, $proofRef) -Label 'Outcome proof contract ancestry'
     $null = Invoke-GitText -RepositoryRoot $root -Arguments @('merge-base', '--is-ancestor', $proofRef, 'HEAD') -Label 'Outcome proof Brain ancestry'
     $proofPath = "memory/retrieval-evidence/proofs/$scheme/$proofId.json"
+    $registered = @($ContractSnapshot.RegisteredGoldenProofs | Where-Object { [string]$_.Id -ceq $proofId })
+    if ($registered.Count -ne 1 -or [string]$registered[0].Path -cne $proofPath -or [string]$registered[0].ContentHash -cne $contentHash) { throw 'Golden outcome proof is not registered in the pinned contract' }
     $proofText = Invoke-GitText -RepositoryRoot $root -Arguments @('show', "$proofRef`:$proofPath") -Label 'Outcome proof artifact'
     if ((Get-Sha256Hex -Text (ConvertTo-NormalizedLf -Text $proofText)) -cne $contentHash) { throw 'Outcome proof content hash mismatch' }
     $proof = ConvertFrom-StrictJsonText -Text $proofText -Label 'Outcome proof artifact'
@@ -349,10 +483,44 @@ function Assert-AllowedObjectFields {
     }
 }
 
+function Assert-UniqueJsonObjectKeys {
+    param([Parameter(Mandatory = $true)][string]$Text, [switch]$JsonLines, [string]$Label = 'JSON input')
+
+    $python = Get-Command python.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1
+    $helper = Join-Path $PSScriptRoot 'Assert-UniqueJsonKeys.py'
+    if (-not [IO.File]::Exists($helper)) { throw 'Strict JSON key helper is missing' }
+    $arguments = @('-I', '"' + $helper.Replace('"', '\"') + '"')
+    if ($JsonLines) { $arguments += '--json-lines' }
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = [string]$python.Source
+    $start.Arguments = [string]::Join(' ', $arguments)
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    try {
+        $null = $process.Start()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Text)
+        $process.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
+        $process.StandardInput.BaseStream.Close()
+        $null = $process.StandardOutput.ReadToEnd()
+        $process.WaitForExit()
+        $stderr = $stderrTask.Result
+        $exitCode = $process.ExitCode
+    }
+    finally { $process.Dispose() }
+    if ($exitCode -ne 0) { throw "$Label is invalid or contains duplicate object keys: $($stderr.Trim())" }
+}
+
 function ConvertFrom-StrictJsonText {
     param([Parameter(Mandatory = $true)][string]$Text, [string]$Label = 'JSON input')
 
     if ([string]::IsNullOrWhiteSpace($Text)) { throw "$Label cannot be empty" }
+    Assert-UniqueJsonObjectKeys -Text $Text -Label $Label
     try { return $Text | ConvertFrom-Json }
     catch {
         $firstCodePoint = if ($Text.Length -gt 0) { [int][char]$Text[0] } else { -1 }
@@ -371,6 +539,7 @@ function Get-StrictUtf8Text {
 function ConvertFrom-JsonLinesText {
     param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text, [Parameter(Mandatory = $true)][string]$IdProperty, [string]$Label = 'JSONL')
 
+    Assert-UniqueJsonObjectKeys -Text $Text -JsonLines -Label $Label
     $rows = New-Object Collections.Generic.List[object]
     $ids = @{}
     foreach ($line in @($Text -split '\r?\n' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })) {
@@ -415,12 +584,17 @@ function Read-AllJsonLineLogs {
     $root = Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot'
     $eventDirectory = Join-Path $root 'memory\retrieval-evidence\events'
     if (-not [IO.Directory]::Exists($eventDirectory)) { return [pscustomobject][ordered]@{ Rows = @(); Ids = @{}; Paths = @() } }
-    $files = @(Get-ChildItem -LiteralPath $eventDirectory -File -Filter "$Kind-*.jsonl" | Sort-Object Name)
+    $entries = @(Get-ChildItem -LiteralPath $eventDirectory -Force | Sort-Object Name)
+    foreach ($entry in $entries) {
+        if (-not [IO.File]::Exists([string]$entry.FullName) -or (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) -or $entry.Name -notmatch '^(receipts|outcomes)-\d{4}-\d{2}\.jsonl$') {
+            throw "Retrieval event directory contains an unexpected or unsafe entry: $($entry.Name)"
+        }
+    }
+    $files = @($entries | Where-Object { $_.Name -match "^$Kind-\d{4}-\d{2}\.jsonl$" })
     $rows = New-Object Collections.Generic.List[object]
     $ids = @{}
     $paths = New-Object Collections.Generic.List[string]
     foreach ($file in $files) {
-        if ($file.Name -notmatch "^$Kind-\d{4}-\d{2}\.jsonl$") { throw "$Kind event directory contains a non-canonical JSONL file" }
         $relativePath = "memory/retrieval-evidence/events/$($file.Name)"
         $log = Read-JsonLineLog -BrainRoot $root -RelativePath $relativePath -Kind $Kind -IdProperty $IdProperty -RequireExisting
         foreach ($row in @($log.Rows)) {
@@ -445,9 +619,28 @@ function Assert-ProductionEventRegistration {
     param([Parameter(Mandatory = $true)][string]$BrainRoot, [Parameter(Mandatory = $true)]$ContractSnapshot, [Parameter(Mandatory = $true)][string]$RelativePath)
 
     $brain = Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot'
-    if ($brain -ceq [string]$ContractSnapshot.ContractRepositoryRoot -and $ContractSnapshot.TrackedEventLogs -cnotcontains $RelativePath) {
+    if ([string]::Equals($brain, [string]$ContractSnapshot.ContractRepositoryRoot, [StringComparison]::OrdinalIgnoreCase) -and $ContractSnapshot.TrackedEventLogs -cnotcontains $RelativePath) {
         throw 'Canonical Brain event log must be pre-registered in the active contract index'
     }
+}
+
+function Assert-CanonicalEventRegistration {
+    param([Parameter(Mandatory = $true)][string]$BrainRoot, [Parameter(Mandatory = $true)]$ContractSnapshot)
+
+    $brain = Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot'
+    if (-not [string]::Equals($brain, [string]$ContractSnapshot.ContractRepositoryRoot, [StringComparison]::OrdinalIgnoreCase)) { return }
+    $eventDirectory = Join-Path $brain 'memory\retrieval-evidence\events'
+    $physical = New-Object Collections.Generic.List[string]
+    if ([IO.Directory]::Exists($eventDirectory)) {
+        foreach ($entry in @(Get-ChildItem -LiteralPath $eventDirectory -Force | Sort-Object Name)) {
+            if (-not [IO.File]::Exists([string]$entry.FullName) -or (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) -or $entry.Name -notmatch '^(receipts|outcomes)-\d{4}-\d{2}\.jsonl$') {
+                throw "Canonical retrieval event directory contains an unexpected or unsafe entry: $($entry.Name)"
+            }
+            $physical.Add("memory/retrieval-evidence/events/$($entry.Name)")
+        }
+    }
+    $registered = @($ContractSnapshot.TrackedEventLogs | Sort-Object)
+    if ([string]::Join("`n", $physical.ToArray()) -cne [string]::Join("`n", $registered)) { throw 'Canonical retrieval event files must exactly match the pinned contract registration' }
 }
 
 function Add-JsonLineAppendOnly {
@@ -463,7 +656,7 @@ function Add-JsonLineAppendOnly {
     $id = [string]$Value.PSObject.Properties[$IdProperty].Value
     $line = [string]($Value | ConvertTo-Json -Depth 20 -Compress)
     $mode = if ([IO.File]::Exists($target)) { [IO.FileMode]::Open } else { [IO.FileMode]::CreateNew }
-    $stream = New-Object IO.FileStream($target, $mode, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Read)
+    $stream = New-Object IO.FileStream($target, $mode, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
     try {
         $existingBytes = New-Object byte[] $stream.Length
         $offset = 0
@@ -495,4 +688,30 @@ function Assert-SafeFingerprintKeyId {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     if ($Value -notmatch '^[a-z0-9][a-z0-9._-]{0,63}$' -or $Value -match '(?i)secret|token|password|credential|api[-_]?key') { throw 'FingerprintKeyId is invalid or secret-like' }
+}
+
+function Enter-RetrievalEvidenceMutex {
+    param([Parameter(Mandatory = $true)][string]$BrainRoot)
+
+    $root = (Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot').ToLowerInvariant()
+    $name = 'Local\YohanRetrievalEvidence-' + (Get-Sha256Hex -Text $root)
+    $mutex = New-Object Threading.Mutex($false, $name)
+    try {
+        try { $acquired = $mutex.WaitOne([TimeSpan]::FromSeconds(120)) }
+        catch [Threading.AbandonedMutexException] { $acquired = $true }
+        if (-not $acquired) { throw 'Timed out waiting for the retrieval evidence transaction lock' }
+        return $mutex
+    }
+    catch {
+        $mutex.Dispose()
+        throw
+    }
+}
+
+function Exit-RetrievalEvidenceMutex {
+    param($Mutex)
+
+    if ($null -eq $Mutex) { return }
+    try { $Mutex.ReleaseMutex() }
+    finally { $Mutex.Dispose() }
 }

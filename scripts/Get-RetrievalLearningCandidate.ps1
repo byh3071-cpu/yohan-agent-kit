@@ -9,21 +9,26 @@ param(
     [Parameter(Mandatory = $true)][ValidatePattern('^memory/retrieval-evidence/events/receipts-\d{4}-\d{2}\.jsonl$')][string]$ReceiptLogPath,
     [Parameter(Mandatory = $true)][ValidatePattern('^memory/retrieval-evidence/events/outcomes-\d{4}-\d{2}\.jsonl$')][string]$OutcomeLogPath,
     [Parameter(Mandatory = $true)][string]$ReceiptId,
+    [ValidatePattern('^[A-Z][A-Z0-9_]{2,63}$')][string]$KeyEnvironmentVariable = 'YOHAN_RETRIEVAL_HMAC_KEY',
     [ValidateSet('Json', 'Human')][string]$OutputFormat = 'Json'
 )
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'RetrievalEvidence.Common.ps1')
+$transactionMutex = $null
 
 try {
     Assert-SafeIdentifier -Value $ReceiptId -Label 'ReceiptId'
+    $transactionMutex = Enter-RetrievalEvidenceMutex -BrainRoot $BrainRoot
     $snapshot = Get-RetrievalContractSnapshot -ContractRepositoryRoot $ContractRepositoryRoot -ContractRef $ContractRef -ExpectedSchemaDigest $ContractSchemaDigest
+    Assert-CanonicalEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot
     $receipts = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $ReceiptLogPath -Kind receipts -IdProperty receipt_id -RequireExisting
     $receipt = @($receipts.Rows | Where-Object { [string]$_.receipt_id -ceq $ReceiptId })
     if ($receipt.Count -ne 1) { throw 'ReceiptId must resolve to exactly one receipt' }
     $receipt = $receipt[0]
     if ([string]$receipt.contract_ref -cne $ContractRef -or [string]$receipt.contract_schema_digest -cne $ContractSchemaDigest) { throw 'Receipt contract binding does not match the requested contract' }
+    Assert-RetrievalReceiptAttestation -Receipt $receipt -KeyEnvironmentVariable $KeyEnvironmentVariable
 
     $outcomeLog = Read-AllJsonLineLogs -BrainRoot $BrainRoot -Kind outcomes -IdProperty outcome_id
     $priorById = @{}
@@ -112,3 +117,4 @@ catch {
     [Console]::Error.WriteLine($_.Exception.Message)
     exit 3
 }
+finally { Exit-RetrievalEvidenceMutex -Mutex $transactionMutex }

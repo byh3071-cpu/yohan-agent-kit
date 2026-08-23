@@ -24,15 +24,26 @@ const gate = (label, ok, detail = '') => {
 const read = (path) => readFileSync(join(repoRoot, path), 'utf8').replace(/^﻿/u, '')
 const has = (text, ...needles) => needles.every((needle) => text.includes(needle))
 const agentKitRuntimePaths = [
+  'scripts/Assert-UniqueJsonKeys.py',
+  'scripts/Get-VerifiedMcpEnvelope.py',
   'scripts/Get-RetrievalLearningCandidate.ps1',
   'scripts/New-RetrievalQueryFingerprint.ps1',
   'scripts/Record-RetrievalOutcome.ps1',
   'scripts/Record-RetrievalReceipt.ps1',
   'scripts/RetrievalEvidence.Common.ps1',
 ].sort()
-const bundleDigest = (readText) => {
+const mcpRuntimePaths = [
+  'adapters/base.py',
+  'adapters/memory_adapter.py',
+  'core/context_resolver.py',
+  'core/paths.py',
+  'core/router.py',
+  'core/tools.py',
+  'server.py',
+].sort()
+const bundleDigest = (paths, readText) => {
   let payload = ''
-  for (const path of agentKitRuntimePaths) {
+  for (const path of paths) {
     let value = readText(path).replace(/\r\n?/gu, '\n')
     if (!value.endsWith('\n')) value += '\n'
     payload += `${path}\n${value}`
@@ -47,6 +58,8 @@ if (existsSync(join(repoRoot, '.vhk', 'HARD_STOP'))) {
 
 const required = [
   'goals/16-retrieval-receipt-outcome-loop.md',
+  'scripts/Assert-UniqueJsonKeys.py',
+  'scripts/Get-VerifiedMcpEnvelope.py',
   'scripts/RetrievalEvidence.Common.ps1',
   'scripts/New-RetrievalQueryFingerprint.ps1',
   'scripts/Record-RetrievalReceipt.ps1',
@@ -67,12 +80,17 @@ const fingerprint = read('scripts/New-RetrievalQueryFingerprint.ps1')
 const receipt = read('scripts/Record-RetrievalReceipt.ps1')
 const outcome = read('scripts/Record-RetrievalOutcome.ps1')
 const candidate = read('scripts/Get-RetrievalLearningCandidate.ps1')
+const verifiedMcpHelper = read('scripts/Get-VerifiedMcpEnvelope.py')
 gate('contract uses exact Git objects and schema digest', has(common, 'rev-parse', '--verify', '^{commit}', 'schema_bundle_digest', 'Pinned schema bundle bytes do not match ExpectedSchemaDigest'))
 gate('contract requires active implemented state', has(common, 'Retrieval evidence index is not active', 'Retrieval evidence contract is not active/implemented', 'agent_kit_implementation_ref'))
 gate('event storage is append-only and reparse guarded', has(common, 'Add-JsonLineAppendOnly', '[IO.FileMode]::CreateNew', '[IO.FileMode]::Open', 'ReparsePoint', 'Duplicate $IdProperty'))
 gate('fingerprint reads stdin and process environment only', has(fingerprint, '[Console]::In.ReadToEnd()', 'Get-HmacQueryFingerprint', 'hmac-sha256-v1') && has(common, '[EnvironmentVariableTarget]::Process', 'HMACSHA256'))
 gate('receipt requires volatile non-persisted diagnostics', has(receipt, 'retrieval-diagnostics/v1', '[bool]$diagnostics.volatile -ne $true', '[bool]$diagnostics.persisted -ne $false'))
 gate('receipt binds query, MCP runtime, and exact document lineage', has(receipt, "Assert-AllowedObjectFields -Value $boundInput", 'query_binding.digest', 'McpRuntimeBundleDigest', 'document_id = $documentId', 'content_hash = $contentHash', 'persistent_query_copy = $false'))
+gate('receipt provenance is fresh pinned MCP stdio', has(receipt, 'Invoke-FreshMcpEnvelope', 'Get-StableRetrievalDiagnosticsJson', 'fresh-verified-mcp-stdio-v1', 'fresh_mcp_stdio_verified = $true'))
+gate('fresh MCP subprocess ignores dotenv and stale bytecode', has(common, "@('-E', '-P', '-B'", 'Get-VerifiedMcpEnvelope.py') && has(verifiedMcpHelper, 'PYTHON_DOTENV_DISABLED', 'PYTHONPYCACHEPREFIX', 'PYTHONDONTWRITEBYTECODE', 'SAFE_CHILD_ENVIRONMENT'))
+gate('receipt payload attestation is required by all consumers', has(common, 'Get-RetrievalReceiptAttestationPayload', 'Assert-RetrievalReceiptAttestation') && has(receipt, 'receipt_attestation_scheme', 'receipt_attestation_verified') && has(outcome, 'Assert-RetrievalReceiptAttestation') && has(candidate, 'Assert-RetrievalReceiptAttestation'))
+gate('JSON duplicate keys and global append transactions fail closed', has(common, 'Assert-UniqueJsonObjectKeys', 'Enter-RetrievalEvidenceMutex', 'FileShare]::None'))
 gate('human outcome cannot be inferred by an agent', has(outcome, "if ($SignalKind -eq 'human-explicit')", "if ($ActorType -ne 'human')", 'exact content-addressed human approval ref'))
 gate('candidate is deterministic and candidate-only', has(candidate, 'retrieval-learning-candidate/v1', "'candidate-' + (Get-Sha256Hex", "status = 'candidate'", 'stable_auto_promotion = $false'))
 gate('candidate without outcome cannot preserve', has(candidate, "$reasonCodes.Add('no-outcome')", "$disposition = 'review'", "$disposition = 'preserve'", "$verdicts[0] -ceq 'helpful'"))
@@ -133,15 +151,23 @@ if (brainRoot && existsSync(brainRoot) && mcpRoot && existsSync(mcpRoot)) {
     gate('Brain checkout descends from schema source ref', brainSchemaAncestor, schemaSourceRef || 'missing')
     let agentKitRuntimeBound = false
     try {
-      const pinnedDigest = bundleDigest((path) => gitText(repoRoot, ['show', `${pinnedAgentKitRef}:${path}`]))
-      const workingDigest = bundleDigest((path) => readFileSync(join(repoRoot, path), 'utf8'))
-      agentKitRuntimeBound = pinnedDigest === pinnedAgentKitDigest && workingDigest === pinnedAgentKitDigest
+      const pinnedDigest = bundleDigest(agentKitRuntimePaths, (path) => gitText(repoRoot, ['show', `${pinnedAgentKitRef}:${path}`]))
+      const workingDigest = bundleDigest(agentKitRuntimePaths, (path) => readFileSync(join(repoRoot, path), 'utf8'))
+      const clean = gitText(repoRoot, ['status', '--porcelain=v1', '--untracked-files=all']) === ''
+      agentKitRuntimeBound = pinnedDigest === pinnedAgentKitDigest && workingDigest === pinnedAgentKitDigest && clean
     } catch {}
     gate('Agent Kit checkout descends from activated implementation ref', agentKitImplementationAncestor, pinnedAgentKitRef || 'missing')
     gate('Agent Kit runtime bytes match activated bundle digest', agentKitRuntimeBound, pinnedAgentKitDigest || 'missing')
-    gate('MCP runtime bundle digest is activated', /^[0-9a-f]{64}$/u.test(pinnedMcpDigest), pinnedMcpDigest || 'missing')
+    let mcpRuntimeBound = false
+    try {
+      const pinnedDigest = bundleDigest(mcpRuntimePaths, (path) => gitText(mcpRoot, ['show', `${pinnedMcpRef}:${path}`]))
+      const workingDigest = bundleDigest(mcpRuntimePaths, (path) => readFileSync(join(mcpRoot, path), 'utf8'))
+      const clean = gitText(mcpRoot, ['status', '--porcelain=v1', '--untracked-files=all']) === ''
+      mcpRuntimeBound = pinnedDigest === pinnedMcpDigest && workingDigest === pinnedMcpDigest && clean
+    } catch {}
+    gate('MCP runtime bytes and repository state match activated bundle', mcpRuntimeBound, pinnedMcpDigest || 'missing')
 
-    if (/^[0-9a-f]{64}$/u.test(schemaDigest) && /^[0-9a-f]{64}$/u.test(goldenProofHash) && pinnedMcpRef === mcpRef && brainSchemaAncestor && agentKitImplementationAncestor && agentKitRuntimeBound) {
+    if (/^[0-9a-f]{64}$/u.test(schemaDigest) && /^[0-9a-f]{64}$/u.test(goldenProofHash) && pinnedMcpRef === mcpRef && brainSchemaAncestor && agentKitImplementationAncestor && agentKitRuntimeBound && mcpRuntimeBound) {
       const crossOutput = execFileSync('powershell.exe', [
         '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
         '-File', 'tests/RetrievalEvidence.CrossRepo.Tests.ps1',

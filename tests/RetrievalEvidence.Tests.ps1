@@ -82,15 +82,8 @@ function New-ContractFixture {
     param([string]$Root)
 
     $contractRoot = Join-Path $Root 'contract'
-    $null = New-Item -ItemType Directory -Path (Join-Path $contractRoot 'memory\core') -Force
-    $null = New-Item -ItemType Directory -Path (Join-Path $contractRoot 'memory\retrieval-evidence\schemas') -Force
-    $null = New-Item -ItemType Directory -Path (Join-Path $contractRoot 'memory\retrieval-evidence\proofs\golden-eval') -Force
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\index.yaml') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\index.yaml')
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-receipt.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-receipt.schema.json')
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-outcome-event.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-outcome-event.schema.json')
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-learning-candidate.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-learning-candidate.schema.json')
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\core\retrieval-contract.yaml') -Destination (Join-Path $contractRoot 'memory\core\retrieval-contract.yaml')
-    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\proofs\golden-eval\asset-location-contract.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\proofs\golden-eval\asset-location-contract.json')
+    & git.exe clone --quiet --shared $BrainContractRoot $contractRoot
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to clone complete Brain contract fixture' }
 
     $mcpRef = [string](& git.exe -C $McpRoot rev-parse HEAD).Trim()
     $agentKitRef = [string](& git.exe -C $repoRoot rev-parse HEAD).Trim()
@@ -118,7 +111,6 @@ function New-ContractFixture {
     $contract = $contract -replace '(?m)^    agent_kit_runtime_bundle_digest: ["'']?[0-9a-f]{64}["'']?\s*$', ('    agent_kit_runtime_bundle_digest: ' + $agentKitDigest)
     Write-Utf8NoBom -Path $contractPath -Text $contract
 
-    & git.exe -C $contractRoot init --quiet
     & git.exe -C $contractRoot config user.name fixture
     & git.exe -C $contractRoot config user.email fixture@example.invalid
     & git.exe -C $contractRoot add --all
@@ -154,14 +146,15 @@ try {
     $null = New-Item -ItemType Directory -Path $eventsRoot -Force
     $receiptLog = 'memory/retrieval-evidence/events/receipts-2026-08.jsonl'
     $outcomeLog = 'memory/retrieval-evidence/events/outcomes-2026-08.jsonl'
-    $query = 'private retrieval query fixture'
+    $query = 'asset location contract ASSETS'
     $fixtureKey = 'fixture-only-hmac-material-32-bytes'
+    $hmacEnvironment = @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
 
     $missingKey = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query
     Assert-Equal 3 $missingKey.ExitCode 'missing HMAC key fails closed'
     Assert-True (-not $missingKey.Stdout.Contains($query)) 'missing-key output omits query'
 
-    $fingerprint = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $fingerprint = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment $hmacEnvironment
     Assert-Equal 0 $fingerprint.ExitCode 'fingerprint succeeds with process key'
     Assert-Equal 'hmac-sha256-v1' ([string]$fingerprint.Data.fingerprint_scheme) 'fingerprint scheme'
     Assert-True ([string]$fingerprint.Data.query_fingerprint -match '^[0-9a-f]{64}$') 'fingerprint shape'
@@ -170,25 +163,15 @@ try {
     finally { $expectedHmac.Dispose() }
     Assert-Equal $expectedFingerprint ([string]$fingerprint.Data.query_fingerprint) 'fingerprint excludes transport BOM bytes'
     Assert-True (-not $fingerprint.Stdout.Contains($query) -and -not $fingerprint.Stdout.Contains($fixtureKey)) 'fingerprint output omits query and key'
-    $fingerprintAgain = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $fingerprintAgain = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment $hmacEnvironment
     Assert-Equal $fingerprint.Stdout $fingerprintAgain.Stdout 'fingerprint is deterministic'
 
-    $envelope = [pscustomobject][ordered]@{
-        data = [pscustomobject][ordered]@{
-            retrieval_diagnostics = [pscustomobject][ordered]@{
-                schema = 'retrieval-diagnostics/v1'
-                volatile = $true
-                persisted = $false
-                runtime = [pscustomobject][ordered]@{ repository = 'yohan-mcp'; implementation_digest = $contract.McpDigest }
-                query_binding = [pscustomobject][ordered]@{ scheme = 'sha256-utf8-v1'; digest = (Get-Sha256Hex -Text $query) }
-                index = [pscustomobject][ordered]@{ revision = ('2' * 64); generation_id = ('3' * 64); corpus_contract_version = '1.1.0'; fresh = $true; reason_code = 'fresh' }
-                sources = [pscustomobject][ordered]@{ attempted = @('memory'); used = @('memory'); errors = [pscustomobject]@{} }
-                collections = [pscustomobject][ordered]@{ requested = @(); available = @(); unavailable = @() }
-                evidence = @([pscustomobject][ordered]@{ type = 'brain:root'; id = 'ASSETS.md'; backend = 'memory'; path = 'ASSETS.md'; sources = @('memory'); score = 0.01639344262295082; document_id = 'brain:ASSETS.md'; content_hash = ('4' * 64); locator = 'ASSETS.md' })
-                graph_edge_count = 0
-            }
-        }
-    }
+    $envelope = Invoke-FreshMcpEnvelope -McpRepositoryRoot $McpRoot -BrainRepositoryRoot $contract.Root -Query $query
+    $transportPayload = ConvertFrom-StrictJsonText -Text ([string]@($envelope.content)[0].text) -Label 'fixture MCP envelope content'
+    $actualDiagnostics = $transportPayload.data.retrieval_diagnostics
+    $assetEvidence = @($actualDiagnostics.evidence | Where-Object { [string]$_.document_id -ceq 'brain:ASSETS.md' })
+    Assert-Equal 1 $assetEvidence.Count 'actual MCP fixture includes ASSETS lineage'
+    $expectedContentHash = [string]$assetEvidence[0].content_hash
     $boundInputJson = [string]([pscustomobject][ordered]@{ query = $query; envelope = $envelope } | ConvertTo-Json -Depth 24 -Compress)
     $receiptArgs = @(
         '-BrainRoot', $evidenceRoot,
@@ -211,20 +194,26 @@ try {
     Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $receiptLog.Replace('/', '\')))) 'digest drift writes no log'
 
     $queryMismatchInput = [string]([pscustomobject][ordered]@{ query = 'different query'; envelope = $envelope } | ConvertTo-Json -Depth 24 -Compress)
-    $queryMismatch = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $queryMismatchInput -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $queryMismatch = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $queryMismatchInput -Environment $hmacEnvironment
     Assert-Equal 3 $queryMismatch.ExitCode 'query fingerprint binding mismatch fails'
     Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $receiptLog.Replace('/', '\')))) 'query binding mismatch writes no log'
 
-    $receipt = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $boundInputJson -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $duplicateKeyInput = $boundInputJson -replace '^\{"query":', '{"query":"shadow duplicate","query":'
+    $duplicateKey = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $duplicateKeyInput -Environment $hmacEnvironment
+    Assert-Equal 3 $duplicateKey.ExitCode 'duplicate JSON input key fails closed'
+    Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $receiptLog.Replace('/', '\')))) 'duplicate JSON key writes no log'
+
+    $receipt = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $boundInputJson -Environment $hmacEnvironment
     Assert-Equal 0 $receipt.ExitCode ("receipt append succeeds; stderr=" + $receipt.Stderr)
     Assert-Equal 1 ([int]$receipt.Data.included) 'receipt includes lineage-complete evidence'
     $receiptPath = Join-Path $evidenceRoot $receiptLog.Replace('/', '\')
     $receiptBytes = [IO.File]::ReadAllBytes($receiptPath)
     $receiptText = [IO.File]::ReadAllText($receiptPath, [Text.Encoding]::UTF8)
     Assert-True (-not $receiptText.Contains($query) -and -not $receiptText.Contains($fixtureKey)) 'receipt stores no query or key'
-    Assert-True ($receiptText.Contains('"document_id":"brain:ASSETS.md"') -and $receiptText.Contains('"content_hash":"' + ('4' * 64) + '"')) 'receipt stores exact document lineage'
+    Assert-True ($receiptText.Contains('"document_id":"brain:ASSETS.md"') -and $receiptText.Contains('"content_hash":"' + $expectedContentHash + '"')) 'receipt stores exact document lineage'
+    Assert-True ($receiptText.Contains('"receipt_attestation_scheme":"hmac-sha256-v1"')) 'receipt carries a full-payload attestation'
 
-    $duplicate = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $boundInputJson -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $duplicate = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $boundInputJson -Environment $hmacEnvironment
     Assert-Equal 3 $duplicate.ExitCode 'duplicate receipt id fails'
     Assert-Equal ([Convert]::ToBase64String($receiptBytes)) ([Convert]::ToBase64String([IO.File]::ReadAllBytes($receiptPath))) 'duplicate failure preserves receipt bytes'
 
@@ -237,7 +226,19 @@ try {
         '-OutcomeLogPath', $outcomeLog,
         '-ReceiptId', 'receipt-fixture'
     )
-    $withoutOutcome = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    $candidateMissingKey = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    Assert-Equal 3 $candidateMissingKey.ExitCode 'candidate requires receipt attestation key'
+    $tamperRoot = Join-Path $fixtureRoot 'tampered-evidence'
+    $tamperEventsRoot = Join-Path $tamperRoot 'memory\retrieval-evidence\events'
+    $null = New-Item -ItemType Directory -Path $tamperEventsRoot -Force
+    $tamperedReceipt = $receiptText.Trim() | ConvertFrom-Json
+    $tamperedReceipt.included[0].score = [double]$tamperedReceipt.included[0].score + 0.001
+    Write-Utf8NoBom -Path (Join-Path $tamperRoot $receiptLog.Replace('/', '\')) -Text ([string]($tamperedReceipt | ConvertTo-Json -Depth 20 -Compress) + "`n")
+    $tamperedCandidateArgs = @($candidateArgs)
+    $tamperedCandidateArgs[[Array]::IndexOf($tamperedCandidateArgs, '-BrainRoot') + 1] = $tamperRoot
+    $tamperedCandidate = Invoke-Script -ScriptPath $candidateScript -Arguments $tamperedCandidateArgs -Environment $hmacEnvironment
+    Assert-Equal 3 $tamperedCandidate.ExitCode 'tampered receipt payload fails attestation verification'
+    $withoutOutcome = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs -Environment $hmacEnvironment
     Assert-Equal 0 $withoutOutcome.ExitCode 'candidate without outcome is returned'
     Assert-Equal 'review' ([string]$withoutOutcome.Data.disposition) 'no outcome cannot infer success'
     Assert-True (@($withoutOutcome.Data.reason_codes) -contains 'no-outcome') 'no outcome reason code'
@@ -259,7 +260,7 @@ try {
     $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-ReceiptId') + 1] = 'receipt-fixture'
     $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-SignalKind') + 1] = 'golden-eval'
     $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-ActorType') + 1] = 'agent'
-    $badHuman = Invoke-Script -ScriptPath $outcomeScript -Arguments $badHumanArgs
+    $badHuman = Invoke-Script -ScriptPath $outcomeScript -Arguments $badHumanArgs -Environment $hmacEnvironment
     Assert-Equal 3 $badHuman.ExitCode 'agent cannot self-score a golden outcome'
 
     $outcomeArgs = @(
@@ -268,56 +269,56 @@ try {
         '-OutcomeId', 'outcome-helpful', '-ReceiptId', 'receipt-fixture', '-SignalKind', 'golden-eval', '-Verdict', 'helpful',
         '-EvidenceRefs', $goldenProofRef, '-ActorType', 'tool', '-RecordedAt', '2026-08-24T09:02:00+09:00'
     )
-    $outcome = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs
+    $outcome = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs -Environment $hmacEnvironment
     Assert-Equal 0 $outcome.ExitCode 'explicit helpful outcome append succeeds'
     $outcomePath = Join-Path $evidenceRoot $outcomeLog.Replace('/', '\')
     $outcomeBytes = [IO.File]::ReadAllBytes($outcomePath)
-    $outcomeDuplicate = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs
+    $outcomeDuplicate = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs -Environment $hmacEnvironment
     Assert-Equal 3 $outcomeDuplicate.ExitCode 'duplicate outcome id fails'
     Assert-Equal ([Convert]::ToBase64String($outcomeBytes)) ([Convert]::ToBase64String([IO.File]::ReadAllBytes($outcomePath))) 'duplicate failure preserves outcome bytes'
 
     $brokenSupersedesArgs = @($outcomeArgs)
     $brokenSupersedesArgs[[Array]::IndexOf($brokenSupersedesArgs, '-OutcomeId') + 1] = 'outcome-broken-supersedes'
     $brokenSupersedesArgs += @('-Supersedes', 'outcome-missing')
-    $brokenSupersedes = Invoke-Script -ScriptPath $outcomeScript -Arguments $brokenSupersedesArgs
+    $brokenSupersedes = Invoke-Script -ScriptPath $outcomeScript -Arguments $brokenSupersedesArgs -Environment $hmacEnvironment
     Assert-Equal 3 $brokenSupersedes.ExitCode 'broken outcome supersedes fails globally'
 
     $secretProofArgs = @($outcomeArgs)
     $secretProofArgs[[Array]::IndexOf($secretProofArgs, '-OutcomeId') + 1] = 'outcome-secret-proof'
     $secretProofId = 'sk-' + ('a' * 20)
     $secretProofArgs[[Array]::IndexOf($secretProofArgs, '-EvidenceRefs') + 1] = "golden-eval:$secretProofId@git:$($contract.Ref)@sha256:$($contract.ProofHash)"
-    $secretProof = Invoke-Script -ScriptPath $outcomeScript -Arguments $secretProofArgs
+    $secretProof = Invoke-Script -ScriptPath $outcomeScript -Arguments $secretProofArgs -Environment $hmacEnvironment
     Assert-Equal 3 $secretProof.ExitCode 'secret-like outcome proof reference fails'
 
     $secondReceiptArgs = @($receiptArgs)
     $secondReceiptArgs[[Array]::IndexOf($secondReceiptArgs, '-ReceiptId') + 1] = 'receipt-second'
-    $secondReceipt = Invoke-Script -ScriptPath $receiptScript -Arguments $secondReceiptArgs -Stdin $boundInputJson -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $secondReceipt = Invoke-Script -ScriptPath $receiptScript -Arguments $secondReceiptArgs -Stdin $boundInputJson -Environment $hmacEnvironment
     Assert-Equal 0 $secondReceipt.ExitCode 'second receipt append succeeds'
     $crossSupersedesArgs = @($outcomeArgs)
     $crossSupersedesArgs[[Array]::IndexOf($crossSupersedesArgs, '-OutcomeId') + 1] = 'outcome-cross-receipt'
     $crossSupersedesArgs[[Array]::IndexOf($crossSupersedesArgs, '-ReceiptId') + 1] = 'receipt-second'
     $crossSupersedesArgs += @('-Supersedes', 'outcome-helpful')
-    $crossSupersedes = Invoke-Script -ScriptPath $outcomeScript -Arguments $crossSupersedesArgs
+    $crossSupersedes = Invoke-Script -ScriptPath $outcomeScript -Arguments $crossSupersedesArgs -Environment $hmacEnvironment
     Assert-Equal 3 $crossSupersedes.ExitCode 'cross-receipt supersedes fails before append'
 
     $septemberOutcomeLog = 'memory/retrieval-evidence/events/outcomes-2026-09.jsonl'
     $partitionMismatchArgs = @($outcomeArgs)
     $partitionMismatchArgs[[Array]::IndexOf($partitionMismatchArgs, '-OutcomeId') + 1] = 'outcome-partition-mismatch'
     $partitionMismatchArgs[[Array]::IndexOf($partitionMismatchArgs, '-EventLogPath') + 1] = $septemberOutcomeLog
-    $partitionMismatch = Invoke-Script -ScriptPath $outcomeScript -Arguments $partitionMismatchArgs
+    $partitionMismatch = Invoke-Script -ScriptPath $outcomeScript -Arguments $partitionMismatchArgs -Environment $hmacEnvironment
     Assert-Equal 3 $partitionMismatch.ExitCode 'outcome month mismatch fails'
 
     $septemberOutcomeArgs = @($partitionMismatchArgs)
     $septemberOutcomeArgs[[Array]::IndexOf($septemberOutcomeArgs, '-OutcomeId') + 1] = 'outcome-helpful-september'
     $septemberOutcomeArgs[[Array]::IndexOf($septemberOutcomeArgs, '-RecordedAt') + 1] = '2026-09-01T09:02:00+09:00'
     $septemberOutcomeArgs += @('-Supersedes', 'outcome-helpful')
-    $septemberOutcome = Invoke-Script -ScriptPath $outcomeScript -Arguments $septemberOutcomeArgs
+    $septemberOutcome = Invoke-Script -ScriptPath $outcomeScript -Arguments $septemberOutcomeArgs -Environment $hmacEnvironment
     Assert-Equal 0 $septemberOutcome.ExitCode 'same-receipt cross-month supersedes succeeds'
 
     $beforeReceipt = [Convert]::ToBase64String([IO.File]::ReadAllBytes($receiptPath))
     $beforeOutcome = [Convert]::ToBase64String([IO.File]::ReadAllBytes($outcomePath))
-    $candidateOne = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
-    $candidateTwo = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    $candidateOne = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs -Environment $hmacEnvironment
+    $candidateTwo = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs -Environment $hmacEnvironment
     Assert-Equal 0 $candidateOne.ExitCode 'candidate with outcome succeeds'
     Assert-Equal $candidateOne.Stdout $candidateTwo.Stdout 'candidate JSON is byte-stable'
     Assert-Equal 'preserve' ([string]$candidateOne.Data.disposition) 'explicit helpful outcome permits preserve candidate'
@@ -332,7 +333,7 @@ try {
     $null = New-Item -ItemType Junction -Path $script:junctionPath -Target $outside
     $junctionArgs = @($receiptArgs)
     $junctionArgs[[Array]::IndexOf($junctionArgs, '-BrainRoot') + 1] = $script:junctionPath
-    $junction = Invoke-Script -ScriptPath $receiptScript -Arguments $junctionArgs -Stdin $boundInputJson -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    $junction = Invoke-Script -ScriptPath $receiptScript -Arguments $junctionArgs -Stdin $boundInputJson -Environment $hmacEnvironment
     Assert-Equal 3 $junction.ExitCode 'reparse BrainRoot fails closed'
     Assert-True (-not [IO.File]::Exists((Join-Path $outside $receiptLog.Replace('/', '\')))) 'reparse failure leaves external target unchanged'
 }

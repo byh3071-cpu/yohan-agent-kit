@@ -14,6 +14,7 @@ param(
     [Parameter(Mandatory = $true)][ValidateSet('helpful', 'partial', 'unhelpful', 'unknown')][string]$Verdict,
     [Parameter(Mandatory = $true)][string[]]$EvidenceRefs,
     [Parameter(Mandatory = $true)][ValidateSet('human', 'agent', 'tool')][string]$ActorType,
+    [ValidatePattern('^[A-Z][A-Z0-9_]{2,63}$')][string]$KeyEnvironmentVariable = 'YOHAN_RETRIEVAL_HMAC_KEY',
     [string]$ApprovalRef,
     [Parameter(Mandatory = $true)][datetime]$RecordedAt,
     [string]$Supersedes,
@@ -23,11 +24,13 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'RetrievalEvidence.Common.ps1')
+$transactionMutex = $null
 
 try {
     Assert-SafeIdentifier -Value $OutcomeId -Label 'OutcomeId'
     Assert-SafeIdentifier -Value $ReceiptId -Label 'ReceiptId'
     if (-not [string]::IsNullOrWhiteSpace($Supersedes)) { Assert-SafeIdentifier -Value $Supersedes -Label 'Supersedes' }
+    $transactionMutex = Enter-RetrievalEvidenceMutex -BrainRoot $BrainRoot
     $evidence = New-Object Collections.Generic.List[string]
     foreach ($reference in @($EvidenceRefs)) {
         $value = [string]$reference
@@ -46,6 +49,7 @@ try {
 
     $snapshot = Get-RetrievalContractSnapshot -ContractRepositoryRoot $ContractRepositoryRoot -ContractRef $ContractRef -ExpectedSchemaDigest $ContractSchemaDigest
     Assert-MonthlyEventPath -RelativePath $EventLogPath -RecordedAt $RecordedAt -Kind outcomes
+    Assert-CanonicalEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot
     Assert-ProductionEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot -RelativePath $EventLogPath
     $specifiedReceiptLog = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $ReceiptLogPath -Kind receipts -IdProperty receipt_id -RequireExisting
     if (-not $specifiedReceiptLog.Ids.ContainsKey($ReceiptId)) { throw 'ReceiptLogPath does not contain ReceiptId' }
@@ -53,6 +57,7 @@ try {
     if (-not $receipts.Ids.ContainsKey($ReceiptId)) { throw 'Outcome receipt_id does not exist' }
     $receipt = @($receipts.Rows | Where-Object { [string]$_.receipt_id -ceq $ReceiptId })[0]
     if ([string]$receipt.contract_ref -cne $ContractRef -or [string]$receipt.contract_schema_digest -cne $ContractSchemaDigest) { throw 'Outcome contract binding does not match the receipt' }
+    Assert-RetrievalReceiptAttestation -Receipt $receipt -KeyEnvironmentVariable $KeyEnvironmentVariable
     $outcomes = Read-AllJsonLineLogs -BrainRoot $BrainRoot -Kind outcomes -IdProperty outcome_id
     if ($outcomes.Ids.ContainsKey($OutcomeId)) { throw 'Duplicate outcome_id across outcome logs' }
     if (-not [string]::IsNullOrWhiteSpace($Supersedes)) {
@@ -90,3 +95,4 @@ catch {
     [Console]::Error.WriteLine($_.Exception.Message)
     exit 3
 }
+finally { Exit-RetrievalEvidenceMutex -Mutex $transactionMutex }
