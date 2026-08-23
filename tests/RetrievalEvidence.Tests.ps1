@@ -82,8 +82,12 @@ function New-ContractFixture {
     param([string]$Root)
 
     $contractRoot = Join-Path $Root 'contract'
-    & git.exe clone --quiet --shared $BrainContractRoot $contractRoot
+    $brainBranch = [string](& git.exe -C $BrainContractRoot rev-parse --abbrev-ref HEAD).Trim()
+    if ([string]::IsNullOrWhiteSpace($brainBranch) -or $brainBranch -ceq 'HEAD') { throw 'Brain contract fixture requires a named branch' }
+    & git.exe -c maintenance.auto=0 clone --quiet --no-local --single-branch --branch $brainBranch $BrainContractRoot $contractRoot
     if ($LASTEXITCODE -ne 0) { throw 'Unable to clone complete Brain contract fixture' }
+    & git.exe -C $contractRoot config maintenance.auto false
+    & git.exe -C $contractRoot config gc.auto 0
 
     $mcpRef = [string](& git.exe -C $McpRoot rev-parse HEAD).Trim()
     $agentKitRef = [string](& git.exe -C $repoRoot rev-parse HEAD).Trim()
