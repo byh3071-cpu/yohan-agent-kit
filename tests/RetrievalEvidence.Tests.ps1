@@ -1,0 +1,280 @@
+#requires -Version 5.1
+
+[CmdletBinding()]
+param([Parameter(Mandatory = $true)][string]$BrainContractRoot)
+
+Set-StrictMode -Version 2.0
+$ErrorActionPreference = 'Stop'
+
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$fingerprintScript = Join-Path $repoRoot 'scripts\New-RetrievalQueryFingerprint.ps1'
+$receiptScript = Join-Path $repoRoot 'scripts\Record-RetrievalReceipt.ps1'
+$outcomeScript = Join-Path $repoRoot 'scripts\Record-RetrievalOutcome.ps1'
+$candidateScript = Join-Path $repoRoot 'scripts\Get-RetrievalLearningCandidate.ps1'
+$fixtureRoot = Join-Path $PSScriptRoot ('.work\retrieval-evidence-{0}' -f [Guid]::NewGuid().ToString('N'))
+$powerShell = (Get-Command powershell.exe -CommandType Application -ErrorAction Stop).Source
+$script:assertions = 0
+$script:failure = $null
+$script:junctionPath = $null
+
+function Assert-True([bool]$Condition, [string]$Message) {
+    $script:assertions++
+    if (-not $Condition) { throw "Assertion failed: $Message" }
+}
+
+function Assert-Equal($Expected, $Actual, [string]$Message) {
+    $script:assertions++
+    if ([string]$Expected -cne [string]$Actual) { throw "Assertion failed: $Message. Expected=[$Expected] Actual=[$Actual]" }
+}
+
+function Write-Utf8NoBom([string]$Path, [string]$Text) {
+    [IO.File]::WriteAllText($Path, $Text, (New-Object Text.UTF8Encoding($false)))
+}
+
+function Quote-Argument([string]$Value) {
+    return '"' + $Value.Replace('\', '\').Replace('"', '\"') + '"'
+}
+
+function Invoke-Script {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptPath,
+        [Parameter(Mandatory = $true)][string[]]$Arguments,
+        [AllowEmptyString()][string]$Stdin = '',
+        [hashtable]$Environment = @{}
+    )
+
+    $parts = New-Object Collections.Generic.List[string]
+    foreach ($fixed in @('-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', $ScriptPath)) { $parts.Add((Quote-Argument $fixed)) }
+    foreach ($argument in $Arguments) { $parts.Add((Quote-Argument ([string]$argument))) }
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = $powerShell
+    $start.Arguments = [string]::Join(' ', $parts.ToArray())
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardInput = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    foreach ($entry in $Environment.GetEnumerator()) { $start.EnvironmentVariables[[string]$entry.Key] = [string]$entry.Value }
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    $null = $process.Start()
+    $process.StandardInput.Write($Stdin)
+    $process.StandardInput.Close()
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
+    $process.WaitForExit()
+    $exitCode = $process.ExitCode
+    $process.Dispose()
+    $data = $null
+    if ($exitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($stdout)) {
+        try { $data = $stdout.Trim() | ConvertFrom-Json }
+        catch { throw "Successful script returned invalid JSON: $stdout" }
+    }
+    return [pscustomobject]@{ ExitCode = $exitCode; Stdout = $stdout.Trim(); Stderr = $stderr.Trim(); Data = $data }
+}
+
+function New-ContractFixture {
+    param([string]$Root)
+
+    $contractRoot = Join-Path $Root 'contract'
+    $null = New-Item -ItemType Directory -Path (Join-Path $contractRoot 'memory\core') -Force
+    $null = New-Item -ItemType Directory -Path (Join-Path $contractRoot 'memory\retrieval-evidence\schemas') -Force
+    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\index.yaml') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\index.yaml')
+    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-receipt.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-receipt.schema.json')
+    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-outcome-event.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-outcome-event.schema.json')
+    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\retrieval-evidence\schemas\retrieval-learning-candidate.schema.json') -Destination (Join-Path $contractRoot 'memory\retrieval-evidence\schemas\retrieval-learning-candidate.schema.json')
+    Copy-Item -LiteralPath (Join-Path $BrainContractRoot 'memory\core\retrieval-contract.yaml') -Destination (Join-Path $contractRoot 'memory\core\retrieval-contract.yaml')
+
+    $indexPath = Join-Path $contractRoot 'memory\retrieval-evidence\index.yaml'
+    $index = [IO.File]::ReadAllText($indexPath, [Text.Encoding]::UTF8)
+    $index = $index -replace '(?m)^status: draft\s*$', 'status: active'
+    $index = $index -replace '(?m)^  brain_contract_status: draft\s*$', '  brain_contract_status: active'
+    $index = $index -replace '(?m)^  agent_kit_implementation_status: not_implemented\s*$', '  agent_kit_implementation_status: implemented'
+    $index = $index -replace '(?m)^  agent_kit_implementation_ref: null\s*$', ('  agent_kit_implementation_ref: ' + ('a' * 40))
+    Write-Utf8NoBom -Path $indexPath -Text $index
+
+    $contractPath = Join-Path $contractRoot 'memory\core\retrieval-contract.yaml'
+    $contract = [IO.File]::ReadAllText($contractPath, [Text.Encoding]::UTF8)
+    $contract = $contract -replace '(?m)^  status: draft\s*$', '  status: active'
+    $contract = $contract -replace '(?m)^  implementation_status: not_implemented\s*$', '  implementation_status: implemented'
+    $contract = $contract -replace '(?m)^    agent_kit_implementation_ref: null\s*$', ('    agent_kit_implementation_ref: ' + ('a' * 40))
+    Write-Utf8NoBom -Path $contractPath -Text $contract
+
+    & git.exe -C $contractRoot init --quiet
+    & git.exe -C $contractRoot config user.name fixture
+    & git.exe -C $contractRoot config user.email fixture@example.invalid
+    & git.exe -C $contractRoot add --all
+    & git.exe -C $contractRoot commit --quiet -m 'fixture active retrieval contract'
+    if ($LASTEXITCODE -ne 0) { throw 'Unable to commit contract fixture' }
+    $contractRef = [string](& git.exe -C $contractRoot rev-parse HEAD)
+    $indexData = [IO.File]::ReadAllText($indexPath, [Text.Encoding]::UTF8)
+    $digest = [Regex]::Match($indexData, '(?m)^  schema_bundle_digest: ([0-9a-f]{64})\s*$').Groups[1].Value
+    return [pscustomobject]@{ Root = $contractRoot; Ref = $contractRef.Trim(); Digest = $digest }
+}
+
+function Remove-FixtureSafely {
+    if (-not [string]::IsNullOrWhiteSpace($script:junctionPath) -and [IO.Directory]::Exists($script:junctionPath)) { [IO.Directory]::Delete($script:junctionPath) }
+    if (-not [IO.Directory]::Exists($fixtureRoot)) { return }
+    $workRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '.work')).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    $target = [IO.Path]::GetFullPath($fixtureRoot)
+    if (-not $target.StartsWith($workRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Fixture cleanup escaped tests/.work' }
+    Remove-Item -LiteralPath $target -Recurse -Force
+}
+
+try {
+    Assert-True ([IO.Directory]::Exists($BrainContractRoot)) 'Brain contract root exists'
+    foreach ($path in @($fingerprintScript, $receiptScript, $outcomeScript, $candidateScript)) { Assert-True ([IO.File]::Exists($path)) "script exists: $path" }
+    $null = New-Item -ItemType Directory -Path $fixtureRoot -Force
+    $contract = New-ContractFixture -Root $fixtureRoot
+    Assert-True ($contract.Ref -match '^[0-9a-f]{40}$') 'fixture contract exact Git ref'
+    Assert-True ($contract.Digest -match '^[0-9a-f]{64}$') 'fixture schema digest'
+
+    $evidenceRoot = Join-Path $fixtureRoot 'evidence'
+    $eventsRoot = Join-Path $evidenceRoot 'memory\retrieval-evidence\events'
+    $null = New-Item -ItemType Directory -Path $eventsRoot -Force
+    $receiptLog = 'memory/retrieval-evidence/events/receipts-2026-08.jsonl'
+    $outcomeLog = 'memory/retrieval-evidence/events/outcomes-2026-08.jsonl'
+    $query = 'private retrieval query fixture'
+    $fixtureKey = 'fixture-only-hmac-material-32-bytes'
+
+    $missingKey = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query
+    Assert-Equal 3 $missingKey.ExitCode 'missing HMAC key fails closed'
+    Assert-True (-not $missingKey.Stdout.Contains($query)) 'missing-key output omits query'
+
+    $fingerprint = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    Assert-Equal 0 $fingerprint.ExitCode 'fingerprint succeeds with process key'
+    Assert-Equal 'hmac-sha256-v1' ([string]$fingerprint.Data.fingerprint_scheme) 'fingerprint scheme'
+    Assert-True ([string]$fingerprint.Data.query_fingerprint -match '^[0-9a-f]{64}$') 'fingerprint shape'
+    Assert-True (-not $fingerprint.Stdout.Contains($query) -and -not $fingerprint.Stdout.Contains($fixtureKey)) 'fingerprint output omits query and key'
+    $fingerprintAgain = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
+    Assert-Equal $fingerprint.Stdout $fingerprintAgain.Stdout 'fingerprint is deterministic'
+
+    $envelope = [pscustomobject][ordered]@{
+        data = [pscustomobject][ordered]@{
+            retrieval_diagnostics = [pscustomobject][ordered]@{
+                schema = 'retrieval-diagnostics/v1'
+                volatile = $true
+                persisted = $false
+                index = [pscustomobject][ordered]@{ revision = ('2' * 64); generation_id = ('3' * 64); corpus_contract_version = '1.1.0'; fresh = $true; reason_code = 'fresh' }
+                sources = [pscustomobject][ordered]@{ attempted = @('memory'); used = @('memory'); errors = [pscustomobject]@{} }
+                collections = [pscustomobject][ordered]@{ requested = @(); available = @(); unavailable = @() }
+                evidence = @([pscustomobject][ordered]@{ type = 'brain:root'; id = 'ASSETS.md'; backend = 'memory'; path = 'ASSETS.md'; sources = @('memory'); score = 0.01639344262295082; document_id = 'brain:ASSETS.md'; content_hash = ('4' * 64); locator = 'ASSETS.md' })
+                graph_edge_count = 0
+            }
+        }
+    }
+    $envelopeJson = [string]($envelope | ConvertTo-Json -Depth 20 -Compress)
+    $receiptArgs = @(
+        '-BrainRoot', $evidenceRoot,
+        '-ContractRepositoryRoot', $contract.Root,
+        '-ContractRef', $contract.Ref,
+        '-ContractSchemaDigest', $contract.Digest,
+        '-EventLogPath', $receiptLog,
+        '-ReceiptId', 'receipt-fixture',
+        '-QueryFingerprint', ([string]$fingerprint.Data.query_fingerprint),
+        '-FingerprintKeyId', 'fixture-v1',
+        '-ResolverVersion', '1.0.0',
+        '-SourceRevision', ('b' * 40),
+        '-RecordedAt', '2026-08-24T09:00:00+09:00'
+    )
+    $wrongDigestArgs = @($receiptArgs)
+    $digestIndex = [Array]::IndexOf($wrongDigestArgs, '-ContractSchemaDigest') + 1
+    $wrongDigestArgs[$digestIndex] = 'f' * 64
+    $wrongDigest = Invoke-Script -ScriptPath $receiptScript -Arguments $wrongDigestArgs -Stdin $envelopeJson
+    Assert-Equal 3 $wrongDigest.ExitCode 'contract digest drift fails'
+    Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $receiptLog.Replace('/', '\')))) 'digest drift writes no log'
+
+    $receipt = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $envelopeJson
+    Assert-Equal 0 $receipt.ExitCode 'receipt append succeeds'
+    Assert-Equal 1 ([int]$receipt.Data.included) 'receipt includes lineage-complete evidence'
+    $receiptPath = Join-Path $evidenceRoot $receiptLog.Replace('/', '\')
+    $receiptBytes = [IO.File]::ReadAllBytes($receiptPath)
+    $receiptText = [IO.File]::ReadAllText($receiptPath, [Text.Encoding]::UTF8)
+    Assert-True (-not $receiptText.Contains($query) -and -not $receiptText.Contains($fixtureKey)) 'receipt stores no query or key'
+    Assert-True ($receiptText.Contains('"document_id":"brain:ASSETS.md"') -and $receiptText.Contains('"content_hash":"' + ('4' * 64) + '"')) 'receipt stores exact document lineage'
+
+    $duplicate = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $envelopeJson
+    Assert-Equal 3 $duplicate.ExitCode 'duplicate receipt id fails'
+    Assert-Equal ([Convert]::ToBase64String($receiptBytes)) ([Convert]::ToBase64String([IO.File]::ReadAllBytes($receiptPath))) 'duplicate failure preserves receipt bytes'
+
+    $candidateArgs = @(
+        '-BrainRoot', $evidenceRoot,
+        '-ContractRepositoryRoot', $contract.Root,
+        '-ContractRef', $contract.Ref,
+        '-ContractSchemaDigest', $contract.Digest,
+        '-ReceiptLogPath', $receiptLog,
+        '-OutcomeLogPath', $outcomeLog,
+        '-ReceiptId', 'receipt-fixture'
+    )
+    $withoutOutcome = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    Assert-Equal 0 $withoutOutcome.ExitCode 'candidate without outcome is returned'
+    Assert-Equal 'review' ([string]$withoutOutcome.Data.disposition) 'no outcome cannot infer success'
+    Assert-True (@($withoutOutcome.Data.reason_codes) -contains 'no-outcome') 'no outcome reason code'
+    Assert-Equal $false ([bool]$withoutOutcome.Data.stable_auto_promotion) 'candidate cannot auto-promote'
+
+    $orphanArgs = @(
+        '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $contract.Root, '-ContractRef', $contract.Ref, '-ContractSchemaDigest', $contract.Digest,
+        '-ReceiptLogPath', $receiptLog, '-EventLogPath', $outcomeLog,
+        '-OutcomeId', 'outcome-orphan', '-ReceiptId', 'receipt-missing', '-SignalKind', 'task-result', '-Verdict', 'helpful',
+        '-EvidenceRefs', 'task-result:fixture', '-ActorType', 'tool', '-RecordedAt', '2026-08-24T09:01:00+09:00'
+    )
+    $orphan = Invoke-Script -ScriptPath $outcomeScript -Arguments $orphanArgs
+    Assert-Equal 3 $orphan.ExitCode 'orphan outcome fails'
+    Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $outcomeLog.Replace('/', '\')))) 'orphan outcome writes no log'
+
+    $badHumanArgs = @($orphanArgs)
+    $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-OutcomeId') + 1] = 'outcome-bad-human'
+    $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-ReceiptId') + 1] = 'receipt-fixture'
+    $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-SignalKind') + 1] = 'human-explicit'
+    $badHumanArgs[[Array]::IndexOf($badHumanArgs, '-ActorType') + 1] = 'agent'
+    $badHuman = Invoke-Script -ScriptPath $outcomeScript -Arguments $badHumanArgs
+    Assert-Equal 3 $badHuman.ExitCode 'agent cannot create human-explicit outcome'
+
+    $outcomeArgs = @(
+        '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $contract.Root, '-ContractRef', $contract.Ref, '-ContractSchemaDigest', $contract.Digest,
+        '-ReceiptLogPath', $receiptLog, '-EventLogPath', $outcomeLog,
+        '-OutcomeId', 'outcome-helpful', '-ReceiptId', 'receipt-fixture', '-SignalKind', 'human-explicit', '-Verdict', 'helpful',
+        '-EvidenceRefs', 'human-approval:goal-29', '-ActorType', 'human', '-ApprovalRef', 'human-approval:goal-29', '-RecordedAt', '2026-08-24T09:02:00+09:00'
+    )
+    $outcome = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs
+    Assert-Equal 0 $outcome.ExitCode 'explicit helpful outcome append succeeds'
+    $outcomePath = Join-Path $evidenceRoot $outcomeLog.Replace('/', '\')
+    $outcomeBytes = [IO.File]::ReadAllBytes($outcomePath)
+    $outcomeDuplicate = Invoke-Script -ScriptPath $outcomeScript -Arguments $outcomeArgs
+    Assert-Equal 3 $outcomeDuplicate.ExitCode 'duplicate outcome id fails'
+    Assert-Equal ([Convert]::ToBase64String($outcomeBytes)) ([Convert]::ToBase64String([IO.File]::ReadAllBytes($outcomePath))) 'duplicate failure preserves outcome bytes'
+
+    $beforeReceipt = [Convert]::ToBase64String([IO.File]::ReadAllBytes($receiptPath))
+    $beforeOutcome = [Convert]::ToBase64String([IO.File]::ReadAllBytes($outcomePath))
+    $candidateOne = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    $candidateTwo = Invoke-Script -ScriptPath $candidateScript -Arguments $candidateArgs
+    Assert-Equal 0 $candidateOne.ExitCode 'candidate with outcome succeeds'
+    Assert-Equal $candidateOne.Stdout $candidateTwo.Stdout 'candidate JSON is byte-stable'
+    Assert-Equal 'preserve' ([string]$candidateOne.Data.disposition) 'explicit helpful outcome permits preserve candidate'
+    Assert-Equal 'candidate' ([string]$candidateOne.Data.status) 'candidate status remains candidate'
+    Assert-Equal $beforeReceipt ([Convert]::ToBase64String([IO.File]::ReadAllBytes($receiptPath))) 'evaluator leaves receipt bytes unchanged'
+    Assert-Equal $beforeOutcome ([Convert]::ToBase64String([IO.File]::ReadAllBytes($outcomePath))) 'evaluator leaves outcome bytes unchanged'
+
+    $outside = Join-Path $fixtureRoot 'outside'
+    $null = New-Item -ItemType Directory -Path (Join-Path $outside 'memory\retrieval-evidence\events') -Force
+    $script:junctionPath = Join-Path $fixtureRoot 'junction-evidence'
+    $null = New-Item -ItemType Junction -Path $script:junctionPath -Target $outside
+    $junctionArgs = @($receiptArgs)
+    $junctionArgs[[Array]::IndexOf($junctionArgs, '-BrainRoot') + 1] = $script:junctionPath
+    $junction = Invoke-Script -ScriptPath $receiptScript -Arguments $junctionArgs -Stdin $envelopeJson
+    Assert-Equal 3 $junction.ExitCode 'reparse BrainRoot fails closed'
+    Assert-True (-not [IO.File]::Exists((Join-Path $outside $receiptLog.Replace('/', '\')))) 'reparse failure leaves external target unchanged'
+}
+catch { $script:failure = [string]$_.Exception.Message }
+finally {
+    try { Remove-FixtureSafely }
+    catch { if ($null -eq $script:failure) { $script:failure = [string]$_.Exception.Message } }
+}
+
+if ($null -eq $script:failure) {
+    Write-Output "PASS: $script:assertions assertions"
+    exit 0
+}
+Write-Output "ERROR: $script:failure"
+Write-Output "FAIL after $script:assertions assertions"
+exit 1
