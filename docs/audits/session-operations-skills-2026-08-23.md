@@ -3,7 +3,7 @@
 - 날짜: 2026-08-23
 - Goal: 15
 - 브랜치: `feat/design-team-session-continuity`
-- 상태: 구현 완료, 로컬 검증 결과 기록 예정
+- 상태: 구현·로컬 검증 완료, 사람 통합 게이트 대기
 
 ## 목적
 
@@ -46,7 +46,16 @@
 
 ## 검증 결과
 
-구현 게이트 실행 뒤 명령, 결과, manifest digest, catalog digest를 이 절에 기록한다. 사용자 홈 설치·외부 provider 실행은 수행하지 않는다.
+- `python -B -X utf8 <skill-creator>/scripts/quick_validate.py <skill>` — `design-team`과 새 세 스킬 모두 PASS. `<skill-creator>`는 실행 환경이 제공한 validator이며 저장소 산출물에 절대경로를 고정하지 않았다.
+- `node scripts/check-goal-15.mjs` — PASS. 책임 경계, report/`worker_done`, 이중 영수증, takeover fail-closed, 5계층 조사, 양방향 링크, 적대 fixture 5건, Goal 11–14 회귀를 검증했다.
+- manifest digest — `design-team` `68A4937B956ADDACE7B47A3C0782D886FF8F1A0938B961645048351C6733787C`; `supervised-session-conductor` `D9DA0572568C2D1E808212A26904713E922494DB68DD3E4AFB972101E842FF25`; `restart-safe-handoff` `F60B82EFFDF017509C694DDD661EB421740EA530524F8DCA133274989A2FCA7C`; `runtime-incident-investigator` `D0C87034222939609FCF7DCF41F1648F725A77DBC411BE51E0CFE62AFB956296`.
+- `node scripts/Build-AssetCatalog.mjs` — PASS. 210개 자산, catalog digest `ce9a161b6386fa7d0c1d180aa5969939a1c3d0337ab1e112ca52feab18adc23b`.
+- `powershell ... tests/Manage-MultivendorSkills.Tests.ps1` — PASS, 233 assertions. `All`이 7개 스킬을 선택하며 fixture HomeRoot의 Check→Install→Healthy→Restore와 transaction 보안 회귀를 통과했다.
+- 새 세 스킬의 실제 `Manage-MultivendorSkills.ps1 -Mode Check` — canonical source `valid`, 대상 미설치로 `Installable`, 각 3개 표준 junction 계획. 쓰기는 수행하지 않았다.
+- 기존 실홈 `design-team` junction은 main checkout을 가리키고 검증 정본은 격리 branch여서 `Conflict`로 fail-closed됐다. 승인 없이 재연결하거나 덮어쓰지 않았다.
+- `git diff --check` — PASS.
+
+사용자 홈 설치·외부 provider 실행은 수행하지 않았다.
 
 ## 사람 게이트와 잔존 위험
 
