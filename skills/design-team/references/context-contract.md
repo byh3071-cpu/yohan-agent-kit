@@ -138,14 +138,15 @@ Update the current snapshot after appending the event. Never erase a rejected di
 
 At the beginning of each design session:
 
-1. Resolve the closest current snapshot and decision log.
-2. Re-check rules, active work, source refs, and any freshness triggers.
-3. Summarize what is known, what changed, and what still needs a human decision.
+1. Resolve the closest current snapshot, decision log, and continuation bundle when one exists.
+2. Re-check rules, active work, source refs, artifact visibility, approval state, production boundary, and any freshness triggers.
+3. Acknowledge what is inherited, what changed, and the exact next human decision. Do not ask the director to repeat confirmed context.
 
 At the end:
 
 1. Save only verified observations, explicit decisions, and clearly labeled open questions.
 2. Link generated artifacts and verification evidence from the owner project.
 3. Record the next gate and exact continuation point.
+4. When pausing or transferring, write the minimum bundle and delivery receipt under [session-continuity.md](session-continuity.md).
 
 This is the skill's durable project memory. Conversation history is a convenience, never the source of truth. Git is preferred where the project already uses Git, but Git is not imposed on physical, service, regulated, or vendor-controlled work.

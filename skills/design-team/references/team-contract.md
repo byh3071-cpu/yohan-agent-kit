@@ -4,7 +4,7 @@ Compose roles from the problem's uncertainty. Do not hardcode a model, vendor, o
 
 ## Required ownership
 
-- **Design conductor** — owns the user dialogue including taste elicitation, context integrity, synthesis, gates, and final handoff. Only one role holds the director dialogue; parallel workers must not interview the director separately.
+- **Design conductor** — owns the user dialogue including taste elicitation, context integrity, synthesis, gates, session continuity, and final handoff. Only one role holds the director dialogue; parallel workers must not interview the director separately.
 - **Design director** — the user or named human who selects direction and approves acceptance.
 
 One agent may cover all other roles when the task is small. Add separation when independent evidence or critique improves the decision.
@@ -40,6 +40,7 @@ Use local routing rules when they are stricter. Same-repository concurrent editi
 3. Prefer read-only workers for research and critique. Give write ownership to one worktree per repository/branch.
 4. The conductor reconciles disagreements and preserves dissent; workers do not decide the final direction.
 5. If a requested provider or model is unavailable, use an available equivalent and disclose the substitution.
+6. Use the director's confirmed language and vocabulary, present one material decision at a time, and distinguish a conversational acknowledgement from direction selection or final acceptance.
 
 ## Independent design session
 
@@ -49,6 +50,7 @@ When the user asks for a separately owned top-level design session:
 - give it design research, directions, and medium-appropriate specification scope;
 - prohibit production work until the design director selects a target;
 - hand over a project-owned context bundle with stable identifiers and a launch prompt;
+- require the receiving conductor to acknowledge the source ref, approval state, production boundary, and exact next gate under [session-continuity.md](session-continuity.md);
 - do not describe a subordinate worker as an independent top-level session;
 - let the independent session own its own conversation while the implementation lineage consumes only approved artifacts.
 

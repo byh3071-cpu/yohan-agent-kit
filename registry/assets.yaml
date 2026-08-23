@@ -3472,6 +3472,29 @@
       ]
     },
     {
+      "id": "script.check-goal-14",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-14.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/14-design-team-session-continuity.md",
+        "docs/audits/design-team-session-continuity-2026-08-23.md",
+        "scripts/check-goal-14.mjs"
+      ]
+    },
+    {
       "id": "script.get-agent-asset-drift",
       "kind": "script",
       "owner": "yohan-agent-kit",
