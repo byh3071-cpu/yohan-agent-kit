@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "report-without-worker-done",
+      "ownerSkill": "supervised-session-conductor",
+      "observed": {
+        "report": { "present": true, "ref": "artifact:report-a" },
+        "workerDone": false,
+        "coordinator": "unknown"
+      },
+      "expected": {
+        "classification": "content-present-runtime-unresolved",
+        "nextGate": "resolve-worker-lifecycle",
+        "forbiddenClaims": ["final-complete", "automatic-redispatch"]
+      }
+    },
+    {
+      "id": "worker-done-without-report",
+      "ownerSkill": "supervised-session-conductor",
+      "observed": {
+        "report": { "present": false, "ref": null },
+        "workerDone": true,
+        "coordinator": "active"
+      },
+      "expected": {
+        "classification": "runtime-complete-content-missing",
+        "nextGate": "obtain-stable-result-or-failure-report",
+        "forbiddenClaims": ["deliverable-verified", "final-complete"]
+      }
+    },
+    {
+      "id": "live-coordinator-blocks-takeover",
+      "ownerSkill": "restart-safe-handoff",
+      "observed": {
+        "coordinator": "active",
+        "ownershipEpoch": 4,
+        "takeoverAuthority": false
+      },
+      "expected": {
+        "classification": "ownership-active",
+        "nextGate": "route-to-current-writer",
+        "forbiddenClaims": ["takeover-authorized", "second-writer-safe"]
+      }
+    },
+    {
+      "id": "design-vs-qa-conflict",
+      "ownerSkill": "supervised-session-conductor",
+      "observed": {
+        "designReport": { "decision": "accept", "ref": "artifact:design-b" },
+        "qaReport": { "decision": "reject", "ref": "artifact:qa-b" },
+        "humanDecision": null
+      },
+      "expected": {
+        "classification": "conflict-open",
+        "nextGate": "single-final-human-decision",
+        "forbiddenClaims": ["average-the-results", "worker-self-approval"]
+      }
+    },
+    {
+      "id": "same-time-enoent-runtime-unavailable",
+      "ownerSkill": "runtime-incident-investigator",
+      "observed": {
+        "events": [
+          { "time": "12:00:00", "layer": "Project", "kind": "ENOENT" },
+          { "time": "12:00:00", "layer": "Runtime", "kind": "unavailable" }
+        ],
+        "sharedMechanismEvidence": false
+      },
+      "expected": {
+        "classification": "correlated-not-causal",
+        "nextGate": "test-shared-mechanism",
+        "forbiddenClaims": ["enoent-caused-runtime-loss", "runtime-loss-caused-enoent"]
+      }
+    }
+  ]
+}
