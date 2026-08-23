@@ -3,12 +3,13 @@ vhk_format: 1
 type: goal
 id: 14
 title: 디자인 팀 세션 연속성·수신 확인·운영 인수인계
-status: IN_PROGRESS
+status: DONE
 priority: P0
 size: L
 execution_provider: native-approved
 automatic_fallback: false
 started: 2026-08-23
+completed: 2026-08-23
 ---
 
 # Goal 14: 디자인 팀 세션 연속성·운영 인수인계
@@ -36,14 +37,14 @@ Goal 11–13은 프로젝트 컨텍스트, 취향 상담, 레퍼런스와 검증
 
 ## Completion Check
 
-- [ ] `session-continuity.md`가 필수 번들, 시작 handshake, 종료 receipt, 실패 복구를 규정한다.
-- [ ] 짧은 진행 동의가 취향 규칙·최종 승인으로 승격되지 않고 승인 단계가 명시적으로 분리된다.
-- [ ] 다음 세션은 해결된 질문을 반복하지 않고 정확한 다음 사람 게이트에서 대화를 시작한다.
-- [ ] 이미지·시안은 실제 표시와 안정 경로가 확인되기 전 선택을 요구하지 않는다.
-- [ ] 보고서 작성·전송 시도·대상 수신 확인이 서로 다른 상태와 근거를 가진다.
-- [ ] 운영 매뉴얼·SKILL·context·report·team 계약이 같은 세션 연속성 모델을 사용한다.
-- [ ] 실제 프로젝트 forward test의 취향값·경로는 프로젝트 저장소에만 남는다.
-- [ ] 스킬 validator, manifest, registry/catalog, Goal 11–13 회귀 게이트가 통과한다.
+- [x] `session-continuity.md`가 필수 번들, 시작 handshake, 종료 receipt, 실패 복구를 규정한다.
+- [x] 짧은 진행 동의가 취향 규칙·최종 승인으로 승격되지 않고 승인 단계가 명시적으로 분리된다.
+- [x] 다음 세션은 해결된 질문을 반복하지 않고 정확한 다음 사람 게이트에서 대화를 시작한다.
+- [x] 이미지·시안은 실제 표시와 안정 경로가 확인되기 전 선택을 요구하지 않는다.
+- [x] 보고서 작성·전송 시도·대상 수신 확인이 서로 다른 상태와 근거를 가진다.
+- [x] 운영 매뉴얼·SKILL·context·report·team 계약이 같은 세션 연속성 모델을 사용한다.
+- [x] 실제 프로젝트 forward test의 취향값·경로는 프로젝트 저장소에만 남는다.
+- [x] 스킬 validator, manifest, registry/catalog, Goal 11–13 회귀 게이트가 통과한다.
 
 ## Forbidden
 

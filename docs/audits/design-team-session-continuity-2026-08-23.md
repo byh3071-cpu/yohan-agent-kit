@@ -3,7 +3,7 @@
 - 날짜: 2026-08-23
 - Goal: 14
 - 브랜치: `feat/design-team-session-continuity`
-- 상태: 구현·검증 중
+- 상태: 구현·로컬 검증 완료, 사람 통합 게이트 대기
 
 ## 결정 영향
 
@@ -42,4 +42,15 @@ Design Team의 프로젝트 기억 계약을 “문서를 남긴다”에서 “
 
 ## 검증 결과
 
-완료 뒤 실제 명령, 판정, 잔존 위험을 기록한다.
+- `python -B -X utf8 <skill-creator>/scripts/quick_validate.py skills/design-team` — PASS (`Skill is valid!`). `<skill-creator>`는 실행 환경이 제공한 현재 validator 경로이며 저장소 산출물에는 고정하지 않았다.
+- `node scripts/check-goal-14.mjs` — PASS. 세션 연속성 계약, 승인·전달·시각 영수증, 고정 경로·프로젝트·벤더·모델 배제, Goal 11–13 회귀가 모두 통과했다.
+- `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/New-SkillManifest.ps1 -Skill design-team` — PASS. 생성 결과가 tracked manifest와 일치했고 digest는 `C3B3059048BA63AC471E22F8E7817D04D4DF324E567511311CDC106900B09265`였다.
+- `node scripts/Build-AssetCatalog.mjs` — PASS. 203개 자산, catalog digest `03b90bb3ed4627971b6d48f90f5e9aa6475e11ecc8e8b4374e6bf707a5b8727f`.
+- `git diff --check` — PASS.
+- `Manage-MultivendorSkills.ps1 -Mode Check -Skill design-team` — source 무결성 충돌 없이 `Installable`. 현재 사용자 홈의 네 표준 대상이 비어 있어 설치 계획만 산출됐으며, Goal 비범위와 사용자 금지에 따라 Install은 실행하지 않았다.
+
+## 잔존 위험과 사람 게이트
+
+- `Installable`은 실홈 새 세션 발견을 증명하지 않는다. 실제 홈 설치와 벤더별 새 세션 확인은 별도 사용자 승인 뒤에만 가능하다.
+- 현재 검증은 정적 계약과 저장소 fixture에 대한 증거다. 외부 세션 런타임의 전달 성공은 대상 acknowledgement가 있을 때만 별도로 주장할 수 있다.
+- push, PR, release, 실홈 설치, merge, publish는 수행하지 않는다.
