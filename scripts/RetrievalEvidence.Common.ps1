@@ -190,7 +190,9 @@ function Assert-ImplementationBinding {
     }
     $pinnedDigest = Get-ImplementationBundleDigest -RepositoryRoot $root -RelativePaths $RelativePaths -GitRef $PinnedRef
     $workingDigest = Get-ImplementationBundleDigest -RepositoryRoot $root -RelativePaths $RelativePaths
-    if ($pinnedDigest -cne $ExpectedBundleDigest -or $workingDigest -cne $ExpectedBundleDigest) { throw "$Label runtime bundle does not match the activated implementation digest" }
+    if ($pinnedDigest -cne $ExpectedBundleDigest -or $workingDigest -cne $ExpectedBundleDigest) {
+        throw "$Label runtime bundle does not match the activated implementation digest (expected=$ExpectedBundleDigest pinned=$pinnedDigest working=$workingDigest)"
+    }
     return [pscustomobject][ordered]@{ Root = $root; Head = $head; BundleDigest = $workingDigest }
 }
 

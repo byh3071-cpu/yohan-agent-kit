@@ -60,11 +60,8 @@ function Invoke-ProcessWithInput {
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $start
     $null = $process.Start()
-    $stdinBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Stdin)
-    $stdinStream = $process.StandardInput.BaseStream
-    $stdinStream.Write($stdinBytes, 0, $stdinBytes.Length)
-    $stdinStream.Flush()
-    $stdinStream.Close()
+    if ($Stdin.Length -gt 0) { $process.StandardInput.Write($Stdin) }
+    $process.StandardInput.Close()
     $stdout = $process.StandardOutput.ReadToEnd()
     $stderr = $process.StandardError.ReadToEnd()
     $process.WaitForExit()

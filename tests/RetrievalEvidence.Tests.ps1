@@ -216,7 +216,7 @@ try {
     Assert-True (-not [IO.File]::Exists((Join-Path $evidenceRoot $receiptLog.Replace('/', '\')))) 'query binding mismatch writes no log'
 
     $receipt = Invoke-Script -ScriptPath $receiptScript -Arguments $receiptArgs -Stdin $boundInputJson -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
-    Assert-Equal 0 $receipt.ExitCode 'receipt append succeeds'
+    Assert-Equal 0 $receipt.ExitCode ("receipt append succeeds; stderr=" + $receipt.Stderr)
     Assert-Equal 1 ([int]$receipt.Data.included) 'receipt includes lineage-complete evidence'
     $receiptPath = Join-Path $evidenceRoot $receiptLog.Replace('/', '\')
     $receiptBytes = [IO.File]::ReadAllBytes($receiptPath)
