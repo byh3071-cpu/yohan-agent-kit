@@ -484,7 +484,7 @@ function Assert-AllowedObjectFields {
 }
 
 function Assert-UniqueJsonObjectKeys {
-    param([Parameter(Mandatory = $true)][string]$Text, [switch]$JsonLines, [string]$Label = 'JSON input')
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text, [switch]$JsonLines, [string]$Label = 'JSON input')
 
     $python = Get-Command python.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1
     $helper = Join-Path $PSScriptRoot 'Assert-UniqueJsonKeys.py'
