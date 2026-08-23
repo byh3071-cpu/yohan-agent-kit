@@ -3,12 +3,13 @@ vhk_format: 1
 type: goal
 id: 16
 title: RetrievalReceipt·성과 학습 후보 루프
-status: IN_PROGRESS
+status: DONE
 priority: P0
 size: L
 execution_provider: native-approved
 automatic_fallback: false
 started: 2026-08-24
+completed: 2026-08-24
 ---
 
 # Goal 16: RetrievalReceipt·성과 학습 후보 루프
@@ -29,15 +30,15 @@ yohan-mcp의 읽기 전용 retrieval diagnostics를 명시적 post-action 명령
 
 ## 완료 조건
 
-- [ ] HMAC 키가 process environment에 없으면 write 전 실패한다.
-- [ ] fingerprint 출력과 tracked JSONL에 query 원문·키가 없다.
-- [ ] receipt/outcome append가 기존 bytes를 바꾸지 않고 duplicate·orphan·broken supersedes를 거부한다.
-- [ ] contract ref·schema digest drift와 draft contract를 거부한다.
-- [ ] BrainRoot 밖·reparse 경로 write를 거부한다.
-- [ ] outcome 없는 candidate를 성공으로 추론하지 않는다.
-- [ ] 같은 receipt/outcome 입력은 byte-stable candidate를 만든다.
-- [ ] 실제 yohan-mcp 봉투 fixture가 receipt → outcome → candidate 한 바퀴를 통과한다.
-- [ ] Brain·MCP·Agent Kit 전체 게이트와 독립 적대 검수가 통과한다.
+- [x] HMAC 키가 process environment에 없으면 write 전 실패한다.
+- [x] fingerprint 출력과 tracked JSONL에 query 원문·키가 없다.
+- [x] receipt/outcome append가 기존 bytes를 바꾸지 않고 duplicate·orphan·broken supersedes를 거부한다.
+- [x] contract ref·schema digest drift와 draft contract를 거부한다.
+- [x] BrainRoot 밖·reparse 경로 write를 거부한다.
+- [x] outcome 없는 candidate를 성공으로 추론하지 않는다.
+- [x] 같은 receipt/outcome 입력은 byte-stable candidate를 만든다.
+- [x] 실제 yohan-mcp 봉투 fixture가 receipt → outcome → candidate 한 바퀴를 통과한다.
+- [x] Brain·MCP·Agent Kit 전체 게이트와 독립 적대 검수가 통과한다.
 
 ## 비범위
 
@@ -52,3 +53,11 @@ yohan-mcp의 읽기 전용 retrieval diagnostics를 명시적 post-action 명령
 ## 악수
 
 입력은 특정 Git ref의 활성 Brain schema와 동일 retrieval generation의 MCP diagnostics이고, 출력은 그 계보·HMAC fingerprint·실제 outcome만 담은 append-only receipt와 candidate다.
+
+## 완료 영수증
+
+- 실행 계약 ref `7188341`, runtime digest `b72cd64f…`
+- native `56 assertions` PASS
+- 실제 yohan-mcp stdio cross-repo `30 assertions` PASS
+- Goal 16 전체 gate PASS
+- 독립 검수 `APPROVED — NO BLOCKER / NO MAJOR`
