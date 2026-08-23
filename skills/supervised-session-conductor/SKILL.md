@@ -26,6 +26,8 @@ Keep a ledger with enough stable identifiers to reconcile independent channels:
 
 Do not create a second writer while the recorded coordinator is alive. If ownership is unclear, inspect read-only evidence and preserve the lower claim. A restart or takeover belongs to `restart-safe-handoff`, not to ordinary supervision.
 
+When a run spans multiple roles, interruption recovery, or a final decision conflict, read the [session operations manual](references/operating-manual.md) for the end-to-end routing and closure flow. Keep this skill as the dialogue owner; the manual does not merge worker responsibilities.
+
 ## Reconcile reports and lifecycle signals
 
 Treat content and runtime state as independent:
