@@ -1,5 +1,5 @@
 {
-  "assetCount": 202,
+  "assetCount": 203,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -732,7 +732,7 @@
       ]
     },
     {
-      "contentDigest": "857cddbacb96f35b46e5269d44c5f9f06e5750dadb88864722379651a54b5848",
+      "contentDigest": "39f44e2b5fb68fff4a5dc825e42d0c9c074e19044840b95d80b9572239756b48",
       "evidenceRefs": [
         "distribution/manifests/design-team.json"
       ],
@@ -1664,6 +1664,30 @@
       ]
     },
     {
+      "contentDigest": "5751b9440c5cb9fc2e49ac20d48e6cba7076fb7e69cf601621972138bf85c9fb",
+      "evidenceRefs": [
+        "goals/14-design-team-session-continuity.md",
+        "docs/audits/design-team-session-continuity-2026-08-23.md",
+        "scripts/check-goal-14.mjs"
+      ],
+      "id": "script.check-goal-14",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-14.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
@@ -2411,7 +2435,7 @@
       ]
     },
     {
-      "contentDigest": "de715671a0266493699a6d6e0e7c784e32bb19c9bebcbe62ec89279aff6193ae",
+      "contentDigest": "e54e4f3c50c455186d87c39e5a8f2d03b74ae2984c9684dc3c7cd9ec61cbc4d5",
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
@@ -4187,9 +4211,9 @@
       ]
     }
   ],
-  "catalogDigest": "04a7ee835257fac2ae0e190fc6e0b46d3fa5faaf606957432ab632a6cfbda4fa",
+  "catalogDigest": "03b90bb3ed4627971b6d48f90f5e9aa6475e11ecc8e8b4374e6bf707a5b8727f",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "d5a021616d5a4ef737ace1765004d5b3bc5906b01553e4e865e759e04071bd98",
+  "registryDigest": "c7b77e156147215a1f8b2ba27a9c55358ac71c307f09963aa866c0f43509c43d",
   "schemaVersion": 1
 }
