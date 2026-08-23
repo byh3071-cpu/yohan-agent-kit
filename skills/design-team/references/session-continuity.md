@@ -4,6 +4,8 @@ A new session must resume the design relationship, not merely receive a summary.
 
 Use this contract when a design workstream pauses, changes conductor, moves to another session or machine, or separates into an independently owned design session.
 
+This contract is the design-domain extension of the generic [restart-safe handoff](../../restart-safe-handoff/SKILL.md). The generic skill owns durable bundle, writer ownership, takeover, and content-versus-delivery receipt semantics; this document adds design approval, taste, artifact visibility, and production-boundary semantics. If the generic skill is not installed, this contract still defines the complete design continuation behavior required here.
+
 ## Project-owned continuation bundle
 
 Use the owner's existing versioned documentation convention. Do not create a parallel source of truth. A complete bundle resolves these fields, either in one handoff file or through stable pointers:
