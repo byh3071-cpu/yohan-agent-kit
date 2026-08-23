@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -22,6 +23,22 @@ const gate = (label, ok, detail = '') => {
 }
 const read = (path) => readFileSync(join(repoRoot, path), 'utf8').replace(/^﻿/u, '')
 const has = (text, ...needles) => needles.every((needle) => text.includes(needle))
+const agentKitRuntimePaths = [
+  'scripts/Get-RetrievalLearningCandidate.ps1',
+  'scripts/New-RetrievalQueryFingerprint.ps1',
+  'scripts/Record-RetrievalOutcome.ps1',
+  'scripts/Record-RetrievalReceipt.ps1',
+  'scripts/RetrievalEvidence.Common.ps1',
+].sort()
+const bundleDigest = (readText) => {
+  let payload = ''
+  for (const path of agentKitRuntimePaths) {
+    let value = readText(path).replace(/\r\n?/gu, '\n')
+    if (!value.endsWith('\n')) value += '\n'
+    payload += `${path}\n${value}`
+  }
+  return createHash('sha256').update(payload, 'utf8').digest('hex')
+}
 
 if (existsSync(join(repoRoot, '.vhk', 'HARD_STOP'))) {
   console.log('[goal 16] HARD_STOP detected: FAIL')
@@ -55,7 +72,7 @@ gate('contract requires active implemented state', has(common, 'Retrieval eviden
 gate('event storage is append-only and reparse guarded', has(common, 'Add-JsonLineAppendOnly', '[IO.FileMode]::CreateNew', '[IO.FileMode]::Open', 'ReparsePoint', 'Duplicate $IdProperty'))
 gate('fingerprint reads stdin and process environment only', has(fingerprint, '[Console]::In.ReadToEnd()', '[EnvironmentVariableTarget]::Process', 'HMACSHA256', 'hmac-sha256-v1'))
 gate('receipt requires volatile non-persisted diagnostics', has(receipt, 'retrieval-diagnostics/v1', '[bool]$diagnostics.volatile -ne $true', '[bool]$diagnostics.persisted -ne $false'))
-gate('receipt records exact document lineage', has(receipt, 'document_id = $documentId', 'content_hash = $contentHash', 'locator = $locator', 'persistent_query_copy = $false'))
+gate('receipt binds query, MCP runtime, and exact document lineage', has(receipt, "Assert-AllowedObjectFields -Value $boundInput", 'query_binding.digest', 'McpRuntimeBundleDigest', 'document_id = $documentId', 'content_hash = $contentHash', 'persistent_query_copy = $false'))
 gate('human outcome cannot be inferred by an agent', has(outcome, "if ($SignalKind -eq 'human-explicit')", "if ($ActorType -ne 'human')", 'explicit human-approval ref'))
 gate('candidate is deterministic and candidate-only', has(candidate, 'retrieval-learning-candidate/v1', "'candidate-' + (Get-Sha256Hex", "status = 'candidate'", 'stable_auto_promotion = $false'))
 gate('candidate without outcome cannot preserve', has(candidate, "$reasonCodes.Add('no-outcome')", "$disposition = 'review'", "$disposition = 'preserve'", "$verdicts[0] -ceq 'helpful'"))
@@ -82,7 +99,7 @@ if (brainRoot && existsSync(brainRoot)) {
   try {
     const output = execFileSync('powershell.exe', [
       '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-      '-File', 'tests/RetrievalEvidence.Tests.ps1', '-BrainContractRoot', brainRoot,
+      '-File', 'tests/RetrievalEvidence.Tests.ps1', '-BrainContractRoot', brainRoot, '-McpRoot', mcpRoot,
     ], { cwd: repoRoot, encoding: 'utf8', timeout: 5 * 60_000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })
     gate('native retrieval evidence tests', /^PASS: \d+ assertions/mu.test(output), output.trim())
   } catch (error) {
@@ -102,7 +119,10 @@ if (brainRoot && existsSync(brainRoot) && mcpRoot && existsSync(mcpRoot)) {
     const schemaDigest = exactValue('schema_bundle_digest', 64)
     const schemaSourceRef = exactValue('schema_source_ref', 40)
     const pinnedMcpRef = exactValue('mcp_diagnostics_implementation_ref', 40)
+    const pinnedMcpDigest = exactValue('mcp_runtime_bundle_digest', 64)
     const pinnedAgentKitRef = exactValue('agent_kit_implementation_ref', 40)
+    const pinnedAgentKitDigest = exactValue('agent_kit_runtime_bundle_digest', 64)
+    const goldenProofHash = exactValue('content_hash', 64)
 
     gate('Brain exact schema digest discovered', /^[0-9a-f]{64}$/u.test(schemaDigest), schemaDigest || 'missing')
     gate('MCP checkout matches activated implementation ref', pinnedMcpRef === mcpRef, `${pinnedMcpRef || 'missing'} / ${mcpRef}`)
@@ -111,13 +131,21 @@ if (brainRoot && existsSync(brainRoot) && mcpRoot && existsSync(mcpRoot)) {
     try { gitText(brainRoot, ['merge-base', '--is-ancestor', schemaSourceRef, brainRef]); brainSchemaAncestor = true } catch {}
     try { gitText(repoRoot, ['merge-base', '--is-ancestor', pinnedAgentKitRef, 'HEAD']); agentKitImplementationAncestor = true } catch {}
     gate('Brain checkout descends from schema source ref', brainSchemaAncestor, schemaSourceRef || 'missing')
+    let agentKitRuntimeBound = false
+    try {
+      const pinnedDigest = bundleDigest((path) => gitText(repoRoot, ['show', `${pinnedAgentKitRef}:${path}`]))
+      const workingDigest = bundleDigest((path) => readFileSync(join(repoRoot, path), 'utf8'))
+      agentKitRuntimeBound = pinnedDigest === pinnedAgentKitDigest && workingDigest === pinnedAgentKitDigest
+    } catch {}
     gate('Agent Kit checkout descends from activated implementation ref', agentKitImplementationAncestor, pinnedAgentKitRef || 'missing')
+    gate('Agent Kit runtime bytes match activated bundle digest', agentKitRuntimeBound, pinnedAgentKitDigest || 'missing')
+    gate('MCP runtime bundle digest is activated', /^[0-9a-f]{64}$/u.test(pinnedMcpDigest), pinnedMcpDigest || 'missing')
 
-    if (/^[0-9a-f]{64}$/u.test(schemaDigest) && pinnedMcpRef === mcpRef && brainSchemaAncestor && agentKitImplementationAncestor) {
+    if (/^[0-9a-f]{64}$/u.test(schemaDigest) && /^[0-9a-f]{64}$/u.test(goldenProofHash) && pinnedMcpRef === mcpRef && brainSchemaAncestor && agentKitImplementationAncestor && agentKitRuntimeBound) {
       const crossOutput = execFileSync('powershell.exe', [
         '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
         '-File', 'tests/RetrievalEvidence.CrossRepo.Tests.ps1',
-        '-BrainRoot', brainRoot, '-BrainRef', brainRef, '-ContractSchemaDigest', schemaDigest,
+        '-BrainRoot', brainRoot, '-BrainRef', brainRef, '-ContractSchemaDigest', schemaDigest, '-GoldenProofHash', goldenProofHash,
         '-McpRoot', mcpRoot, '-McpRef', mcpRef,
       ], { cwd: repoRoot, encoding: 'utf8', timeout: 5 * 60_000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })
       gate('actual MCP envelope cross-repository fixture', /^PASS: \d+ assertions/mu.test(crossOutput), crossOutput.trim())

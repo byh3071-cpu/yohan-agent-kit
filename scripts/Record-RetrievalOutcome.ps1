@@ -31,20 +31,36 @@ try {
     $evidence = New-Object Collections.Generic.List[string]
     foreach ($reference in @($EvidenceRefs)) {
         $value = [string]$reference
-        if ([string]::IsNullOrWhiteSpace($value) -or $value -notmatch '^[a-z][a-z0-9+.-]*:[^\r\n]+$' -or [IO.Path]::IsPathRooted($value)) { throw 'EvidenceRefs contains an invalid reference' }
+        if ([string]::IsNullOrWhiteSpace($value) -or $value -notmatch '^(human-approval|golden-eval|task-result):[a-z0-9][a-z0-9._-]{0,127}@git:[0-9a-f]{40}@sha256:[0-9a-f]{64}$') { throw 'EvidenceRefs contains an invalid content-addressed proof reference' }
         if (-not $evidence.Contains($value)) { $evidence.Add($value) }
     }
-    if ($evidence.Count -eq 0) { throw 'EvidenceRefs cannot be empty' }
+    if ($evidence.Count -ne 1) { throw 'Exactly one outcome proof reference is required in v1' }
     if ($SignalKind -eq 'human-explicit') {
         if ($ActorType -ne 'human') { throw 'human-explicit outcome requires a human actor' }
-        if ([string]::IsNullOrWhiteSpace($ApprovalRef) -or $ApprovalRef -notmatch '^human-approval:[^\r\n]+$') { throw 'human-explicit outcome requires an explicit human-approval ref' }
+        if ([string]::IsNullOrWhiteSpace($ApprovalRef) -or $ApprovalRef -cne $evidence[0]) { throw 'human-explicit outcome requires the exact content-addressed human approval ref' }
+    }
+    else {
+        if ($ActorType -ne 'tool') { throw "$SignalKind outcome requires a tool actor" }
+        if (-not [string]::IsNullOrWhiteSpace($ApprovalRef)) { throw 'Non-human outcomes cannot carry ApprovalRef' }
     }
 
     $snapshot = Get-RetrievalContractSnapshot -ContractRepositoryRoot $ContractRepositoryRoot -ContractRef $ContractRef -ExpectedSchemaDigest $ContractSchemaDigest
-    $receipts = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $ReceiptLogPath -Kind receipts -IdProperty receipt_id -RequireExisting
+    Assert-MonthlyEventPath -RelativePath $EventLogPath -RecordedAt $RecordedAt -Kind outcomes
+    Assert-ProductionEventRegistration -BrainRoot $BrainRoot -ContractSnapshot $snapshot -RelativePath $EventLogPath
+    $specifiedReceiptLog = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $ReceiptLogPath -Kind receipts -IdProperty receipt_id -RequireExisting
+    if (-not $specifiedReceiptLog.Ids.ContainsKey($ReceiptId)) { throw 'ReceiptLogPath does not contain ReceiptId' }
+    $receipts = Read-AllJsonLineLogs -BrainRoot $BrainRoot -Kind receipts -IdProperty receipt_id
     if (-not $receipts.Ids.ContainsKey($ReceiptId)) { throw 'Outcome receipt_id does not exist' }
-    $outcomes = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $EventLogPath -Kind outcomes -IdProperty outcome_id
-    if (-not [string]::IsNullOrWhiteSpace($Supersedes) -and -not $outcomes.Ids.ContainsKey($Supersedes)) { throw 'Supersedes must reference an existing outcome in the same log' }
+    $receipt = @($receipts.Rows | Where-Object { [string]$_.receipt_id -ceq $ReceiptId })[0]
+    if ([string]$receipt.contract_ref -cne $ContractRef -or [string]$receipt.contract_schema_digest -cne $ContractSchemaDigest) { throw 'Outcome contract binding does not match the receipt' }
+    $outcomes = Read-AllJsonLineLogs -BrainRoot $BrainRoot -Kind outcomes -IdProperty outcome_id
+    if ($outcomes.Ids.ContainsKey($OutcomeId)) { throw 'Duplicate outcome_id across outcome logs' }
+    if (-not [string]::IsNullOrWhiteSpace($Supersedes)) {
+        if (-not $outcomes.Ids.ContainsKey($Supersedes)) { throw 'Supersedes must reference an existing prior outcome' }
+        $prior = @($outcomes.Rows | Where-Object { [string]$_.outcome_id -ceq $Supersedes })[0]
+        if ([string]$prior.receipt_id -cne $ReceiptId) { throw 'Supersedes must stay within the same receipt' }
+    }
+    $null = Resolve-OutcomeProof -ContractSnapshot $snapshot -Receipt $receipt -Reference $evidence[0] -SignalKind $SignalKind -Verdict $Verdict -ActorType $ActorType
 
     $outcome = [pscustomobject][ordered]@{
         schema_version = 1

@@ -18,15 +18,7 @@ try {
     if ($query.Length -gt 0 -and [int][char]$query[0] -eq 0xFEFF) { $query = $query.Substring(1) }
     if ([string]::IsNullOrEmpty($query)) { throw 'Query stdin cannot be empty' }
     if ($query.IndexOf([char]0) -ge 0) { throw 'Query stdin contains a forbidden null character' }
-    $key = [Environment]::GetEnvironmentVariable($KeyEnvironmentVariable, [EnvironmentVariableTarget]::Process)
-    if ([string]::IsNullOrWhiteSpace($key)) { throw 'Retrieval HMAC key is not configured in the process environment' }
-    if ($key.Length -lt 16) { throw 'Retrieval HMAC key is too short' }
-
-    $keyBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($key)
-    $queryBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($query)
-    $hmac = New-Object Security.Cryptography.HMACSHA256(,$keyBytes)
-    try { $fingerprint = ([BitConverter]::ToString($hmac.ComputeHash($queryBytes))).Replace('-', '').ToLowerInvariant() }
-    finally { $hmac.Dispose() }
+    $fingerprint = Get-HmacQueryFingerprint -Query $query -KeyEnvironmentVariable $KeyEnvironmentVariable
 
     $result = [pscustomobject][ordered]@{
         fingerprint_scheme = 'hmac-sha256-v1'

@@ -25,24 +25,32 @@ try {
     $receipt = $receipt[0]
     if ([string]$receipt.contract_ref -cne $ContractRef -or [string]$receipt.contract_schema_digest -cne $ContractSchemaDigest) { throw 'Receipt contract binding does not match the requested contract' }
 
-    $outcomeLog = Read-JsonLineLog -BrainRoot $BrainRoot -RelativePath $OutcomeLogPath -Kind outcomes -IdProperty outcome_id
-    $priorIds = @{}
+    $outcomeLog = Read-AllJsonLineLogs -BrainRoot $BrainRoot -Kind outcomes -IdProperty outcome_id
+    $priorById = @{}
     $supersededIds = @{}
     $matching = New-Object Collections.Generic.List[object]
     foreach ($outcome in @($outcomeLog.Rows)) {
         $outcomeId = [string]$outcome.outcome_id
+        if (@('helpful', 'partial', 'unhelpful', 'unknown') -cnotcontains [string]$outcome.verdict) { throw "Outcome verdict is invalid: $outcomeId" }
+        if ($null -ne $outcome.PSObject.Properties['supersedes']) {
+            $supersedes = [string]$outcome.supersedes
+            if (-not $priorById.ContainsKey($supersedes)) { throw "Outcome supersedes does not reference a prior event: $outcomeId" }
+            if ([string]$priorById[$supersedes].receipt_id -cne [string]$outcome.receipt_id) { throw "Outcome supersedes crosses receipt boundary: $outcomeId" }
+            $supersededIds[$supersedes] = $true
+        }
+        $priorById[$outcomeId] = $outcome
         if ([string]$outcome.receipt_id -ceq $ReceiptId) {
-            if (@('helpful', 'partial', 'unhelpful', 'unknown') -cnotcontains [string]$outcome.verdict) { throw "Outcome verdict is invalid: $outcomeId" }
-            if ($null -ne $outcome.PSObject.Properties['supersedes']) {
-                $supersedes = [string]$outcome.supersedes
-                if (-not $priorIds.ContainsKey($supersedes)) { throw "Outcome supersedes does not reference a prior event: $outcomeId" }
-                $supersededIds[$supersedes] = $true
-            }
+            if (@($outcome.evidence_refs).Count -ne 1) { throw "Outcome proof cardinality is invalid: $outcomeId" }
+            $actor = [string]$outcome.actor_type
+            $null = Resolve-OutcomeProof -ContractSnapshot $snapshot -Receipt $receipt -Reference ([string]@($outcome.evidence_refs)[0]) -SignalKind ([string]$outcome.signal_kind) -Verdict ([string]$outcome.verdict) -ActorType $actor
             $matching.Add($outcome)
-            $priorIds[$outcomeId] = $true
         }
     }
-    $activeOutcomes = @($matching.ToArray() | Where-Object { -not $supersededIds.ContainsKey([string]$_.outcome_id) } | Sort-Object { [string]$_.outcome_id })
+    $activeById = @{}
+    foreach ($outcome in @($matching.ToArray() | Where-Object { -not $supersededIds.ContainsKey([string]$_.outcome_id) })) { $activeById[[string]$outcome.outcome_id] = $outcome }
+    $activeIds = [string[]]@($activeById.Keys)
+    [Array]::Sort($activeIds, [StringComparer]::Ordinal)
+    $activeOutcomes = @($activeIds | ForEach-Object { $activeById[$_] })
 
     $affected = New-Object Collections.Generic.List[string]
     foreach ($included in @($receipt.included)) {
@@ -52,17 +60,21 @@ try {
             if (-not $affected.Contains($documentId)) { $affected.Add($documentId) }
         }
     }
-    $affectedRefs = @($affected.ToArray() | Sort-Object)
+    $affectedRefs = [string[]]$affected.ToArray()
+    [Array]::Sort($affectedRefs, [StringComparer]::Ordinal)
     if ($affectedRefs.Count -eq 0) { throw 'Receipt has no affected evidence references' }
 
-    $outcomeRefs = @($activeOutcomes | ForEach-Object { [string]$_.outcome_id })
+    $outcomeRefs = [string[]]@($activeOutcomes | ForEach-Object { [string]$_.outcome_id })
     $disposition = 'review'
     $reasonCodes = New-Object Collections.Generic.List[string]
     if ($activeOutcomes.Count -eq 0) {
         $reasonCodes.Add('no-outcome')
     }
     else {
-        $verdicts = @($activeOutcomes | ForEach-Object { [string]$_.verdict } | Sort-Object -Unique)
+        $verdictSet = @{}
+        foreach ($outcome in $activeOutcomes) { $verdictSet[[string]$outcome.verdict] = $true }
+        $verdicts = [string[]]@($verdictSet.Keys)
+        [Array]::Sort($verdicts, [StringComparer]::Ordinal)
         if ($verdicts.Count -eq 1 -and $verdicts[0] -ceq 'helpful') {
             $disposition = 'preserve'
             $reasonCodes.Add('outcome-helpful')

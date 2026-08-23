@@ -7,6 +7,18 @@ $script:RetrievalSchemaPaths = @(
     'memory/retrieval-evidence/schemas/retrieval-outcome-event.schema.json',
     'memory/retrieval-evidence/schemas/retrieval-receipt.schema.json'
 ) | Sort-Object
+$script:AgentKitRuntimePaths = @(
+    'scripts/Get-RetrievalLearningCandidate.ps1',
+    'scripts/New-RetrievalQueryFingerprint.ps1',
+    'scripts/Record-RetrievalOutcome.ps1',
+    'scripts/Record-RetrievalReceipt.ps1',
+    'scripts/RetrievalEvidence.Common.ps1'
+) | Sort-Object
+$script:McpRuntimePaths = @(
+    'adapters/memory_adapter.py',
+    'core/context_resolver.py',
+    'core/router.py'
+) | Sort-Object
 $script:Utf8NoBom = New-Object Text.UTF8Encoding($false, $true)
 
 function Get-Sha256Hex {
@@ -18,6 +30,19 @@ function Get-Sha256Hex {
         return ([BitConverter]::ToString($sha.ComputeHash($bytes))).Replace('-', '').ToLowerInvariant()
     }
     finally { $sha.Dispose() }
+}
+
+function Get-HmacQueryFingerprint {
+    param([Parameter(Mandatory = $true)][string]$Query, [Parameter(Mandatory = $true)][string]$KeyEnvironmentVariable)
+
+    $key = [Environment]::GetEnvironmentVariable($KeyEnvironmentVariable, [EnvironmentVariableTarget]::Process)
+    if ([string]::IsNullOrWhiteSpace($key)) { throw 'Retrieval HMAC key is not configured in the process environment' }
+    if ($key.Length -lt 16) { throw 'Retrieval HMAC key is too short' }
+    $keyBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($key)
+    $queryBytes = (New-Object Text.UTF8Encoding($false)).GetBytes($Query)
+    $hmac = New-Object Security.Cryptography.HMACSHA256(,$keyBytes)
+    try { return ([BitConverter]::ToString($hmac.ComputeHash($queryBytes))).Replace('-', '').ToLowerInvariant() }
+    finally { $hmac.Dispose() }
 }
 
 function ConvertTo-NormalizedLf {
@@ -71,6 +96,16 @@ function Get-SafeEventLogPath {
     if ([IO.File]::Exists($target)) {
         $entry = Get-Item -LiteralPath $target -Force
         if (($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { throw "$Kind event log cannot be a reparse point" }
+        $fsutil = Get-Command fsutil.exe -CommandType Application -ErrorAction SilentlyContinue
+        if ($null -eq $fsutil) { throw 'fsutil.exe is required to verify event log hardlink count on Windows' }
+        $previous = $ErrorActionPreference
+        $ErrorActionPreference = 'Continue'
+        try {
+            $links = @(& $fsutil.Source hardlink list $target 2>$null | ForEach-Object { [string]$_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+            $linkExit = $LASTEXITCODE
+        }
+        finally { $ErrorActionPreference = $previous }
+        if ($linkExit -ne 0 -or $links.Count -ne 1) { throw "$Kind event log must have exactly one hardlink" }
     }
     return $target
 }
@@ -98,6 +133,67 @@ function Invoke-GitText {
     return [string]::Join("`n", @($output | ForEach-Object { [string]$_ }))
 }
 
+function Get-ImplementationBundleDigest {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string[]]$RelativePaths,
+        [string]$GitRef
+    )
+
+    $root = Get-OrdinaryRoot -Path $RepositoryRoot -Label 'Implementation repository root'
+    $bundle = ''
+    foreach ($relativePath in @($RelativePaths | Sort-Object)) {
+        if (-not (Test-RepoRelativePosixPath -Path $relativePath)) { throw 'Implementation bundle path is invalid' }
+        if ([string]::IsNullOrWhiteSpace($GitRef)) {
+            $path = [IO.Path]::GetFullPath((Join-Path $root $relativePath.Replace('/', '\')))
+            if (-not [IO.File]::Exists($path)) { throw "Implementation bundle file is missing: $relativePath" }
+            $text = Get-StrictUtf8Text -Bytes ([IO.File]::ReadAllBytes($path)) -Label $relativePath
+        }
+        else {
+            $text = Invoke-GitText -RepositoryRoot $root -Arguments @('show', "$GitRef`:$relativePath") -Label $relativePath
+        }
+        $bundle += $relativePath + "`n" + (ConvertTo-NormalizedLf -Text $text)
+    }
+    return Get-Sha256Hex -Text $bundle
+}
+
+function Get-YamlHexValue {
+    param([Parameter(Mandatory = $true)][string]$Text, [Parameter(Mandatory = $true)][string]$Name, [Parameter(Mandatory = $true)][int]$Length)
+
+    $pattern = '(?m)^\s*' + [Regex]::Escape($Name) + ': "?([0-9a-f]{' + $Length + '})"?\s*$'
+    $matches = [Regex]::Matches($Text, $pattern)
+    if ($matches.Count -lt 1) { throw "Retrieval contract value is missing: $Name" }
+    $values = @($matches | ForEach-Object { [string]$_.Groups[1].Value } | Sort-Object -Unique)
+    if ($values.Count -ne 1) { throw "Retrieval contract value is ambiguous: $Name" }
+    return $values[0]
+}
+
+function Assert-ImplementationBinding {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$PinnedRef,
+        [Parameter(Mandatory = $true)][string]$ExpectedBundleDigest,
+        [Parameter(Mandatory = $true)][string[]]$RelativePaths,
+        [Parameter(Mandatory = $true)][string]$Label,
+        [switch]$RequireExactHead
+    )
+
+    $root = Get-OrdinaryRoot -Path $RepositoryRoot -Label "$Label repository root"
+    $resolved = (Invoke-GitText -RepositoryRoot $root -Arguments @('rev-parse', '--verify', "$PinnedRef`^{commit}") -Label "$Label implementation ref").Trim()
+    if ($resolved -cne $PinnedRef) { throw "$Label implementation ref does not resolve exactly" }
+    $head = (Invoke-GitText -RepositoryRoot $root -Arguments @('rev-parse', 'HEAD') -Label "$Label HEAD").Trim()
+    if ($RequireExactHead) {
+        if ($head -cne $PinnedRef) { throw "$Label HEAD does not equal the activated implementation ref" }
+    }
+    else {
+        $null = Invoke-GitText -RepositoryRoot $root -Arguments @('merge-base', '--is-ancestor', $PinnedRef, $head) -Label "$Label implementation ancestry"
+    }
+    $pinnedDigest = Get-ImplementationBundleDigest -RepositoryRoot $root -RelativePaths $RelativePaths -GitRef $PinnedRef
+    $workingDigest = Get-ImplementationBundleDigest -RepositoryRoot $root -RelativePaths $RelativePaths
+    if ($pinnedDigest -cne $ExpectedBundleDigest -or $workingDigest -cne $ExpectedBundleDigest) { throw "$Label runtime bundle does not match the activated implementation digest" }
+    return [pscustomobject][ordered]@{ Root = $root; Head = $head; BundleDigest = $workingDigest }
+}
+
 function Get-RetrievalContractSnapshot {
     param(
         [Parameter(Mandatory = $true)][string]$ContractRepositoryRoot,
@@ -115,7 +211,21 @@ function Get-RetrievalContractSnapshot {
     if (-not $indexText.Contains("schema_bundle_digest: $ExpectedSchemaDigest")) { throw 'Retrieval evidence index schema digest mismatch' }
     if ($contractText -notmatch '(?m)^  status: active\s*$' -or $contractText -notmatch '(?m)^  implementation_status: implemented\s*$') { throw 'Retrieval evidence contract is not active/implemented' }
     if (-not $contractText.Contains("digest: $ExpectedSchemaDigest")) { throw 'Retrieval contract schema digest mismatch' }
-    if ($contractText -notmatch '(?m)^    agent_kit_implementation_ref: [0-9a-f]{40}\s*$') { throw 'Retrieval contract Agent Kit implementation ref missing' }
+    $mcpImplementationRef = Get-YamlHexValue -Text $contractText -Name 'mcp_diagnostics_implementation_ref' -Length 40
+    $mcpRuntimeDigest = Get-YamlHexValue -Text $contractText -Name 'mcp_runtime_bundle_digest' -Length 64
+    $agentKitImplementationRef = Get-YamlHexValue -Text $contractText -Name 'agent_kit_implementation_ref' -Length 40
+    $agentKitRuntimeDigest = Get-YamlHexValue -Text $contractText -Name 'agent_kit_runtime_bundle_digest' -Length 64
+    foreach ($binding in @(
+        @('mcp_diagnostics_implementation_ref', $mcpImplementationRef, 40),
+        @('mcp_runtime_bundle_digest', $mcpRuntimeDigest, 64),
+        @('agent_kit_implementation_ref', $agentKitImplementationRef, 40),
+        @('agent_kit_runtime_bundle_digest', $agentKitRuntimeDigest, 64)
+    )) {
+        $indexValue = Get-YamlHexValue -Text $indexText -Name ([string]$binding[0]) -Length ([int]$binding[2])
+        if ($indexValue -cne [string]$binding[1]) { throw "Retrieval index/contract handshake mismatch: $($binding[0])" }
+    }
+    $agentKitRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+    $null = Assert-ImplementationBinding -RepositoryRoot $agentKitRoot -PinnedRef $agentKitImplementationRef -ExpectedBundleDigest $agentKitRuntimeDigest -RelativePaths $script:AgentKitRuntimePaths -Label 'Agent Kit'
     foreach ($required in @(
         'persistent_writes: []',
         'persistence: forbidden',
@@ -148,7 +258,56 @@ function Get-RetrievalContractSnapshot {
         ReceiptSchema = $schemaByName['retrieval-receipt.schema.json']
         OutcomeSchema = $schemaByName['retrieval-outcome-event.schema.json']
         CandidateSchema = $schemaByName['retrieval-learning-candidate.schema.json']
+        ContractRepositoryRoot = $contractRoot
+        McpImplementationRef = $mcpImplementationRef
+        McpRuntimeBundleDigest = $mcpRuntimeDigest
+        AgentKitImplementationRef = $agentKitImplementationRef
+        AgentKitRuntimeBundleDigest = $agentKitRuntimeDigest
+        TrackedEventLogs = @([Regex]::Matches($indexText, '(?m)^    - (memory/retrieval-evidence/events/(?:receipts|outcomes|candidates)-\d{4}-\d{2}\.jsonl)\s*$') | ForEach-Object { [string]$_.Groups[1].Value })
     }
+}
+
+function Resolve-OutcomeProof {
+    param(
+        [Parameter(Mandatory = $true)]$ContractSnapshot,
+        [Parameter(Mandatory = $true)]$Receipt,
+        [Parameter(Mandatory = $true)][string]$Reference,
+        [Parameter(Mandatory = $true)][ValidateSet('human-explicit', 'golden-eval', 'task-result')][string]$SignalKind,
+        [Parameter(Mandatory = $true)][ValidateSet('helpful', 'partial', 'unhelpful', 'unknown')][string]$Verdict,
+        [Parameter(Mandatory = $true)][ValidateSet('human', 'tool')][string]$ActorType
+    )
+
+    $match = [Regex]::Match($Reference, '^(human-approval|golden-eval|task-result):([a-z0-9][a-z0-9._-]{0,127})@git:([0-9a-f]{40})@sha256:([0-9a-f]{64})$')
+    if (-not $match.Success) { throw 'Outcome evidence ref must be a content-addressed Brain proof' }
+    if ($Reference -match '(?:github_pat_|gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|secret|token|password|credential|api[-_]?key)') { throw 'Outcome evidence ref is secret-like' }
+    $scheme = [string]$match.Groups[1].Value
+    $proofId = [string]$match.Groups[2].Value
+    $proofRef = [string]$match.Groups[3].Value
+    $contentHash = [string]$match.Groups[4].Value
+    $expectedScheme = if ($SignalKind -eq 'human-explicit') { 'human-approval' } else { $SignalKind }
+    if ($scheme -cne $expectedScheme) { throw 'Outcome evidence ref scheme does not match SignalKind' }
+    $root = [string]$ContractSnapshot.ContractRepositoryRoot
+    $null = Invoke-GitText -RepositoryRoot $root -Arguments @('merge-base', '--is-ancestor', [string]$Receipt.contract_ref, $proofRef) -Label 'Outcome proof contract ancestry'
+    $null = Invoke-GitText -RepositoryRoot $root -Arguments @('merge-base', '--is-ancestor', $proofRef, 'HEAD') -Label 'Outcome proof Brain ancestry'
+    $proofPath = "memory/retrieval-evidence/proofs/$scheme/$proofId.json"
+    $proofText = Invoke-GitText -RepositoryRoot $root -Arguments @('show', "$proofRef`:$proofPath") -Label 'Outcome proof artifact'
+    if ((Get-Sha256Hex -Text (ConvertTo-NormalizedLf -Text $proofText)) -cne $contentHash) { throw 'Outcome proof content hash mismatch' }
+    $proof = ConvertFrom-StrictJsonText -Text $proofText -Label 'Outcome proof artifact'
+    if ($scheme -ceq 'golden-eval') {
+        Assert-AllowedObjectFields -Value $proof -Allowed @('schema', 'proof_id', 'signal_kind', 'actor_type', 'verdict_rule', 'required_document_ids') -Required @('schema', 'proof_id', 'signal_kind', 'actor_type', 'verdict_rule', 'required_document_ids') -Label 'Golden outcome proof'
+        if ([string]$proof.schema -cne 'retrieval-golden-outcome-proof/v1' -or [string]$proof.proof_id -cne $proofId -or [string]$proof.signal_kind -cne 'golden-eval' -or [string]$proof.actor_type -cne 'tool' -or [string]$proof.verdict_rule -cne 'all-required-document-ids') { throw 'Golden outcome proof policy mismatch' }
+        $requiredIds = @($proof.required_document_ids | ForEach-Object { [string]$_ })
+        if ($requiredIds.Count -eq 0 -or @($requiredIds | Sort-Object -Unique).Count -ne $requiredIds.Count) { throw 'Golden outcome proof required_document_ids are invalid' }
+        $includedIds = @($Receipt.included | ForEach-Object { $_.evidence_refs } | ForEach-Object { [string]$_.document_id })
+        $matched = @($requiredIds | Where-Object { $includedIds -ccontains $_ }).Count
+        $expectedVerdict = if ($matched -eq $requiredIds.Count) { 'helpful' } elseif ($matched -gt 0) { 'partial' } else { 'unhelpful' }
+        if ($ActorType -cne 'tool' -or $Verdict -cne $expectedVerdict) { throw 'Golden outcome does not match deterministic proof result' }
+    }
+    else {
+        Assert-AllowedObjectFields -Value $proof -Allowed @('schema', 'proof_id', 'signal_kind', 'receipt_id', 'verdict', 'actor_type') -Required @('schema', 'proof_id', 'signal_kind', 'receipt_id', 'verdict', 'actor_type') -Label 'Outcome attestation'
+        if ([string]$proof.schema -cne 'retrieval-outcome-attestation/v1' -or [string]$proof.proof_id -cne $proofId -or [string]$proof.signal_kind -cne $SignalKind -or [string]$proof.receipt_id -cne [string]$Receipt.receipt_id -or [string]$proof.verdict -cne $Verdict -or [string]$proof.actor_type -cne $ActorType) { throw 'Outcome attestation does not bind the event' }
+    }
+    return [pscustomobject][ordered]@{ Scheme = $scheme; ProofId = $proofId; ProofRef = $proofRef; ContentHash = $contentHash }
 }
 
 function Assert-AllowedObjectFields {
@@ -223,6 +382,51 @@ function Read-JsonLineLog {
     $bytes = [IO.File]::ReadAllBytes($target)
     $parsed = ConvertFrom-JsonLinesText -Text (Get-StrictUtf8Text -Bytes $bytes -Label "$Kind event log") -IdProperty $IdProperty -Label "$Kind event log"
     return [pscustomobject][ordered]@{ Path = $target; Rows = $parsed.Rows; Ids = $parsed.Ids }
+}
+
+function Read-AllJsonLineLogs {
+    param(
+        [Parameter(Mandatory = $true)][string]$BrainRoot,
+        [Parameter(Mandatory = $true)][ValidateSet('receipts', 'outcomes', 'candidates')][string]$Kind,
+        [Parameter(Mandatory = $true)][string]$IdProperty
+    )
+
+    $root = Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot'
+    $eventDirectory = Join-Path $root 'memory\retrieval-evidence\events'
+    if (-not [IO.Directory]::Exists($eventDirectory)) { return [pscustomobject][ordered]@{ Rows = @(); Ids = @{}; Paths = @() } }
+    $files = @(Get-ChildItem -LiteralPath $eventDirectory -File -Filter "$Kind-*.jsonl" | Sort-Object Name)
+    $rows = New-Object Collections.Generic.List[object]
+    $ids = @{}
+    $paths = New-Object Collections.Generic.List[string]
+    foreach ($file in $files) {
+        if ($file.Name -notmatch "^$Kind-\d{4}-\d{2}\.jsonl$") { throw "$Kind event directory contains a non-canonical JSONL file" }
+        $relativePath = "memory/retrieval-evidence/events/$($file.Name)"
+        $log = Read-JsonLineLog -BrainRoot $root -RelativePath $relativePath -Kind $Kind -IdProperty $IdProperty -RequireExisting
+        foreach ($row in @($log.Rows)) {
+            $id = [string]$row.PSObject.Properties[$IdProperty].Value
+            if ($ids.ContainsKey($id)) { throw "Duplicate $IdProperty across $Kind logs: $id" }
+            $ids[$id] = $true
+            $rows.Add($row)
+        }
+        $paths.Add($relativePath)
+    }
+    return [pscustomobject][ordered]@{ Rows = $rows.ToArray(); Ids = $ids; Paths = $paths.ToArray() }
+}
+
+function Assert-MonthlyEventPath {
+    param([Parameter(Mandatory = $true)][string]$RelativePath, [Parameter(Mandatory = $true)][datetime]$RecordedAt, [Parameter(Mandatory = $true)][string]$Kind)
+
+    $expected = "$Kind-$($RecordedAt.ToUniversalTime().ToString('yyyy-MM', [Globalization.CultureInfo]::InvariantCulture)).jsonl"
+    if ([IO.Path]::GetFileName($RelativePath) -cne $expected) { throw "$Kind event log month does not match RecordedAt" }
+}
+
+function Assert-ProductionEventRegistration {
+    param([Parameter(Mandatory = $true)][string]$BrainRoot, [Parameter(Mandatory = $true)]$ContractSnapshot, [Parameter(Mandatory = $true)][string]$RelativePath)
+
+    $brain = Get-OrdinaryRoot -Path $BrainRoot -Label 'BrainRoot'
+    if ($brain -ceq [string]$ContractSnapshot.ContractRepositoryRoot -and $ContractSnapshot.TrackedEventLogs -cnotcontains $RelativePath) {
+        throw 'Canonical Brain event log must be pre-registered in the active contract index'
+    }
 }
 
 function Add-JsonLineAppendOnly {

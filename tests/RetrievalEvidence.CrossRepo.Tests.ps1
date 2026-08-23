@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory = $true)][string]$BrainRoot,
     [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-f]{40}$')][string]$BrainRef,
     [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-f]{64}$')][string]$ContractSchemaDigest,
+    [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-f]{64}$')][string]$GoldenProofHash,
     [Parameter(Mandatory = $true)][string]$McpRoot,
     [Parameter(Mandatory = $true)][ValidatePattern('^[0-9a-f]{40}$')][string]$McpRef
 )
@@ -79,10 +80,20 @@ function Invoke-PowerShellScript {
 }
 
 function Get-TrackedStateDigest([string]$RepositoryRoot) {
-    $status = [string]::Join("`n", @(& git.exe -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot status --porcelain=v1 --untracked-files=no))
+    $status = [string]::Join("`n", @(& git.exe -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot status --porcelain=v1 --untracked-files=all))
+    $untrackedHashes = New-Object Collections.Generic.List[string]
+    foreach ($relativePath in @(& git.exe -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot ls-files --others --exclude-standard | Sort-Object)) {
+        $fullPath = [IO.Path]::GetFullPath((Join-Path $RepositoryRoot ([string]$relativePath)))
+        if ([IO.File]::Exists($fullPath)) {
+            $fileSha = [Security.Cryptography.SHA256]::Create()
+            try { $hash = ([BitConverter]::ToString($fileSha.ComputeHash([IO.File]::ReadAllBytes($fullPath)))).Replace('-', '').ToLowerInvariant() }
+            finally { $fileSha.Dispose() }
+            $untrackedHashes.Add(([string]$relativePath) + ':' + $hash)
+        }
+    }
     $unstaged = [string]::Join("`n", @(& git.exe -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot diff --binary --no-ext-diff))
     $staged = [string]::Join("`n", @(& git.exe -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot diff --cached --binary --no-ext-diff))
-    $text = $status + "`n--unstaged--`n" + $unstaged + "`n--staged--`n" + $staged
+    $text = $status + "`n--untracked-hashes--`n" + ([string]::Join("`n", $untrackedHashes.ToArray())) + "`n--unstaged--`n" + $unstaged + "`n--staged--`n" + $staged
     $sha = [Security.Cryptography.SHA256]::Create()
     try {
         $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($text)
@@ -113,14 +124,19 @@ try {
     $generated = Invoke-ProcessWithInput -FileName $python -Arguments @($generator, '--mcp-root', $McpRoot, '--brain-root', $BrainRoot, '--query', $query)
     if ($generated.ExitCode -ne 0) { throw "Actual yohan-mcp envelope generation failed: $($generated.Stderr)" }
     Assert-Equal 0 $generated.ExitCode 'actual yohan-mcp envelope generation succeeds'
-    try { $envelope = $generated.Stdout | ConvertFrom-Json }
+    try { $transportEnvelope = $generated.Stdout | ConvertFrom-Json }
     catch { throw "Actual MCP envelope is invalid JSON: $($generated.Stderr)" }
+    $transportText = [string]@($transportEnvelope.content)[0].text
+    $envelope = $transportText | ConvertFrom-Json
     $diagnostics = $envelope.data.retrieval_diagnostics
     Assert-Equal 'retrieval-diagnostics/v1' ([string]$diagnostics.schema) 'actual diagnostics schema'
     Assert-Equal $true ([bool]$diagnostics.volatile) 'actual diagnostics remain volatile'
     Assert-Equal $false ([bool]$diagnostics.persisted) 'actual diagnostics remain non-persisted'
     Assert-True ([string]$diagnostics.index.generation_id -match '^[0-9a-f]{64}$') 'actual index generation id'
     Assert-Equal '1.1.0' ([string]$diagnostics.index.corpus_contract_version) 'actual corpus contract version'
+    Assert-Equal 'yohan-mcp' ([string]$diagnostics.runtime.repository) 'actual MCP runtime repository'
+    Assert-True ([string]$diagnostics.runtime.implementation_digest -match '^[0-9a-f]{64}$') 'actual MCP runtime bundle digest'
+    Assert-Equal 'sha256-utf8-v1' ([string]$diagnostics.query_binding.scheme) 'actual query binding scheme'
     $assetEvidence = @($diagnostics.evidence | Where-Object { [string]$_.locator -ceq 'ASSETS.md' })
     Assert-Equal 1 $assetEvidence.Count 'actual MCP returns ASSETS evidence exactly once'
     Assert-Equal 'brain:ASSETS.md' ([string]$assetEvidence[0].document_id) 'actual ASSETS document id'
@@ -129,14 +145,14 @@ try {
     $fixtureKey = 'cross-fixture-hmac-material-32-bytes'
     $fingerprint = Invoke-PowerShellScript -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'cross-fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
     Assert-Equal 0 $fingerprint.ExitCode 'cross fixture fingerprint succeeds'
-    $fingerprintData = $fingerprint.Stdout | ConvertFrom-Json
     $receiptLog = 'memory/retrieval-evidence/events/receipts-2026-08.jsonl'
     $outcomeLog = 'memory/retrieval-evidence/events/outcomes-2026-08.jsonl'
+    $boundInput = [string]([pscustomobject][ordered]@{ query = $query; envelope = $transportEnvelope } | ConvertTo-Json -Depth 30 -Compress)
     $receipt = Invoke-PowerShellScript -ScriptPath $receiptScript -Arguments @(
-        '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
-        '-EventLogPath', $receiptLog, '-ReceiptId', 'receipt-actual-mcp', '-QueryFingerprint', ([string]$fingerprintData.query_fingerprint),
+        '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-McpRepositoryRoot', $McpRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
+        '-EventLogPath', $receiptLog, '-ReceiptId', 'receipt-actual-mcp',
         '-FingerprintKeyId', 'cross-fixture-v1', '-ResolverVersion', '1.0.0', '-SourceRevision', $McpRef, '-RecordedAt', '2026-08-24T10:00:00+09:00'
-    ) -Stdin $generated.Stdout
+    ) -Stdin $boundInput -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
     if ($receipt.ExitCode -ne 0) { throw "Actual MCP receipt append failed: $($receipt.Stderr) $($receipt.Stdout)" }
     Assert-Equal 0 $receipt.ExitCode 'actual MCP receipt append succeeds'
     $receiptData = $receipt.Stdout | ConvertFrom-Json
@@ -145,10 +161,11 @@ try {
     $receiptText = [IO.File]::ReadAllText($receiptPath, [Text.Encoding]::UTF8)
     Assert-True (-not $receiptText.Contains($query) -and -not $receiptText.Contains($fixtureKey)) 'actual receipt stores no query or HMAC key'
 
+    $goldenProofRef = "golden-eval:asset-location-contract@git:$BrainRef@sha256:$GoldenProofHash"
     $outcome = Invoke-PowerShellScript -ScriptPath $outcomeScript -Arguments @(
         '-BrainRoot', $evidenceRoot, '-ContractRepositoryRoot', $BrainRoot, '-ContractRef', $BrainRef, '-ContractSchemaDigest', $ContractSchemaDigest,
         '-ReceiptLogPath', $receiptLog, '-EventLogPath', $outcomeLog, '-OutcomeId', 'outcome-actual-golden', '-ReceiptId', 'receipt-actual-mcp',
-        '-SignalKind', 'golden-eval', '-Verdict', 'helpful', '-EvidenceRefs', 'golden-eval:asset-location-contract', '-ActorType', 'tool', '-RecordedAt', '2026-08-24T10:01:00+09:00'
+        '-SignalKind', 'golden-eval', '-Verdict', 'helpful', '-EvidenceRefs', $goldenProofRef, '-ActorType', 'tool', '-RecordedAt', '2026-08-24T10:01:00+09:00'
     )
     if ($outcome.ExitCode -ne 0) { throw "Actual golden outcome append failed: $($outcome.Stderr) $($outcome.Stdout)" }
     Assert-Equal 0 $outcome.ExitCode 'actual golden outcome append succeeds'
