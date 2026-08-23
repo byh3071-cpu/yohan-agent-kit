@@ -122,15 +122,34 @@ function Invoke-GitText {
         if ([IO.File]::Exists([string]$candidate.Source)) { $git = [string]$candidate.Source; break }
     }
     if ([string]::IsNullOrWhiteSpace($git)) { throw 'git.exe is unavailable' }
-    $previous = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        $output = @(& $git -c "safe.directory=$RepositoryRoot" -C $RepositoryRoot @Arguments 2>&1)
-        $exitCode = $LASTEXITCODE
+    $quotedArguments = New-Object Collections.Generic.List[string]
+    foreach ($argument in @('-c', "safe.directory=$RepositoryRoot", '-C', $RepositoryRoot) + $Arguments) {
+        $quotedArguments.Add('"' + ([string]$argument).Replace('"', '\"') + '"')
     }
-    finally { $ErrorActionPreference = $previous }
-    if ($exitCode -ne 0) { throw "$Label is unavailable at the requested Git ref" }
-    return [string]::Join("`n", @($output | ForEach-Object { [string]$_ }))
+    $start = New-Object Diagnostics.ProcessStartInfo
+    $start.FileName = $git
+    $start.Arguments = [string]::Join(' ', $quotedArguments.ToArray())
+    $start.UseShellExecute = $false
+    $start.CreateNoWindow = $true
+    $start.RedirectStandardOutput = $true
+    $start.RedirectStandardError = $true
+    $process = New-Object Diagnostics.Process
+    $process.StartInfo = $start
+    $stdout = New-Object IO.MemoryStream
+    try {
+        $null = $process.Start()
+        $stderrTask = $process.StandardError.ReadToEndAsync()
+        $process.StandardOutput.BaseStream.CopyTo($stdout)
+        $process.WaitForExit()
+        $stderr = $stderrTask.Result
+        $exitCode = $process.ExitCode
+    }
+    finally {
+        $process.Dispose()
+        $stdout.Dispose()
+    }
+    if ($exitCode -ne 0) { throw "$Label is unavailable at the requested Git ref: $($stderr.Trim())" }
+    return Get-StrictUtf8Text -Bytes $stdout.ToArray() -Label "$Label Git output"
 }
 
 function Get-ImplementationBundleDigest {
