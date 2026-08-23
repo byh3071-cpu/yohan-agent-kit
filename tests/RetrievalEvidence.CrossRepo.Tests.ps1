@@ -60,13 +60,16 @@ function Invoke-ProcessWithInput {
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $start
     $null = $process.Start()
-    if ($Stdin.Length -gt 0) { $process.StandardInput.Write($Stdin) }
-    $process.StandardInput.Close()
+    $stdinWriteError = $null
+    try { if ($Stdin.Length -gt 0) { $process.StandardInput.Write($Stdin) } }
+    catch { $stdinWriteError = [string]$_.Exception.Message }
+    try { $process.StandardInput.Close() } catch {}
     $stdout = $process.StandardOutput.ReadToEnd()
     $stderr = $process.StandardError.ReadToEnd()
     $process.WaitForExit()
     $exitCode = $process.ExitCode
     $process.Dispose()
+    if ($exitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($stdinWriteError)) { throw "Successful process closed stdin early: $stdinWriteError" }
     return [pscustomobject]@{ ExitCode = $exitCode; Stdout = $stdout.Trim(); Stderr = $stderr.Trim() }
 }
 

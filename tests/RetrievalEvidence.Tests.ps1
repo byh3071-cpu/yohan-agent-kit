@@ -63,13 +63,16 @@ function Invoke-Script {
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $start
     $null = $process.Start()
-    $process.StandardInput.Write($Stdin)
-    $process.StandardInput.Close()
+    $stdinWriteError = $null
+    try { $process.StandardInput.Write($Stdin) }
+    catch { $stdinWriteError = [string]$_.Exception.Message }
+    try { $process.StandardInput.Close() } catch {}
     $stdout = $process.StandardOutput.ReadToEnd()
     $stderr = $process.StandardError.ReadToEnd()
     $process.WaitForExit()
     $exitCode = $process.ExitCode
     $process.Dispose()
+    if ($exitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($stdinWriteError)) { throw "Successful script closed stdin early: $stdinWriteError" }
     $data = $null
     if ($exitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($stdout)) {
         try { $data = $stdout.Trim() | ConvertFrom-Json }
