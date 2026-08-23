@@ -29,6 +29,7 @@ function Get-StringArray {
 }
 
 try {
+    [Console]::InputEncoding = New-Object Text.UTF8Encoding($false)
     Assert-SafeIdentifier -Value $ReceiptId -Label 'ReceiptId'
     Assert-SafeFingerprintKeyId -Value $FingerprintKeyId
     if (-not [string]::IsNullOrWhiteSpace($Supersedes)) { Assert-SafeIdentifier -Value $Supersedes -Label 'Supersedes' }
@@ -36,6 +37,7 @@ try {
     $snapshot = Get-RetrievalContractSnapshot -ContractRepositoryRoot $ContractRepositoryRoot -ContractRef $ContractRef -ExpectedSchemaDigest $ContractSchemaDigest
 
     $inputText = [Console]::In.ReadToEnd()
+    if ($inputText.Length -gt 0 -and [int][char]$inputText[0] -eq 0xFEFF) { $inputText = $inputText.Substring(1) }
     $envelope = ConvertFrom-StrictJsonText -Text $inputText -Label 'MCP envelope stdin'
     if ($null -ne $envelope.PSObject.Properties['content'] -and @($envelope.content).Count -gt 0) {
         $first = @($envelope.content)[0]

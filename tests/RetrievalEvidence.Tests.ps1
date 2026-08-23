@@ -145,6 +145,10 @@ try {
     Assert-Equal 0 $fingerprint.ExitCode 'fingerprint succeeds with process key'
     Assert-Equal 'hmac-sha256-v1' ([string]$fingerprint.Data.fingerprint_scheme) 'fingerprint scheme'
     Assert-True ([string]$fingerprint.Data.query_fingerprint -match '^[0-9a-f]{64}$') 'fingerprint shape'
+    $expectedHmac = New-Object Security.Cryptography.HMACSHA256(,((New-Object Text.UTF8Encoding($false)).GetBytes($fixtureKey)))
+    try { $expectedFingerprint = ([BitConverter]::ToString($expectedHmac.ComputeHash((New-Object Text.UTF8Encoding($false)).GetBytes($query)))).Replace('-', '').ToLowerInvariant() }
+    finally { $expectedHmac.Dispose() }
+    Assert-Equal $expectedFingerprint ([string]$fingerprint.Data.query_fingerprint) 'fingerprint excludes transport BOM bytes'
     Assert-True (-not $fingerprint.Stdout.Contains($query) -and -not $fingerprint.Stdout.Contains($fixtureKey)) 'fingerprint output omits query and key'
     $fingerprintAgain = Invoke-Script -ScriptPath $fingerprintScript -Arguments @('-FingerprintKeyId', 'fixture-v1') -Stdin $query -Environment @{ YOHAN_RETRIEVAL_HMAC_KEY = $fixtureKey }
     Assert-Equal $fingerprint.Stdout $fingerprintAgain.Stdout 'fingerprint is deterministic'

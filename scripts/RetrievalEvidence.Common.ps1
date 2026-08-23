@@ -174,7 +174,10 @@ function ConvertFrom-StrictJsonText {
 
     if ([string]::IsNullOrWhiteSpace($Text)) { throw "$Label cannot be empty" }
     try { return $Text | ConvertFrom-Json }
-    catch { throw "$Label is not valid JSON" }
+    catch {
+        $firstCodePoint = if ($Text.Length -gt 0) { [int][char]$Text[0] } else { -1 }
+        throw "$Label is not valid JSON (length=$($Text.Length), first_codepoint=$firstCodePoint, parser=$($_.Exception.GetType().Name))"
+    }
 }
 
 function Get-StrictUtf8Text {

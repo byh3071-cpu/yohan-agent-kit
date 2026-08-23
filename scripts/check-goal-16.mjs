@@ -7,8 +7,13 @@ import { fileURLToPath } from 'node:url'
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
-const brainArgIndex = args.indexOf('--brain-root')
-const brainRoot = brainArgIndex >= 0 ? resolve(args[brainArgIndex + 1] ?? '') : (process.env.YOHAN_BRAIN_ROOT ? resolve(process.env.YOHAN_BRAIN_ROOT) : '')
+const optionValue = (name, environmentName) => {
+  const index = args.indexOf(name)
+  if (index >= 0) return resolve(args[index + 1] ?? '')
+  return process.env[environmentName] ? resolve(process.env[environmentName]) : ''
+}
+const brainRoot = optionValue('--brain-root', 'YOHAN_BRAIN_ROOT')
+const mcpRoot = optionValue('--mcp-root', 'YOHAN_MCP_ROOT')
 let pass = true
 
 const gate = (label, ok, detail = '') => {
@@ -31,6 +36,8 @@ const required = [
   'scripts/Record-RetrievalOutcome.ps1',
   'scripts/Get-RetrievalLearningCandidate.ps1',
   'tests/RetrievalEvidence.Tests.ps1',
+  'tests/RetrievalEvidence.CrossRepo.Tests.ps1',
+  'tests/generate_actual_retrieval_envelope.py',
 ]
 for (const path of required) gate(`required artifact ${path}`, existsSync(join(repoRoot, path)))
 
@@ -80,6 +87,45 @@ if (brainRoot && existsSync(brainRoot)) {
     gate('native retrieval evidence tests', /^PASS: \d+ assertions/mu.test(output), output.trim())
   } catch (error) {
     gate('native retrieval evidence tests', false, String(error.stdout || error.stderr || `exit ${error.status ?? 'unknown'}`).trim())
+  }
+}
+
+gate('MCP implementation root supplied', Boolean(mcpRoot) && existsSync(mcpRoot), mcpRoot || 'missing --mcp-root')
+if (brainRoot && existsSync(brainRoot) && mcpRoot && existsSync(mcpRoot)) {
+  try {
+    const git = process.platform === 'win32' ? 'git.exe' : 'git'
+    const gitText = (cwd, commandArgs) => execFileSync(git, commandArgs, { cwd, encoding: 'utf8', timeout: 30_000, windowsHide: true }).trim()
+    const brainRef = gitText(brainRoot, ['rev-parse', 'HEAD'])
+    const mcpRef = gitText(mcpRoot, ['rev-parse', 'HEAD'])
+    const contractIndex = gitText(brainRoot, ['show', `${brainRef}:memory/retrieval-evidence/index.yaml`])
+    const exactValue = (key, length) => new RegExp(`^\\s*${key}: ([0-9a-f]{${length}})\\s*$`, 'mu').exec(contractIndex)?.[1] ?? ''
+    const schemaDigest = exactValue('schema_bundle_digest', 64)
+    const schemaSourceRef = exactValue('schema_source_ref', 40)
+    const pinnedMcpRef = exactValue('mcp_diagnostics_implementation_ref', 40)
+    const pinnedAgentKitRef = exactValue('agent_kit_implementation_ref', 40)
+
+    gate('Brain exact schema digest discovered', /^[0-9a-f]{64}$/u.test(schemaDigest), schemaDigest || 'missing')
+    gate('MCP checkout matches activated implementation ref', pinnedMcpRef === mcpRef, `${pinnedMcpRef || 'missing'} / ${mcpRef}`)
+    let brainSchemaAncestor = false
+    let agentKitImplementationAncestor = false
+    try { gitText(brainRoot, ['merge-base', '--is-ancestor', schemaSourceRef, brainRef]); brainSchemaAncestor = true } catch {}
+    try { gitText(repoRoot, ['merge-base', '--is-ancestor', pinnedAgentKitRef, 'HEAD']); agentKitImplementationAncestor = true } catch {}
+    gate('Brain checkout descends from schema source ref', brainSchemaAncestor, schemaSourceRef || 'missing')
+    gate('Agent Kit checkout descends from activated implementation ref', agentKitImplementationAncestor, pinnedAgentKitRef || 'missing')
+
+    if (/^[0-9a-f]{64}$/u.test(schemaDigest) && pinnedMcpRef === mcpRef && brainSchemaAncestor && agentKitImplementationAncestor) {
+      const crossOutput = execFileSync('powershell.exe', [
+        '-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+        '-File', 'tests/RetrievalEvidence.CrossRepo.Tests.ps1',
+        '-BrainRoot', brainRoot, '-BrainRef', brainRef, '-ContractSchemaDigest', schemaDigest,
+        '-McpRoot', mcpRoot, '-McpRef', mcpRef,
+      ], { cwd: repoRoot, encoding: 'utf8', timeout: 5 * 60_000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 })
+      gate('actual MCP envelope cross-repository fixture', /^PASS: \d+ assertions/mu.test(crossOutput), crossOutput.trim())
+    } else {
+      gate('actual MCP envelope cross-repository fixture', false, 'handshake prerequisite failed')
+    }
+  } catch (error) {
+    gate('actual MCP envelope cross-repository fixture', false, String(error.stdout || error.stderr || `exit ${error.status ?? 'unknown'}`).trim())
   }
 }
 

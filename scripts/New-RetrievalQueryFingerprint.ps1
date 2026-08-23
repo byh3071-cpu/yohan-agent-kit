@@ -12,8 +12,10 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'RetrievalEvidence.Common.ps1')
 
 try {
+    [Console]::InputEncoding = New-Object Text.UTF8Encoding($false)
     Assert-SafeFingerprintKeyId -Value $FingerprintKeyId
     $query = [Console]::In.ReadToEnd()
+    if ($query.Length -gt 0 -and [int][char]$query[0] -eq 0xFEFF) { $query = $query.Substring(1) }
     if ([string]::IsNullOrEmpty($query)) { throw 'Query stdin cannot be empty' }
     if ($query.IndexOf([char]0) -ge 0) { throw 'Query stdin contains a forbidden null character' }
     $key = [Environment]::GetEnvironmentVariable($KeyEnvironmentVariable, [EnvironmentVariableTarget]::Process)
