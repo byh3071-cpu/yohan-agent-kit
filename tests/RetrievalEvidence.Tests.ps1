@@ -114,8 +114,12 @@ function New-ContractFixture {
     & git.exe -C $contractRoot config user.name fixture
     & git.exe -C $contractRoot config user.email fixture@example.invalid
     & git.exe -C $contractRoot add --all
-    & git.exe -C $contractRoot commit --quiet -m 'fixture active retrieval contract'
-    if ($LASTEXITCODE -ne 0) { throw 'Unable to commit contract fixture' }
+    & git.exe -C $contractRoot diff --cached --quiet
+    if ($LASTEXITCODE -eq 1) {
+        & git.exe -C $contractRoot commit --quiet -m 'fixture active retrieval contract'
+        if ($LASTEXITCODE -ne 0) { throw 'Unable to commit contract fixture' }
+    }
+    elseif ($LASTEXITCODE -ne 0) { throw 'Unable to inspect contract fixture changes' }
     $contractRef = [string](& git.exe -C $contractRoot rev-parse HEAD)
     $indexData = [IO.File]::ReadAllText($indexPath, [Text.Encoding]::UTF8)
     $digest = [Regex]::Match($indexData, '(?m)^  schema_bundle_digest: ([0-9a-f]{64})\s*$').Groups[1].Value
