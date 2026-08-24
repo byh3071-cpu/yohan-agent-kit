@@ -4,18 +4,18 @@
     "files":  [
                   {
                       "path":  "agents/openai.yaml",
-                      "bytes":  366,
-                      "sha256":  "62AA46734D5FD1CEC0B8619A3F8AFC2352B8CFCEEF3487B9EEF39E88BE1B6DE0"
+                      "bytes":  440,
+                      "sha256":  "9E5A2BA72EFA6DE00A90B844F95B339F31B6D4C3FA7BEE11320343C9ED88AB5F"
                   },
                   {
                       "path":  "references/context-contract.md",
-                      "bytes":  6175,
-                      "sha256":  "E9A7105BCBA52AB12E24EDFCB346660489EAFA90624A54A8485F52746B3DA964"
+                      "bytes":  6459,
+                      "sha256":  "6A6C90D12CB2A45EA9C666A6F8B7ADCDB095A2119053F67F00F0FFAB379F1BF7"
                   },
                   {
                       "path":  "references/operating-manual.md",
-                      "bytes":  5418,
-                      "sha256":  "84C10E306ABFCE049C776F677DFEEB89D7EB7450FE5AA04B76CF3608AADD7EAB"
+                      "bytes":  9000,
+                      "sha256":  "43313859B2DA1ABC41C2EC6C2C411DBDA3B10EC7A1F619D53EBE08B0CED2AACA"
                   },
                   {
                       "path":  "references/reference-intake.md",
@@ -24,8 +24,13 @@
                   },
                   {
                       "path":  "references/report-contract.md",
-                      "bytes":  4970,
-                      "sha256":  "E70CC8A42CF901C7F60B96ECA27A569F24988603B1E0478BD825041C6EAC458A"
+                      "bytes":  5619,
+                      "sha256":  "9339C718231B2855C0935693E1CA34288441B755E0277A9637F056B7F583340A"
+                  },
+                  {
+                      "path":  "references/session-continuity.md",
+                      "bytes":  7487,
+                      "sha256":  "7D553BB8694D8A571BFB13FD37243CA5D553F92D82B0BB50714EB982E59A457A"
                   },
                   {
                       "path":  "references/taste-interview.md",
@@ -34,8 +39,8 @@
                   },
                   {
                       "path":  "references/team-contract.md",
-                      "bytes":  4395,
-                      "sha256":  "B4CB5B46229BF2EE2143C881B7B906118E43B606E83FA50C401C975D7767A5A5"
+                      "bytes":  4784,
+                      "sha256":  "C1055902B1C518FFEF99BEC5FE73C072389E5122FF725BB9D4630C082520A413"
                   },
                   {
                       "path":  "references/verification-contract.md",
@@ -44,9 +49,9 @@
                   },
                   {
                       "path":  "SKILL.md",
-                      "bytes":  8145,
-                      "sha256":  "270B91139F0BAB00187A9AAB78C1CA4D1937E79DCD001CFD27104D264ACD1CEC"
+                      "bytes":  9708,
+                      "sha256":  "96F11839A5CE2F9C6E72A7F80E72F3D616537B5AC455904D9583AE3E7CCB776A"
                   }
               ],
-    "digest":  "891F7971513C289C351BF3BD7198B1D403DC81560C15CF592C734D60B6053CB3"
+    "digest":  "68A4937B956ADDACE7B47A3C0782D886FF8F1A0938B961645048351C6733787C"
 }

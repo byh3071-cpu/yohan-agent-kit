@@ -138,6 +138,69 @@
       ]
     },
     {
+      "id": "manifest.restart-safe-handoff",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/restart-safe-handoff.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/restart-safe-handoff.json"
+      ]
+    },
+    {
+      "id": "manifest.runtime-incident-investigator",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/runtime-incident-investigator.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/runtime-incident-investigator.json"
+      ]
+    },
+    {
+      "id": "manifest.supervised-session-conductor",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/supervised-session-conductor.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/supervised-session-conductor.json"
+      ]
+    },
+    {
       "id": "manifest.goal-cycle",
       "kind": "manifest",
       "owner": "yohan-agent-kit",
@@ -288,6 +351,72 @@
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
+      ]
+    },
+    {
+      "id": "skill.restart-safe-handoff",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/restart-safe-handoff",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/restart-safe-handoff",
+        "docs/audits/session-operations-skills-2026-08-23.md"
+      ]
+    },
+    {
+      "id": "skill.runtime-incident-investigator",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/runtime-incident-investigator",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/runtime-incident-investigator",
+        "docs/audits/session-operations-skills-2026-08-23.md"
+      ]
+    },
+    {
+      "id": "skill.supervised-session-conductor",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/supervised-session-conductor",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/supervised-session-conductor",
+        "docs/audits/session-operations-skills-2026-08-23.md"
       ]
     },
     {
@@ -3469,6 +3598,194 @@
       "evidenceRefs": [
         "goals/13-design-team-elicitation-hardening.md",
         "scripts/check-goal-13.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-14",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-14.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/14-design-team-session-continuity.md",
+        "docs/audits/design-team-session-continuity-2026-08-23.md",
+        "scripts/check-goal-14.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-15",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-15.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/15-session-operations-skills.md",
+        "docs/audits/session-operations-skills-2026-08-23.md",
+        "scripts/check-goal-15.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-16",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-16.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/check-goal-16.mjs"
+      ]
+    },
+    {
+      "id": "script.get-retrieval-learning-candidate",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Get-RetrievalLearningCandidate.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Get-RetrievalLearningCandidate.ps1"
+      ]
+    },
+    {
+      "id": "script.new-retrieval-query-fingerprint",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/New-RetrievalQueryFingerprint.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/New-RetrievalQueryFingerprint.ps1"
+      ]
+    },
+    {
+      "id": "script.record-retrieval-outcome",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Record-RetrievalOutcome.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Record-RetrievalOutcome.ps1"
+      ]
+    },
+    {
+      "id": "script.record-retrieval-receipt",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/Record-RetrievalReceipt.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Record-RetrievalReceipt.ps1"
+      ]
+    },
+    {
+      "id": "script.retrieval-evidence-common",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/RetrievalEvidence.Common.ps1",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/RetrievalEvidence.Common.ps1"
       ]
     },
     {

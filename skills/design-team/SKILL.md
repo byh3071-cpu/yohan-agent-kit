@@ -12,15 +12,17 @@ Run a context-led design workstream in which the user remains the design directo
 1. Find the actual owner workspace or repository and read its nearest instructions, active work state, and stop files before making changes.
 2. Find existing product flows, screens, tokens, components, brand assets, research, screenshots, and prior decisions. Prefer project evidence over remembered assumptions.
 3. Resolve the two-layer context contract in [context-contract.md](references/context-contract.md). Reconcile stale or contradictory facts; never silently pick one.
-4. Resolve the project's taste record, forbidden patterns, and reference set. If none exists, is stale, or covers a different medium, a taste pass precedes visual work — do not substitute the team's own aesthetic.
-5. State the design outcome, user, surface, constraints, current evidence, unknowns, and the next human gate.
-6. Choose the smallest team that covers the uncertainty using [team-contract.md](references/team-contract.md).
+4. When resuming or transferring work, resolve the project-owned continuation bundle under [session-continuity.md](references/session-continuity.md). Verify the source ref, approval state, production boundary, artifact visibility, and exact next gate before asking the director to restate anything.
+5. Resolve the project's taste record, forbidden patterns, and reference set. If none exists, is stale, or covers a different medium, a taste pass precedes visual work — do not substitute the team's own aesthetic.
+6. State the design outcome, user, surface, constraints, current evidence, unknowns, and the next human gate.
+7. Choose the smallest team that covers the uncertainty using [team-contract.md](references/team-contract.md).
 
 Do not store project facts in this skill. The reusable method belongs here; project facts and decisions belong in the owner's versioned source of truth, using Git where the project uses Git.
 
 ## Choose the work mode
 
 - **Discover** — inventory context, identify uncertainty, and produce a design brief. Do not invent a visual direction.
+- **Resume** — restore an existing project-owned context, taste record, approval state, and exact continuation point. Do not reopen resolved questions unless evidence changed.
 - **Elicit** — establish or refresh the taste model with the design director through structured comparison, using [taste-interview.md](references/taste-interview.md). Produces confirmed taste rules and forbidden patterns, not artifacts.
 - **Audit** — critique an existing experience against its goals, system, accessibility, and evidence. Separate observed defects from proposals.
 - **Explore** — collect references under [reference-intake.md](references/reference-intake.md), define information architecture and flows, then create visual directions.
@@ -31,7 +33,7 @@ For a faithful reproduction or an already approved source, match that source. Fo
 
 ## Operate the design loop
 
-1. **Frame** — write or refresh the project DesignContext and cite evidence with freshness.
+1. **Frame** — write or refresh the project DesignContext and cite evidence with freshness. On a resumed run, acknowledge the inherited state and contradictions under the session continuity contract.
 2. **Elicit** — resolve or establish the taste model with the design director. Show real candidates and let the director choose; do not ask for style in words. Read the choices back as explicit rules and get them confirmed.
 3. **Gather** — collect references against stated project questions under [reference-intake.md](references/reference-intake.md), and use authoritative primary sources for standards. Collect rejected work with equal rigor. Label facts, inferences, and proposals.
 4. **Reduce** — decide what to keep, merge, hide, defer, or remove before adding new design elements. For an existing surface, have the director rank what is used constantly, occasionally, and never; contrast comes from removing, and a team that guesses at importance weights everything evenly.
@@ -39,20 +41,23 @@ For a faithful reproduction or an already approved source, match that source. Fo
 6. **Visualize** — create the required artifact at its real viewport, print size, physical scale, or environmental context with realistic content and materials. Check it against the recorded forbidden patterns before showing it.
 7. **Select** — record the user's chosen, rejected, or deferred direction and why. The team does not self-approve.
 8. **Specify** — define the relevant visual, content, interaction, material, spatial, accessibility, and production rules.
-9. **Handoff** — connect the specification to the real implementation or production environment without replacing established systems.
+9. **Handoff** — connect the specification to the real implementation or production environment without replacing established systems. If ownership moves to another session, write and deliver the project-owned continuation bundle separately from production authorization.
 10. **Verify** — measure against [verification-contract.md](references/verification-contract.md) in the real medium and runtime, scan for forbidden patterns, run an adversarial critique, and record readings and residual risks.
-11. **Close** — update the project context snapshot, including the taste record, and append the decision event. Nominate reusable learning for shared promotion; never auto-promote project facts.
+11. **Close** — update the project context snapshot, including the taste record, and append the decision event. When pausing or transferring, apply [session-continuity.md](references/session-continuity.md) and report `prepared`, `sent`, `acknowledged`, or `failed` from evidence. Nominate reusable learning for shared promotion; never auto-promote project facts.
 
 ## Gates and boundaries
 
 - The user decides visual direction, density, layout, interaction, and final acceptance.
+- Keep `continue`, direction selection, final design acceptance, and production authorization distinct. A short acknowledgement authorizes only the immediately stated next action unless the gate explicitly names a specific artifact and consequence.
 - Do not begin production implementation before visual selection unless the user has supplied an already approved target.
 - Do not create visual directions against an empty or stale taste record. Run the taste pass first, or say plainly that directions are being produced without a taste model and that rejection is the expected outcome.
 - Do not create visual directions before references have been gathered against stated questions. A project holding one reference produces work anchored to that single accident; widening the evidence is cheaper than another rejected round.
 - Do not produce visual options when the surface's job cannot be stated in one sentence. Offer competing purposes instead, differing in what is present rather than in styling.
 - Do not present taste inferences the director has not confirmed as if they were approved rules.
+- Do not ask for a visual choice until the exact artifact revision is rendered or attached and a stable owner-project path is available. Tool success alone does not prove the director saw it.
 - Apply the forbidden-pattern scan to the team's own comparison sheets and candidates, not only to final artifacts.
 - Do not create a supposedly independent top-level design session as a child worker. Use a separate approved worktree/session and leave a project-owned handoff.
+- Do not report a session transfer as complete until the target acknowledges the project, source ref, current gate, and next action. A committed report or successful send call is not a receipt.
 - Follow local concurrency, worktree, write, privacy, cost, deployment, and release rules.
 - Do not transmit private assets or source material to an external provider without authorization.
 - Do not claim an unexposed backend model name. Record the tool and model labels actually shown by the runtime.
@@ -65,4 +70,4 @@ For a code-based responsive interactive HTML outcome, hand approved work to an i
 
 Before delivering an artifact or handoff, measure against [verification-contract.md](references/verification-contract.md) and apply [report-contract.md](references/report-contract.md).
 
-For a walkthrough of how a full run proceeds and what the design director is asked to do at each gate, see [operating-manual.md](references/operating-manual.md).
+For a walkthrough of how a full run proceeds and what the design director is asked to do at each gate, including session start and transfer, see [operating-manual.md](references/operating-manual.md).

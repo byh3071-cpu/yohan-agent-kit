@@ -1,0 +1,17 @@
+{
+    "schemaVersion":  1,
+    "skill":  "restart-safe-handoff",
+    "files":  [
+                  {
+                      "path":  "agents/openai.yaml",
+                      "bytes":  352,
+                      "sha256":  "804692FB1BAA93E245CF7250F5480FDB76532EE85F3D06B721F4EC8729548519"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  4328,
+                      "sha256":  "B161C01B01A6B06CD7F9F0B0B975EC1865004F3E670B34633A568E6E65220456"
+                  }
+              ],
+    "digest":  "F60B82EFFDF017509C694DDD661EB421740EA530524F8DCA133274989A2FCA7C"
+}

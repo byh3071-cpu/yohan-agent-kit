@@ -14,7 +14,7 @@ Use the smallest set of artifacts that preserves the decision. Use stable projec
 | Exploration | exactly three real visual options when no visual is approved | human selects, combines, or rejects |
 | Selection | decision-log entry with rationale and rejected directions | human approval |
 | Specification | medium-appropriate visual, content, interaction, material, spatial, accessibility, and production rules | selected direction is producible |
-| Handoff | actual production environment, source/asset/vendor/operational boundaries, verification plan | production may begin |
+| Handoff | actual production environment, source/asset/vendor/operational boundaries, verification plan; session continuation bundle when ownership moves | production may begin only after the named human gate |
 | Verification | measured readings per the verification contract, forbidden-pattern scan, adversarial review, residual risks | final human acceptance or named quality gate |
 
 ## Research report
@@ -75,6 +75,19 @@ Map the selected design to the actual implementation or production environment:
 
 The handoff may recommend a medium-appropriate implementation skill or production owner. It must not mutate or release production work while selection is pending.
 
+## Session transfer receipt
+
+When ownership moves to another session, apply [session-continuity.md](session-continuity.md) and record separately:
+
+- bundle path and source ref;
+- launch prompt or message identifier;
+- delivery channel and result;
+- recipient acknowledgement evidence;
+- current approval state and production boundary;
+- exact next human decision.
+
+Use `prepared`, `sent`, `acknowledged`, or `failed`. Do not collapse writing, sending, and receiving into one `completed` status.
+
 For regulated or safety-critical work, add the governing framework/version, intended use, hazards and risk controls, requirement traceability, protected safety semantics, and the named qualified approver. Keep design QA distinct from formal validation and compliance evidence.
 
 ## Final receipt
@@ -84,6 +97,7 @@ End with:
 - selected outcome and human gate status;
 - artifact paths and source refs;
 - team/provider receipt;
+- session transfer state and acknowledgement evidence when applicable;
 - verification performed and evidence;
 - known residual risks;
 - exact next action.

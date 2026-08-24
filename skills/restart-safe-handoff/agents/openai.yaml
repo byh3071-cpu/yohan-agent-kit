@@ -1,0 +1,6 @@
+interface:
+  display_name: "Restart-Safe Handoff"
+  short_description: "재시작 가능한 번들과 이중 영수증으로 인수인계를 보호합니다"
+  default_prompt: "Use $restart-safe-handoff to prepare or resume a durable handoff with guarded ownership and separate content and delivery receipts."
+policy:
+  allow_implicit_invocation: true

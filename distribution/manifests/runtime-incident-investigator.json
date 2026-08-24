@@ -1,0 +1,17 @@
+{
+    "schemaVersion":  1,
+    "skill":  "runtime-incident-investigator",
+    "files":  [
+                  {
+                      "path":  "agents/openai.yaml",
+                      "bytes":  373,
+                      "sha256":  "73FB3354AD0830DC39A35322EEA51C00236EDE16A27F8ADAD4F7ABB375817429"
+                  },
+                  {
+                      "path":  "SKILL.md",
+                      "bytes":  4041,
+                      "sha256":  "769B202DFD0B1937C699C0C5D1AD1F3319FC1F1139D3B477701C2AB4954452AB"
+                  }
+              ],
+    "digest":  "D0C87034222939609FCF7DCF41F1648F725A77DBC411BE51E0CFE62AFB956296"
+}

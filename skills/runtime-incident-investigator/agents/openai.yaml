@@ -1,0 +1,6 @@
+interface:
+  display_name: "Runtime Incident Investigator"
+  short_description: "다섯 계층의 증거와 반증으로 런타임 장애 원인을 좁힙니다"
+  default_prompt: "Use $runtime-incident-investigator to investigate this failure read-only across the five layers and separate observations, inferences, and disproof."
+policy:
+  allow_implicit_invocation: true
