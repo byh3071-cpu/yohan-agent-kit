@@ -24,6 +24,8 @@ settings.json.bak-*
 
 # Deterministic local fixtures for skill distribution tests
 tests/.work/
+__pycache__/
+*.pyc
 
 # Generated Agent Kit releases and machine-local intake/evidence
 dist/
