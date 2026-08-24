@@ -1,5 +1,5 @@
 {
-  "assetCount": 210,
+  "assetCount": 216,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -1778,6 +1778,29 @@
       ]
     },
     {
+      "contentDigest": "3588387c122331bde04c35d870dbbd95445974b5cb50101326df5be8233ad038",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/check-goal-16.mjs"
+      ],
+      "id": "script.check-goal-16",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-16.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
@@ -1946,6 +1969,31 @@
       ]
     },
     {
+      "contentDigest": "4c8f1c4d4f517fc188afb37744c673b302cf54e319e871509c4a9149f49a24dd",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Get-RetrievalLearningCandidate.ps1"
+      ],
+      "id": "script.get-retrieval-learning-candidate",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "sourcePath": "scripts/Get-RetrievalLearningCandidate.ps1",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "e8e5d9e7549f8139122d5d80b2938d5fd7154efa94ecae4c58bec2016e66dfd3",
       "evidenceRefs": [
         "scripts/Invoke-VendorSmoke.ps1",
@@ -2053,6 +2101,31 @@
       ]
     },
     {
+      "contentDigest": "81f043b97fd42ba730d770e16f269cf62a4a122a04917b90b8553d8e00232a9e",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/New-RetrievalQueryFingerprint.ps1"
+      ],
+      "id": "script.new-retrieval-query-fingerprint",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "sourcePath": "scripts/New-RetrievalQueryFingerprint.ps1",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "fc1bc502f283710e18719459396252259727b37bf712b4bd0be7c9e31e0f0169",
       "evidenceRefs": [
         "scripts/New-SkillManifest.ps1"
@@ -2095,6 +2168,56 @@
       ]
     },
     {
+      "contentDigest": "e274e1ac7435dcaf7ab4a8c28e6b07c1bc1a6fd0378f86830436fc4fbdf365f2",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Record-RetrievalOutcome.ps1"
+      ],
+      "id": "script.record-retrieval-outcome",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "sourcePath": "scripts/Record-RetrievalOutcome.ps1",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "cb436a64bee1616c13bb34bc119cb8e58d1ba7778f4405c643a996c4f0c842db",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/Record-RetrievalReceipt.ps1"
+      ],
+      "id": "script.record-retrieval-receipt",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "sourcePath": "scripts/Record-RetrievalReceipt.ps1",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "a2481d84267e86eee18ba55695d275c9108bc3280e393f43b10d64ed56eb587b",
       "evidenceRefs": [
         "scripts/Resolve-DesignContext.ps1"
@@ -2130,6 +2253,31 @@
       "requiredEnv": [],
       "sourcePath": "scripts/Restore-ExternalSkills.ps1",
       "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "e6c1ac1f5d833232d74235c0d80aff23097fd308e6b4792b68ca14e4fb872187",
+      "evidenceRefs": [
+        "goals/16-retrieval-receipt-outcome-loop.md",
+        "scripts/RetrievalEvidence.Common.ps1"
+      ],
+      "id": "script.retrieval-evidence-common",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [
+        "YOHAN_RETRIEVAL_HMAC_KEY"
+      ],
+      "sourcePath": "scripts/RetrievalEvidence.Common.ps1",
+      "vendors": [
+        "agent-plugins",
         "claude-code",
         "codex",
         "cursor",
@@ -4370,9 +4518,9 @@
       ]
     }
   ],
-  "catalogDigest": "ce9a161b6386fa7d0c1d180aa5969939a1c3d0337ab1e112ca52feab18adc23b",
+  "catalogDigest": "2b24175b59f8c76c35fa2406e07933f25c9501d2814c95684842c8940567275f",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "419552fe8c8c6c8fcc988de55a6dd7125e6311a4779c219f3b1b2ffc0cd1367c",
+  "registryDigest": "80380d3b67d0a70c0ec20bf25bd772eeb2a4182c45a98a4b66fecdcd8ab80014",
   "schemaVersion": 1
 }
