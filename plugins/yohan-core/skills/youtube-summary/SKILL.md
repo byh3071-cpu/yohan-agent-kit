@@ -1,62 +1,76 @@
 ---
 name: youtube-summary
-description: 유튜브 영상을 요한 브레인에 지식화(요약·온톨로지·트리플·wiki 카드)할 때. yt-dlp로 자막 확보 → 원문→요약 프로토콜 Step 0~6 실행. 노동은 자동, 판단 지점(학습 의도·승격·최종 검토)만 요한이 개입(B 방식). "영상 브레인에 넣어줘", "유튜브 지식화", "이 영상 정리해줘 <url>", "영상 넣어줘 <url>" 트리거.
+description: YouTube를 Focus Feed knowledge_jobs → NotebookLM 근거 → yohan-brain 검토 후보로 지식화할 때. "지식 대기열 처리해줘", "영상 브레인에 넣어줘", "유튜브 지식화", "이 영상 정리해줘", "영상 넣어줘", "영상 요약 승인" 트리거. 옛 yt-dlp→wiki/트리플 원샷 경로는 쓰지 않는다.
 ---
 
-# youtube-summary — 유튜브 → 요한 브레인 지식화
+# youtube-summary — YouTube → 검토 후보 (얇은 진입점)
 
-> 얇은 진입점. 상세 규칙은 **brain이 SoT** — 아래 정본을 반드시 대조하며 실행한다.
-> 역할 분담: **노동(자막·요약초안·트리플·적재)은 자동, 판단(학습의도·승격·검토)은 요한.** 판단 지점은 `[요한 개입]`으로 표시했고 **건너뛰지 않는다.**
+> 상세 계약은 **yohan-brain이 SoT**. 이 파일은 실행 순서만 담는다.
+> 정본: `docs/specs/knowledge-capture-workflow-v0.md` · `memory/decisions/2026-07-27-focus-feed-knowledge-capture-p0.md` · `docs/specs/KNOWLEDGE-WORKFLOW-P0-AGENT-PLAN.md`
 
-## 진입 전제 (먼저 확인)
+## 원칙
 
-- **brain 경로 파악(포커스피드 등 어디서 발동해도 OK):** cwd가 `yohan-brain`이면 그대로. 아니면 요한에게 brain 절대경로를 확인하거나 흔한 위치(`…/yohan-ecosystem/yohan-brain`)를 탐색해 **절대경로로 적재**한다(cd 불필요 — 파일 read/write는 절대경로면 됨). 못 찾으면 요한에게 확인.
-- `python -m yt_dlp --version` 확인. 없으면 `pip install -U yt-dlp` 안내(요한 실행).
-- **재개 체크:** 대상 영상의 id로 부분 산출물 스캔(`ingest/url/`엔 있는데 `insights/`엔 없음 / insight는 있는데 `triple-map.md` 행 없음 등) → 있으면 **미완료 단계부터** 이어서(프로토콜 "원샷 완료").
+- 대기열 정본 = Focus Feed `knowledge_jobs`. 원문 도구 = NotebookLM D0 Inbox. 지식 정본 = 사람 승인 뒤 `memory/ingest/` RESOURCE·SUMMARY.
+- 기본은 dry-run. `--execute`와 승인은 요한이 **처리/실행/승인**을 말했을 때만.
+- P0 승인은 RESOURCE·SUMMARY만. wiki·트리플·역전파·Notion 자동 쓰기 금지.
+- 자막 전문·쿠키·키를 Git·Notion·PR·세션 로그에 넣지 않는다.
 
-## 정본 참조 (brain SoT)
+## 먼저 확인
 
-| 무엇 | 어디 (yohan-brain) |
-|---|---|
-| 파이프라인 전체 Step 0~6·체크포인트 | `memory/rules/source-to-summary-protocol.md` (**#5 YouTube 특칙 필독**) |
-| 요약 9섹션 구조 | 프로토콜 Step 2 "표준 요약 구조" |
-| 트리플 관계 21종·도메인·신뢰도 | `memory/knowledge-hub/triple-map.md` 상단 팔레트 |
-| 승격 기준(2소스+·재사용) | 프로토콜 Step 4.5-B |
-| wiki 카드 포맷(Source Lock·Verified/Inferred) | 기존 카드 `memory/wiki/{entities,concepts}/*.md` |
-| 키워드 DB(프롬프트 영향 전용) | `memory/knowledge-hub/keywords.md` |
+1. URL이면 YouTube watch URL로 정규화한다. 지식화가 아직이면 Focus Feed **지식화** 버튼 또는 `/capture`로 대기열에 넣으라고 안내한다. NotebookLM에 직접 올리지 않는다.
+2. UI를 못 쓰면 아래만 만들어 붙여넣게 한다.
 
-## 실행 절차 (B = 판단 지점 개입)
+```text
+채널: {채널명 또는 확인 필요}
+제목: {영상 제목 또는 확인 필요}
+URL: {표준 YouTube URL}
+소스 가이드:
+- {설명란의 핵심 문맥}
+- {유의미한 타임라인·공식 링크}
+```
 
-0. **[요한 개입] 학습 의도** — "왜 이 영상 봐? (한 줄)" 물어본다. 답 없으면 기존 트리플·wiki 맥락으로 추론하고 SUMMARY에 `[학습 의도] (추론)` 표기.
-1. **자막 확보 (yt-dlp 인라인 — 번들 경로 의존 제거)** — 아래를 Bash로 실행(`<URL>` 치환):
-   ```bash
-   TMP=$(mktemp -d)
-   python -m yt_dlp --skip-download --write-auto-subs --write-subs \
-     --sub-langs "ko,ko-orig,en" --sub-format "vtt/best" -o "$TMP/cap" "<URL>" 2>&1 | tail -3
-   for L in ko-orig ko en; do f="$TMP/cap.$L.vtt"; [ -f "$f" ] && \
-     grep -vE "^(WEBVTT|Kind:|Language:|[0-9]{2}:[0-9]{2}:)" "$f" \
-     | sed 's/<[^>]*>//g; s/&amp;/\&/g; s/&gt;/>/g; s/&lt;/</g; s/&nbsp;/ /g' \
-     | grep -vE "^[[:space:]]*$" | awk '!seen[$0]++' > "$TMP/transcript.txt" && break; done
-   wc -m "$TMP/transcript.txt" && head -3 "$TMP/transcript.txt"
-   ```
-   `$TMP/transcript.txt`가 원문. 실패(자막 없음) 시 요한에게 텍스트 요청 or 요약 보류(프로토콜 #5).
-2. **Step 0-Pre·1** — 읽기 등급(A/B/C) 보고 → `ingest/url/url-{sha256-16}.md`에 raw 저장(YouTube=전문 보존). **고유명사 오인식 교정**(영상 설명 등 clean 소스 대조, 화자 이름 충돌 시 `[확인 필요]` — 추측 금지).
-3. **Step 2 요약** — `insights/{kebab-id}.md` 9섹션. `related`에 원본 필수. 긴 영상은 타임라인 구조. 인물 감지 시 후보 보고.
-4. **Step 4.5 교차검증** — 같은 domain·기존 트리플과 수렴/충돌 대조 보고.
-5. **[요한 개입] 체크포인트 1·2** — 역전파(4.6)·승격(위키/인물) 진행/스킵을 **A/B/C로 요한에게 판단 요청**(단일소스면 스킵/보류 추천 명시). 침묵 금지.
-6. **Step 4.7 온톨로지** — 트리플 3~7 추출 → 기존 대조 → **SUMMARY 본문 `## 트리플 맵` + `triple-map.md` 둘 다 등록**. 키워드 스캔 **한 줄 보고**(등록 N / 스킵+이유).
-7. **위키 카드** — 5번에서 승격 결정된 것만 생성(정의·`## Verified` [source: id]·Inferred TTL 30일) → `index.md` 통계·`log.md` append.
-8. **[요한 개입] 최종 검토** — 요약을 요한이 읽고 프레이밍·수정. 트리플 관계 오용·과장·부풀리기 자가 점검.
-9. **Step 5·6** — 인박스 아카이브(있으면) → **`logs/sessions/`에 세션 로그(실패·부분성공도 생략 금지)**.
+3. 명령은 **yohan-brain 루트**에서 돌린다. cwd가 아니면 절대경로로 찾는다(`…/yohan-ecosystem/yohan-brain`). 못 찾으면 요한에게 묻는다.
+4. `package.json`에 `knowledge:pickup` / `knowledge:approve`가 없으면 이 checkout은 계약 미탑재다. 추측 요약·yt-dlp로 우회하지 말고 멈춘다.
+
+## 처리
+
+### 1. 상태 확인 (외부 쓰기 없음)
+
+```text
+npm run knowledge:pickup -- --limit 1
+```
+
+대기열·NotebookLM·환경 변수 중 뭐가 준비됐고 뭐가 막혔는지 짧게 보고한다. 키 없음·인증 실패면 멈춘다. 값은 출력하지 않는다.
+
+### 2. 후보 생성 (요한이 처리/실행을 명시한 때만)
+
+```text
+npm run knowledge:pickup -- --execute --limit 1
+```
+
+- `--limit`은 1|2|3만. 한 세션 최대 3건.
+- 공개 자막·타임스탬프·품질 게이트 실패는 `action_required`. 제목·URL만으로 내용을 만들지 않는다.
+- 성공하면 `memory/inbox/knowledge-review/` 경로와 품질 점수·불확실성만 보여 준다.
+
+### 3. 승인 (요한이 승인한다고 명시한 때만)
+
+```text
+npm run knowledge:approve -- --job {uuid} --approve
+```
+
+`--stdin`은 ADR-017이 Accepted가 아니면 쓰지 않는다. 완료 뒤 RESOURCE·SUMMARY 경로만 보고한다. wiki·허브·Git·Notion을 이 단계에서 고치지 않는다.
 
 ## 금지
 
-- 자막 오인식 교정 **생략 금지**(고유명사가 트리플·엔티티를 채움).
-- 트리플 **한쪽만 등록 금지**(SUMMARY 본문 + `triple-map.md` 둘 다).
-- **단일소스 자동 승격 금지** — 위키/인물 카드는 요한 확인 후(propose-and-confirm).
-- 채용/홍보 등 저밀도 소스를 **부풀리기 금지** — 본문은 발화 충실 매핑, 벤치마크 해석은 내생각/OS적용에.
-- **세션 로그 생략 금지.** 커밋은 요한 확인 후.
+- yt-dlp 자동 실행·설치. 개인 로컬 캐시 예외는 요한이 **한 번** 명시한 뒤에만, 전문 영구 저장 없이.
+- NotebookLM 실패를 다른 추출기로 조용히 우회.
+- 커밋·MCP 재인증·Supabase migration·키 교체. 각각 사람 게이트.
+- 운영 canary 실패 row를 되돌리거나 품질 기준을 낮추기.
 
-## 요구 도구
+## 짧은 보고
 
-- `python -m yt_dlp` (없으면 `pip install -U yt-dlp`). 2026-07-13 실측: npm 자막 4경로(youtube-transcript·youtubei.js·caption url·ANDROID) 실패, yt-dlp만 성공. 자막 명령은 절차 1번에 인라인(번들 스크립트·경로 변수 의존 없음).
+```text
+상태: 캡처됨 | 검토 후보 생성 | 보류 | 승인 완료
+근거: 자막·타임스탬프 충족 여부 / 품질 점수
+다음: 검토 | 보류 사유 해결 | 승인
+```

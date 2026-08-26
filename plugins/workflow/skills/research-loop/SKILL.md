@@ -32,7 +32,7 @@ description: "Use when 요한 wants to run a research question through the full 
 - **fetch 폴백 체인** (한 소스가 막히면 다음으로): `WebFetch` → `playwright`/`claude-in-chrome`(JS 렌더·로그인 벽 우회) → **스크린샷 → vision(Read)로 차트·다이어그램 해석**.
 - **미디어 한계 돌파** — `source-to-summary-protocol` 입력 분기 재사용(신규 구현 금지):
   - 이미지(벤치 차트 등): 브라우저 스크린샷 → vision 해석 → 수치를 본문에 반영 + 원본을 `research/assets/<slug>/`에 증거로 저장.
-  - 동영상(발표·데모·리뷰): `yohan-core:youtube-summary`의 yt-dlp 자막 확보 절차 그대로 → 타임스탬프 인용. 필요 시 키프레임 추출 → vision.
+  - 동영상(발표·데모·리뷰): 지식화는 `yohan-core:youtube-summary`(Focus Feed 대기열·NotebookLM). 리서치 인용만 필요할 때도 yt-dlp 자동 우회 금지. 공개 자막·근거 실패면 해당 주장은 `[미검증]`.
 - 원문 확보 실패 = 해당 주장 `[미검증]` 표기(추측 요약 금지).
 
 ### ④ 적대검증
