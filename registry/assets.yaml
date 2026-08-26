@@ -96,6 +96,27 @@
       ]
     },
     {
+      "id": "manifest.agent-team-operations",
+      "kind": "manifest",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "distribution/manifests/agent-team-operations.json",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "distribution/manifests/agent-team-operations.json"
+      ]
+    },
+    {
       "id": "manifest.design-to-html",
       "kind": "manifest",
       "owner": "yohan-agent-kit",
@@ -351,6 +372,28 @@
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
+      ]
+    },
+    {
+      "id": "skill.agent-team-operations",
+      "kind": "skill",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "skills/agent-team-operations",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "skills/agent-team-operations",
+        "docs/audits/agent-team-operations-promotion-2026-08-26.md"
       ]
     },
     {
@@ -3598,6 +3641,28 @@
       "evidenceRefs": [
         "goals/13-design-team-elicitation-hardening.md",
         "scripts/check-goal-13.mjs"
+      ]
+    },
+    {
+      "id": "script.check-agent-team-operations",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-agent-team-operations.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "docs/audits/agent-team-operations-promotion-2026-08-26.md",
+        "scripts/check-agent-team-operations.mjs"
       ]
     },
     {

@@ -8,7 +8,7 @@
 - VHK: AGENTS·Cursor 규칙 동기화만 담당하며 사용자 홈 스킬을 설치하지 않는다.
 - Orca: 같은 Windows 사용자 프로필에서 실행될 때 전역 설치본을 상속한다. 원격 호스트는 별도 설치가 필요하다.
 
-현재 `All` 선택은 `adr-cycle`, `design-team`, `design-to-html`, `goal-cycle`, `restart-safe-handoff`, `runtime-incident-investigator`, `supervised-session-conductor`의 정본과 manifest를 함께 검사한다. 개별 이름으로도 같은 읽기 전용 Check와 승인 기반 Install·Restore 계약을 사용한다.
+현재 `All` 선택은 `adr-cycle`, `design-team`, `design-to-html`, `goal-cycle`, `agent-team-operations`, `restart-safe-handoff`, `runtime-incident-investigator`, `supervised-session-conductor`의 정본과 manifest를 함께 검사한다. 개별 이름으로도 같은 읽기 전용 Check와 승인 기반 Install·Restore 계약을 사용한다.
 
 `plugins/`의 Claude Code 플러그인은 그대로 유지한다. 범용 스킬과 같은 이름의 복사본을 플러그인 안에 만들지 않는다.
 

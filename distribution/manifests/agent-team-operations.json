@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "skill": "agent-team-operations",
+  "files": [
+    {
+      "path": "agents/openai.yaml",
+      "bytes": 407,
+      "sha256": "8C050069AD916EA951224D5268662498E717BA828FB7B4FE4980C375D89701E3"
+    },
+    {
+      "path": "references/operating-manual.md",
+      "bytes": 9014,
+      "sha256": "F222EF08E9A52B84F032E4D0204E9B052161E8485832BDA15E207CC875CB8A1C"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 6634,
+      "sha256": "A3EB07D53DE6B752359E3A962C6B9395871766F906449EB037AA342B5E6A9893"
+    }
+  ],
+  "digest": "C321E4C231EACE51D4F84A99BB1CBD5942708B1894D72A3723D4A0F1B66D54BD"
+}
