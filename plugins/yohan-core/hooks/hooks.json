@@ -33,25 +33,47 @@
       {
         "matcher": "Bash|Write|Edit|Read",
         "hooks": [
-          { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/protect-secrets.ps1\"", "timeout": 15 }
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/protect-secrets.ps1\"",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"& (Join-Path $env:CLAUDE_PLUGIN_ROOT 'hooks/protect-secrets.ps1')\"",
+            "timeout": 15
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/destructive-guard.ps1\"", "timeout": 15 }
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/destructive-guard.ps1\"",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"& (Join-Path $env:CLAUDE_PLUGIN_ROOT 'hooks/destructive-guard.ps1')\"",
+            "timeout": 15
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "if": "Bash(git commit *)", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-check.ps1\"", "timeout": 60 }
+          {
+            "type": "command",
+            "if": "Bash(git commit *)",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-commit-check.ps1\"",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"& (Join-Path $env:CLAUDE_PLUGIN_ROOT 'hooks/pre-commit-check.ps1')\"",
+            "timeout": 60
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "if": "Bash(git push *)", "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/critic-gate.ps1\"", "timeout": 30 }
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${CLAUDE_PLUGIN_ROOT}/hooks/critic-gate.ps1\"",
+            "commandWindows": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"& (Join-Path $env:CLAUDE_PLUGIN_ROOT 'hooks/critic-gate.ps1')\"",
+            "timeout": 30
+          }
         ]
       }
     ],
