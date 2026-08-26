@@ -206,10 +206,10 @@ try {
     $check = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'All', '-HomeRoot', $emptyHome)
     Assert-Equal -Expected 2 -Actual $check.ExitCode -Message 'Missing targets must be installable'
     Assert-Equal -Expected 'Installable' -Actual $check.Data.status -Message 'Missing target status'
-    Assert-Equal -Expected 7 -Actual @($check.Data.sources).Count -Message 'All selects seven canonical skill sources'
-    Assert-Equal -Expected 7 -Actual @($check.Data.sources | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All source skill identities are unique'
-    Assert-Equal -Expected 21 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Three canonical junctions per skill'
-    Assert-Equal -Expected 7 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' } | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All standard targets cover seven skills'
+    Assert-Equal -Expected 8 -Actual @($check.Data.sources).Count -Message 'All selects eight canonical skill sources'
+    Assert-Equal -Expected 8 -Actual @($check.Data.sources | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All source skill identities are unique'
+    Assert-Equal -Expected 24 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Three canonical junctions per skill'
+    Assert-Equal -Expected 8 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' } | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All standard targets cover eight skills'
     Assert-True -Condition (-not [IO.Directory]::Exists($emptyHome)) -Message 'Check must not create HomeRoot'
 
     $stale = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'All', '-HomeRoot', $emptyHome, '-PlanDigest', ('0' * 64), '-ApproveGlobalHomeWrite')

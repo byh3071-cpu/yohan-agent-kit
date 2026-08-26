@@ -1,5 +1,5 @@
 {
-  "assetCount": 216,
+  "assetCount": 219,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "contentDigest": "4ec0157362bd39f802d903802472a83fceaa9931ae899110c93e692f75a082ff",
+      "contentDigest": "31bb922adf3084222aa5510789784922c1ea09551261c3774845423d004d0b0d",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -723,6 +723,28 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "distribution/manifests/adr-cycle.json",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "4e959e03a14ef0a08bc7319310368ee31cea5e6c430e5b95650ef4d1a54b6e04",
+      "evidenceRefs": [
+        "distribution/manifests/agent-team-operations.json"
+      ],
+      "id": "manifest.agent-team-operations",
+      "kind": "manifest",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "distribution/manifests/agent-team-operations.json",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -1212,7 +1234,7 @@
       ]
     },
     {
-      "contentDigest": "94423a8092e518e2af1242c9d3a568f20f58b79e62c50b8647594692bfbfb65e",
+      "contentDigest": "1111c1fdf608bdbffbc4b48ce0fdbe00724b4cd1978f5e035082e8f66e8dbf3b",
       "evidenceRefs": [
         "plugins/workflow/.claude-plugin/plugin.json"
       ],
@@ -1230,7 +1252,7 @@
       ]
     },
     {
-      "contentDigest": "07bd50f1c1b62106092f2494f3d750dd742a4f7682fdcb7aecfc55641f3dd916",
+      "contentDigest": "c144fb56e8b14b59ec411191cd4be75da3b1e9dee7b234d4efaad16d948bc87b",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1610,6 +1632,29 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/Build-AssetCatalog.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "2bd3726d864c185abcefb9ada42cc40c19b8a3085209c0e60d96f34a5b845509",
+      "evidenceRefs": [
+        "docs/audits/agent-team-operations-promotion-2026-08-26.md",
+        "scripts/check-agent-team-operations.mjs"
+      ],
+      "id": "script.check-agent-team-operations",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-agent-team-operations.mjs",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -2059,7 +2104,7 @@
       ]
     },
     {
-      "contentDigest": "befeba259ede8301cfbafb0af0b764de5f5c576df86295f949d8dad92775fa48",
+      "contentDigest": "e047a4669caa54ce4414cdaaf02961320efdfaf8bbd67cc4c78ecc1bb98b58b4",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -2468,6 +2513,29 @@
       "provenance": "external:https://github.com/panniantong/agent-reach@93ae1d1",
       "requiredEnv": [],
       "sourcePath": "external://github.com/panniantong/agent-reach/agent_reach/skill",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "628ae0d6fae3192ad93d3742b0d0ecacaa76de94b78613ebc082e4cfd0270566",
+      "evidenceRefs": [
+        "skills/agent-team-operations",
+        "docs/audits/agent-team-operations-promotion-2026-08-26.md"
+      ],
+      "id": "skill.agent-team-operations",
+      "kind": "skill",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "skills/agent-team-operations",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -4052,7 +4120,7 @@
       ]
     },
     {
-      "contentDigest": "1c51d78cfebe5a256ee3a4d2ac6c2c33ad057913529e9295598985d43f669753",
+      "contentDigest": "ea46d0d2d0e2bdc5a7397e6b388ce0d3c16cee1d512021ae5653a1a9786ef7e8",
       "evidenceRefs": [
         "plugins/workflow/skills/research-loop"
       ],
@@ -4452,7 +4520,7 @@
       ]
     },
     {
-      "contentDigest": "0106b3adb35aea18d98014c4534f128b2bedbb95caff755b41f2a4a83bb3530a",
+      "contentDigest": "82432dc19c1bd06ccc9910dab2b6cc7961cd8fc01074e19a4f10f737989444cd",
       "evidenceRefs": [
         "plugins/yohan-core/skills/youtube-summary"
       ],
@@ -4518,9 +4586,9 @@
       ]
     }
   ],
-  "catalogDigest": "2b24175b59f8c76c35fa2406e07933f25c9501d2814c95684842c8940567275f",
+  "catalogDigest": "4f9727a8901abc6288f86c3a3b433b72ae28af79a336377d6323d287eb8cf807",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "80380d3b67d0a70c0ec20bf25bd772eeb2a4182c45a98a4b66fecdcd8ab80014",
+  "registryDigest": "58a04817fcc798f39996f7c1eaabf42828bd338ba66ad8ead0a0cc7c8f639381",
   "schemaVersion": 1
 }

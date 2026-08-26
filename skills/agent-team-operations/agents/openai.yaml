@@ -1,0 +1,6 @@
+interface:
+  display_name: "Agent Team Operations"
+  short_description: "여러 세션·벤더 팀을 하나의 지휘·Task·artifact 계약으로 운영합니다"
+  default_prompt: "이 프로젝트를 $agent-team-operations로 복구하고, 정본·ownership·현재 gate를 ACK한 뒤 가장 작은 팀과 모델 라우팅으로 작업을 운영해 주세요."
+policy:
+  allow_implicit_invocation: true
