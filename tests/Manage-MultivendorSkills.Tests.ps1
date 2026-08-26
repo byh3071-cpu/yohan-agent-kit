@@ -35,6 +35,62 @@ function Assert-Equal {
     }
 }
 
+function Assert-AdapterWrapperDelegation {
+    param(
+        [Parameter(Mandatory = $true)]$FunctionAsts,
+        [Parameter(Mandatory = $true)][string]$FunctionName,
+        [Parameter(Mandatory = $true)][string]$ExpectedHelperName,
+        [Parameter(Mandatory = $true)][hashtable]$ExpectedLiteralArguments,
+        [Parameter(Mandatory = $true)][hashtable]$ExpectedExpressionArguments,
+        [string[]]$ForbiddenArguments = @()
+    )
+
+    $functionMatches = @($FunctionAsts | Where-Object { $_.Name -ceq $FunctionName })
+    Assert-Equal -Expected 1 -Actual $functionMatches.Count -Message "$FunctionName is defined once"
+    if ($functionMatches.Count -ne 1) { return }
+
+    $commands = @($functionMatches[0].Body.FindAll({ param($node) $node -is [Management.Automation.Language.CommandAst] }, $true))
+    Assert-Equal -Expected 1 -Actual $commands.Count -Message "$FunctionName contains exactly one command"
+    if ($commands.Count -ne 1) { return }
+
+    $command = $commands[0]
+    Assert-Equal -Expected $ExpectedHelperName -Actual $command.GetCommandName() -Message "$FunctionName delegates to $ExpectedHelperName"
+    $elements = @($command.CommandElements)
+
+    foreach ($argumentName in [string[]]$ExpectedLiteralArguments.Keys) {
+        $argumentIndexes = @(for ($index = 1; $index -lt $elements.Count; $index++) {
+            if ($elements[$index] -is [Management.Automation.Language.CommandParameterAst] -and $elements[$index].ParameterName -ieq $argumentName) { $index }
+        })
+        Assert-Equal -Expected 1 -Actual $argumentIndexes.Count -Message "$FunctionName has one -$argumentName argument"
+        if ($argumentIndexes.Count -eq 1) {
+            $valueIndex = $argumentIndexes[0] + 1
+            $valueAst = $null
+            if ($valueIndex -lt $elements.Count -and $elements[$valueIndex] -isnot [Management.Automation.Language.CommandParameterAst]) { $valueAst = $elements[$valueIndex] }
+            $isExpected = $null -ne $valueAst -and $valueAst -is [Management.Automation.Language.StringConstantExpressionAst] -and [string]::Equals([string]$valueAst.Value, [string]$ExpectedLiteralArguments[$argumentName], [StringComparison]::Ordinal)
+            Assert-True -Condition $isExpected -Message "$FunctionName passes the expected literal for -$argumentName"
+        }
+    }
+
+    foreach ($argumentName in [string[]]$ExpectedExpressionArguments.Keys) {
+        $argumentIndexes = @(for ($index = 1; $index -lt $elements.Count; $index++) {
+            if ($elements[$index] -is [Management.Automation.Language.CommandParameterAst] -and $elements[$index].ParameterName -ieq $argumentName) { $index }
+        })
+        Assert-Equal -Expected 1 -Actual $argumentIndexes.Count -Message "$FunctionName has one -$argumentName argument"
+        if ($argumentIndexes.Count -eq 1) {
+            $valueIndex = $argumentIndexes[0] + 1
+            $valueAst = $null
+            if ($valueIndex -lt $elements.Count -and $elements[$valueIndex] -isnot [Management.Automation.Language.CommandParameterAst]) { $valueAst = $elements[$valueIndex] }
+            $isExpected = $null -ne $valueAst -and [string]::Equals([string]$valueAst.Extent.Text, [string]$ExpectedExpressionArguments[$argumentName], [StringComparison]::OrdinalIgnoreCase)
+            Assert-True -Condition $isExpected -Message "$FunctionName passes the expected expression for -$argumentName"
+        }
+    }
+
+    foreach ($argumentName in $ForbiddenArguments) {
+        $argumentCount = @($elements | Where-Object { $_ -is [Management.Automation.Language.CommandParameterAst] -and $_.ParameterName -ieq $argumentName }).Count
+        Assert-Equal -Expected 0 -Actual $argumentCount -Message "$FunctionName does not pass -$argumentName"
+    }
+}
+
 function Invoke-Manager {
     param(
         [Parameter(Mandatory = $true)][string[]]$Arguments,
@@ -864,6 +920,12 @@ try {
     $managerAst = [Management.Automation.Language.Parser]::ParseFile($toolPath, [ref]$managerTokens, [ref]$managerParseErrors)
     Assert-Equal -Expected 0 -Actual $managerParseErrors.Count -Message 'Manager AST for primitive safety tests'
     $topLevelFunctions = @($managerAst.EndBlock.Statements | Where-Object { $_ -is [Management.Automation.Language.FunctionDefinitionAst] })
+    $sealedAdapterHelpers = @($topLevelFunctions | Where-Object { $_.Name -in @('Get-SealedAdapterInfo', 'New-SealedAdapterDirectory') })
+    Assert-Equal -Expected 2 -Actual $sealedAdapterHelpers.Count -Message 'Vendor-neutral sealed adapter helpers are defined once'
+    Assert-AdapterWrapperDelegation -FunctionAsts $topLevelFunctions -FunctionName 'Get-AgyAdapterInfo' -ExpectedHelperName 'Get-SealedAdapterInfo' -ExpectedLiteralArguments @{ AdapterKind = 'agy-cli-physical-copy'; DiagnosticLabel = 'AGY' } -ExpectedExpressionArguments @{ Source = '$Source'; AgyVersion = '$AgyVersion' }
+    Assert-AdapterWrapperDelegation -FunctionAsts $topLevelFunctions -FunctionName 'Get-ClaudeAdapterInfo' -ExpectedHelperName 'Get-SealedAdapterInfo' -ExpectedLiteralArguments @{ AdapterKind = 'claude-code-personal-physical-copy'; DiagnosticLabel = 'Claude' } -ExpectedExpressionArguments @{ Source = '$Source' } -ForbiddenArguments @('AgyVersion')
+    Assert-AdapterWrapperDelegation -FunctionAsts $topLevelFunctions -FunctionName 'New-AgyAdapterDirectory' -ExpectedHelperName 'New-SealedAdapterDirectory' -ExpectedLiteralArguments @{ DiagnosticLabel = 'AGY' } -ExpectedExpressionArguments @{ Path = '$Path'; Source = '$Source'; Adapter = '$Adapter'; AllowedRoot = '$AllowedRoot' }
+    Assert-AdapterWrapperDelegation -FunctionAsts $topLevelFunctions -FunctionName 'New-ClaudeAdapterDirectory' -ExpectedHelperName 'New-SealedAdapterDirectory' -ExpectedLiteralArguments @{ DiagnosticLabel = 'Claude' } -ExpectedExpressionArguments @{ Path = '$Path'; Source = '$Source'; Adapter = '$Adapter'; AllowedRoot = '$AllowedRoot' }
     foreach ($functionAst in $topLevelFunctions) {
         . ([scriptblock]::Create([string]$functionAst.Extent.Text))
     }

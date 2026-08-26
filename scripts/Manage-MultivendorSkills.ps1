@@ -566,30 +566,32 @@ function Get-SourceInfo {
     }
 }
 
-function Get-AgyAdapterInfo {
+function Get-SealedAdapterInfo {
     param(
         [Parameter(Mandatory = $true)]$Source,
-        [Parameter(Mandatory = $true)][string]$AgyVersion
+        [Parameter(Mandatory = $true)][string]$AdapterKind,
+        [Parameter(Mandatory = $true)][string]$DiagnosticLabel,
+        [AllowEmptyString()][string]$AgyVersion
     )
 
     if ([string]::IsNullOrWhiteSpace([string]$Source.commit) -or [string]$Source.commit -notmatch '^[a-fA-F0-9]{40,64}$') {
         throw "Canonical source commit is unavailable:$($Source.skill)"
     }
-    if ([string]::IsNullOrWhiteSpace($AgyVersion)) { throw 'AGY adapter requires a verified CLI version' }
+    if ($PSBoundParameters.ContainsKey('AgyVersion') -and [string]::IsNullOrWhiteSpace($AgyVersion)) { throw "$DiagnosticLabel adapter requires a verified CLI version" }
     $metadataName = '.yohan-adapter.json'
     if (@($Source.manifest.files | Where-Object { [string]$_.path -ieq $metadataName }).Count -gt 0) {
-        throw "Canonical source reserves the AGY adapter metadata path:$metadataName"
+        throw "Canonical source reserves the $DiagnosticLabel adapter metadata path:$metadataName"
     }
 
     $metadata = [pscustomobject][ordered]@{
         schemaVersion = 1
-        adapterKind = 'agy-cli-physical-copy'
+        adapterKind = $AdapterKind
         skill = [string]$Source.skill
         sourcePath = Get-NormalizedFullPath -Path ([string]$Source.directory)
         sourceCommit = ([string]$Source.commit).ToLowerInvariant()
         sourceDigest = ([string]$Source.manifest.digest).ToUpperInvariant()
-        agyVersion = $AgyVersion
     }
+    if ($PSBoundParameters.ContainsKey('AgyVersion')) { $metadata | Add-Member -NotePropertyName agyVersion -NotePropertyValue $AgyVersion }
     $metadataText = (ConvertTo-AsciiJson -Value $metadata) + [Environment]::NewLine
     $rows = @($Source.manifest.files | ForEach-Object {
         [pscustomobject][ordered]@{
@@ -613,6 +615,57 @@ function Get-AgyAdapterInfo {
             files = $rows
             digest = Get-Sha256Text -Text $digestInput
         }
+    }
+}
+
+function Get-AgyAdapterInfo {
+    param(
+        [Parameter(Mandatory = $true)]$Source,
+        [Parameter(Mandatory = $true)][string]$AgyVersion
+    )
+
+    return Get-SealedAdapterInfo -Source $Source -AdapterKind 'agy-cli-physical-copy' -AgyVersion $AgyVersion -DiagnosticLabel 'AGY'
+}
+
+function New-SealedAdapterDirectory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)]$Source,
+        [Parameter(Mandatory = $true)]$Adapter,
+        [Parameter(Mandatory = $true)][string]$AllowedRoot,
+        [Parameter(Mandatory = $true)][string]$DiagnosticLabel
+    )
+
+    $destination = Get-NormalizedFullPath -Path $Path
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label "$DiagnosticLabel adapter staging directory"
+    if ((Get-PathEntryInfo -Path $destination).kind -ne 'Missing') {
+        throw "$DiagnosticLabel adapter staging directory already exists:$destination"
+    }
+    $parent = Split-Path -Parent $destination
+    if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $parent -Label "$DiagnosticLabel adapter staging parent" -IncludeLeaf
+    $null = New-Item -ItemType Directory -Path $destination
+    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label "$DiagnosticLabel adapter staging directory" -IncludeLeaf
+
+    foreach ($row in @($Source.manifest.files)) {
+        $relative = ([string]$row.path).Replace('/', '\')
+        $sourceFile = Join-Path ([string]$Source.directory) $relative
+        $destinationFile = Join-Path $destination $relative
+        Assert-SafeFilePath -AllowedRoot ([string]$Source.directory) -Candidate $sourceFile -Label "$DiagnosticLabel adapter source file"
+        Assert-SafeFilePath -AllowedRoot $destination -Candidate $destinationFile -Label "$DiagnosticLabel adapter destination file"
+        $destinationParent = Split-Path -Parent $destinationFile
+        if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent -Force }
+        Assert-SafeDestinationPath -AllowedRoot $destination -Candidate $destinationParent -Label "$DiagnosticLabel adapter destination parent" -IncludeLeaf
+        [IO.File]::Copy($sourceFile, $destinationFile, $false)
+    }
+    $metadataPath = Join-Path $destination ([string]$Adapter.metadataName)
+    Assert-SafeFilePath -AllowedRoot $destination -Candidate $metadataPath -Label "$DiagnosticLabel adapter metadata file"
+    [IO.File]::WriteAllText($metadataPath, [string]$Adapter.metadataText, (New-Object Text.UTF8Encoding($false)))
+
+    $actual = Get-DirectoryManifest -Directory $destination
+    $comparison = Compare-DirectoryManifest -Expected $Adapter.manifest -Actual $actual
+    if (-not $comparison.equal -or -not [string]::Equals([string]$actual.digest, [string]$Adapter.manifest.digest, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Generated $DiagnosticLabel adapter verification failed:$([string]::Join(',', @($comparison.differences)))"
     }
 }
 
@@ -624,82 +677,13 @@ function New-AgyAdapterDirectory {
         [Parameter(Mandatory = $true)][string]$AllowedRoot
     )
 
-    $destination = Get-NormalizedFullPath -Path $Path
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'AGY adapter staging directory'
-    if ((Get-PathEntryInfo -Path $destination).kind -ne 'Missing') {
-        throw "AGY adapter staging directory already exists:$destination"
-    }
-    $parent = Split-Path -Parent $destination
-    if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $parent -Label 'AGY adapter staging parent' -IncludeLeaf
-    $null = New-Item -ItemType Directory -Path $destination
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'AGY adapter staging directory' -IncludeLeaf
-
-    foreach ($row in @($Source.manifest.files)) {
-        $relative = ([string]$row.path).Replace('/', '\')
-        $sourceFile = Join-Path ([string]$Source.directory) $relative
-        $destinationFile = Join-Path $destination $relative
-        Assert-SafeFilePath -AllowedRoot ([string]$Source.directory) -Candidate $sourceFile -Label 'AGY adapter source file'
-        Assert-SafeFilePath -AllowedRoot $destination -Candidate $destinationFile -Label 'AGY adapter destination file'
-        $destinationParent = Split-Path -Parent $destinationFile
-        if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent -Force }
-        Assert-SafeDestinationPath -AllowedRoot $destination -Candidate $destinationParent -Label 'AGY adapter destination parent' -IncludeLeaf
-        [IO.File]::Copy($sourceFile, $destinationFile, $false)
-    }
-    $metadataPath = Join-Path $destination ([string]$Adapter.metadataName)
-    Assert-SafeFilePath -AllowedRoot $destination -Candidate $metadataPath -Label 'AGY adapter metadata file'
-    [IO.File]::WriteAllText($metadataPath, [string]$Adapter.metadataText, (New-Object Text.UTF8Encoding($false)))
-
-    $actual = Get-DirectoryManifest -Directory $destination
-    $comparison = Compare-DirectoryManifest -Expected $Adapter.manifest -Actual $actual
-    if (-not $comparison.equal -or -not [string]::Equals([string]$actual.digest, [string]$Adapter.manifest.digest, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Generated AGY adapter verification failed:$([string]::Join(',', @($comparison.differences)))"
-    }
+    New-SealedAdapterDirectory -Path $Path -Source $Source -Adapter $Adapter -AllowedRoot $AllowedRoot -DiagnosticLabel 'AGY'
 }
 
 function Get-ClaudeAdapterInfo {
     param([Parameter(Mandatory = $true)]$Source)
 
-    if ([string]::IsNullOrWhiteSpace([string]$Source.commit) -or [string]$Source.commit -notmatch '^[a-fA-F0-9]{40,64}$') {
-        throw "Canonical source commit is unavailable:$($Source.skill)"
-    }
-    $metadataName = '.yohan-adapter.json'
-    if (@($Source.manifest.files | Where-Object { [string]$_.path -ieq $metadataName }).Count -gt 0) {
-        throw "Canonical source reserves the Claude adapter metadata path:$metadataName"
-    }
-
-    $metadata = [pscustomobject][ordered]@{
-        schemaVersion = 1
-        adapterKind = 'claude-code-personal-physical-copy'
-        skill = [string]$Source.skill
-        sourcePath = Get-NormalizedFullPath -Path ([string]$Source.directory)
-        sourceCommit = ([string]$Source.commit).ToLowerInvariant()
-        sourceDigest = ([string]$Source.manifest.digest).ToUpperInvariant()
-    }
-    $metadataText = (ConvertTo-AsciiJson -Value $metadata) + [Environment]::NewLine
-    $rows = @($Source.manifest.files | ForEach-Object {
-        [pscustomobject][ordered]@{
-            path = [string]$_.path
-            bytes = [int64]$_.bytes
-            sha256 = ([string]$_.sha256).ToUpperInvariant()
-        }
-    })
-    $rows += [pscustomobject][ordered]@{
-        path = $metadataName
-        bytes = [int64][Text.Encoding]::UTF8.GetByteCount($metadataText)
-        sha256 = Get-Sha256Text -Text $metadataText
-    }
-    $rows = @($rows | Sort-Object -Property @{ Expression = { $_.path.ToLowerInvariant() } }, @{ Expression = { $_.path } })
-    $digestInput = [string]::Join("`n", @($rows | ForEach-Object { "$($_.path)`0$($_.bytes)`0$($_.sha256)" }))
-    return [pscustomobject][ordered]@{
-        metadataName = $metadataName
-        metadata = $metadata
-        metadataText = $metadataText
-        manifest = [pscustomobject][ordered]@{
-            files = $rows
-            digest = Get-Sha256Text -Text $digestInput
-        }
-    }
+    return Get-SealedAdapterInfo -Source $Source -AdapterKind 'claude-code-personal-physical-copy' -DiagnosticLabel 'Claude'
 }
 
 function New-ClaudeAdapterDirectory {
@@ -710,37 +694,7 @@ function New-ClaudeAdapterDirectory {
         [Parameter(Mandatory = $true)][string]$AllowedRoot
     )
 
-    $destination = Get-NormalizedFullPath -Path $Path
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'Claude adapter staging directory'
-    if ((Get-PathEntryInfo -Path $destination).kind -ne 'Missing') {
-        throw "Claude adapter staging directory already exists:$destination"
-    }
-    $parent = Split-Path -Parent $destination
-    if (-not [IO.Directory]::Exists($parent)) { $null = New-Item -ItemType Directory -Path $parent -Force }
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $parent -Label 'Claude adapter staging parent' -IncludeLeaf
-    $null = New-Item -ItemType Directory -Path $destination
-    Assert-SafeDestinationPath -AllowedRoot $AllowedRoot -Candidate $destination -Label 'Claude adapter staging directory' -IncludeLeaf
-
-    foreach ($row in @($Source.manifest.files)) {
-        $relative = ([string]$row.path).Replace('/', '\')
-        $sourceFile = Join-Path ([string]$Source.directory) $relative
-        $destinationFile = Join-Path $destination $relative
-        Assert-SafeFilePath -AllowedRoot ([string]$Source.directory) -Candidate $sourceFile -Label 'Claude adapter source file'
-        Assert-SafeFilePath -AllowedRoot $destination -Candidate $destinationFile -Label 'Claude adapter destination file'
-        $destinationParent = Split-Path -Parent $destinationFile
-        if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent -Force }
-        Assert-SafeDestinationPath -AllowedRoot $destination -Candidate $destinationParent -Label 'Claude adapter destination parent' -IncludeLeaf
-        [IO.File]::Copy($sourceFile, $destinationFile, $false)
-    }
-    $metadataPath = Join-Path $destination ([string]$Adapter.metadataName)
-    Assert-SafeFilePath -AllowedRoot $destination -Candidate $metadataPath -Label 'Claude adapter metadata file'
-    [IO.File]::WriteAllText($metadataPath, [string]$Adapter.metadataText, (New-Object Text.UTF8Encoding($false)))
-
-    $actual = Get-DirectoryManifest -Directory $destination
-    $comparison = Compare-DirectoryManifest -Expected $Adapter.manifest -Actual $actual
-    if (-not $comparison.equal -or -not [string]::Equals([string]$actual.digest, [string]$Adapter.manifest.digest, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Generated Claude adapter verification failed:$([string]::Join(',', @($comparison.differences)))"
-    }
+    New-SealedAdapterDirectory -Path $Path -Source $Source -Adapter $Adapter -AllowedRoot $AllowedRoot -DiagnosticLabel 'Claude'
 }
 
 function Get-LinkTargetPath {

@@ -2129,7 +2129,7 @@
       ]
     },
     {
-      "contentDigest": "c6b5b02daca7bcbfafcfb362c9a6a4aeea8100ab0c56382063d90986f648a328",
+      "contentDigest": "15d65e5a692ee0de8b56e67b465bfa67f5e82da2cf3feae7b991d6a1e4e47ec3",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -4611,7 +4611,7 @@
       ]
     }
   ],
-  "catalogDigest": "24308392fcd112251358038e252d4394f7e1fba6f966d885e1022ee956942c4b",
+  "catalogDigest": "3b60d72a87487a7401fa76680310d373168ec648028d27388497b7b36a3ecf50",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "6111843fd9d33fa60626df45c5dc63a999a30bb1a378301bc7c28719a2b9ba4f",
