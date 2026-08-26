@@ -1,7 +1,7 @@
 {
   "name": "workflow",
   "description": "요한의 반복 작업 워크플로 스킬 묶음: new-repo, parallel, release-gate, dogfood-crosscheck, visualize, handoff, overnight-autoloop, research-loop, ship-plan-to-pr(승인 플랜→PR 머지X), VHK P0.",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "author": {
     "name": "byh3071",
     "email": "byh3071@gmail.com"
