@@ -69,6 +69,17 @@ function Write-Utf8NoBom {
     [IO.File]::WriteAllText($Path, $Text, (New-Object Text.UTF8Encoding($false)))
 }
 
+function Move-FixtureDirectoryExact {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$DestinationPath
+    )
+
+    $destinationParent = Split-Path -Parent $DestinationPath
+    if (-not [IO.Directory]::Exists($destinationParent)) { $null = New-Item -ItemType Directory -Path $destinationParent }
+    [IO.Directory]::Move($SourcePath, $DestinationPath)
+}
+
 function Get-TreeSignature {
     param([Parameter(Mandatory = $true)][string]$Directory)
 
@@ -117,8 +128,11 @@ function Get-TestTransactionInstallSeal {
         if ([int]$Transaction.schemaVersion -eq 3) {
             $lines += "item|$($item.skill)|$($item.role)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)"
         }
-        else {
+        elseif ([int]$Transaction.schemaVersion -eq 4) {
             $lines += "item|$($item.skill)|$($item.role)|$($item.deploymentKind)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceCommit)|$($item.sourceDigest)|$($item.expectedDigest)|$($item.adapterDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)|$($item.adapterStagingPath)|$($item.adapterRemovalPath)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.deploymentKind)|$($item.adapterKind)|$($item.action)|$($item.targetPath)|$($item.sourcePath)|$($item.sourceCommit)|$($item.sourceDigest)|$($item.expectedDigest)|$($item.adapterDigest)|$($item.originalKind)|$($item.originalTarget)|$($item.originalJunctionIdentity)|$($item.originalDigest)|$($item.backupPath)|$($item.junctionStagingPath)|$($item.adapterStagingPath)|$($item.adapterRemovalPath)|$($item.preservedJunctionPath)"
         }
     }
     return Get-TestSha256Text -Text ([string]::Join("`n", $lines))
@@ -132,8 +146,11 @@ function Get-TestTransactionCommitSeal {
         if ([int]$Transaction.schemaVersion -eq 3) {
             $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)"
         }
-        else {
+        elseif ([int]$Transaction.schemaVersion -eq 4) {
             $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)|$($item.adapterPrepared)|$($item.createdAdapter)"
+        }
+        else {
+            $lines += "item|$($item.skill)|$($item.role)|$($item.changed)|$($item.junctionPrepared)|$($item.createdJunction)|$($item.junctionIdentity)|$($item.adapterPrepared)|$($item.createdAdapter)|$($item.junctionPreserved)"
         }
     }
     return Get-TestSha256Text -Text ([string]::Join("`n", $lines))
@@ -150,11 +167,21 @@ function Get-TestTransactionRecoverySeal {
 }
 
 try {
+    $claudeContractHome = Join-Path $fixtureRoot 'claude-contract-home'
+    $claudeContractCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeContractHome)
+    Assert-Equal -Expected 5 -Actual $claudeContractCheck.Data.contractVersion -Message 'Goal 17 install plan uses contract 5'
+    $claudeContractTarget = @($claudeContractCheck.Data.targets | Where-Object { $_.role -eq 'Claude' })[0]
+    Assert-Equal -Expected 'Adapter' -Actual $claudeContractTarget.deploymentKind -Message 'Contract 5 materializes Claude as a sealed adapter'
+    Assert-Equal -Expected 'CreateAdapter' -Actual $claudeContractTarget.action -Message 'Missing Claude personal skill plans adapter creation'
+    Assert-Equal -Expected 'claude-code-personal-physical-copy' -Actual $claudeContractTarget.adapterMetadata.adapterKind -Message 'Claude adapter kind is explicit and deterministic'
+    Assert-True -Condition (-not [IO.Directory]::Exists($claudeContractHome)) -Message 'Claude contract Check remains read-only'
+
     $designHome = Join-Path $fixtureRoot 'design-to-html-home'
     $designCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-to-html', '-HomeRoot', $designHome)
     Assert-Equal -Expected 2 -Actual $designCheck.ExitCode -Message 'design-to-html missing targets must be installable'
     Assert-Equal -Expected 'Installable' -Actual $designCheck.Data.status -Message 'design-to-html missing target status'
-    Assert-Equal -Expected 3 -Actual @($designCheck.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'design-to-html has three canonical junctions'
+    Assert-Equal -Expected 2 -Actual @($designCheck.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'design-to-html keeps Agents and AgyStandard junctions'
+    Assert-Equal -Expected 1 -Actual @($designCheck.Data.targets | Where-Object { $_.action -eq 'CreateAdapter' -and $_.role -eq 'Claude' }).Count -Message 'design-to-html creates one Claude physical adapter'
     Assert-True -Condition (-not [IO.Directory]::Exists($designHome)) -Message 'design-to-html Check must not create HomeRoot'
     $designManifest = Get-Content -LiteralPath (Join-Path $repoRoot 'distribution\manifests\design-to-html.json') -Raw | ConvertFrom-Json
     $designSource = @($designCheck.Data.sources | Where-Object { $_.skill -eq 'design-to-html' })
@@ -181,7 +208,8 @@ try {
     $teamCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-team', '-HomeRoot', $teamHome)
     Assert-Equal -Expected 2 -Actual $teamCheck.ExitCode -Message 'design-team missing targets must be installable'
     Assert-Equal -Expected 'Installable' -Actual $teamCheck.Data.status -Message 'design-team missing target status'
-    Assert-Equal -Expected 3 -Actual @($teamCheck.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'design-team has three canonical junctions'
+    Assert-Equal -Expected 2 -Actual @($teamCheck.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'design-team keeps Agents and AgyStandard junctions'
+    Assert-Equal -Expected 1 -Actual @($teamCheck.Data.targets | Where-Object { $_.action -eq 'CreateAdapter' -and $_.role -eq 'Claude' }).Count -Message 'design-team creates one Claude physical adapter'
     Assert-True -Condition (-not [IO.Directory]::Exists($teamHome)) -Message 'design-team Check must not create HomeRoot'
     $teamManifest = Get-Content -LiteralPath (Join-Path $repoRoot 'distribution\manifests\design-team.json') -Raw | ConvertFrom-Json
     $teamSource = @($teamCheck.Data.sources | Where-Object { $_.skill -eq 'design-team' })
@@ -202,13 +230,67 @@ try {
     $teamPostRestore = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'design-team', '-HomeRoot', $teamHome)
     Assert-Equal -Expected 'Installable' -Actual $teamPostRestore.Data.status -Message 'design-team absent pre-install state must be restored'
 
+    $claudeCopyHome = Join-Path $fixtureRoot 'claude-copy-home'
+    $claudeCopyParent = Join-Path $claudeCopyHome '.claude\skills'
+    $null = New-Item -ItemType Directory -Path $claudeCopyParent -Force
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'skills\agent-team-operations') -Destination (Join-Path $claudeCopyParent 'agent-team-operations') -Recurse
+    $claudeCopyCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeCopyHome)
+    Assert-Equal -Expected 'BackupAndAdapt' -Actual (@($claudeCopyCheck.Data.targets | Where-Object { $_.role -eq 'Claude' })[0].action) -Message 'Source-identical unmanaged Claude directory is explicitly backed up before adaptation'
+
+    $claudeWrongSourceHome = Join-Path $fixtureRoot 'claude-wrong-source-home'
+    $claudeWrongSourceTarget = Join-Path $claudeWrongSourceHome '.claude\skills\agent-team-operations'
+    $claudeWrongSourceDirectory = Join-Path $fixtureRoot 'claude-wrong-source'
+    $null = New-Item -ItemType Directory -Path $claudeWrongSourceDirectory -Force
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $claudeWrongSourceTarget) -Force
+    $null = New-Item -ItemType Junction -Path $claudeWrongSourceTarget -Target $claudeWrongSourceDirectory
+    $claudeWrongSourceCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeWrongSourceHome)
+    Assert-Equal -Expected 'Conflict' -Actual $claudeWrongSourceCheck.Data.status -Message 'Claude junction to the wrong source fails closed'
+
+    $claudeDriftHome = Join-Path $fixtureRoot 'claude-drift-home'
+    $claudeDriftCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome)
+    $claudeDriftInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome, '-PlanDigest', [string]$claudeDriftCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $claudeDriftInstall.ExitCode -Message 'Claude drift fixture install'
+    $claudeDriftTarget = Join-Path $claudeDriftHome '.claude\skills\agent-team-operations'
+    $claudeMetadataPath = Join-Path $claudeDriftTarget '.yohan-adapter.json'
+    $claudeMetadataText = [IO.File]::ReadAllText($claudeMetadataPath, [Text.Encoding]::UTF8)
+    [IO.File]::AppendAllText($claudeMetadataPath, " `r`n", (New-Object Text.UTF8Encoding($false)))
+    $claudeMetadataDrift = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome)
+    Assert-Equal -Expected 'Conflict' -Actual $claudeMetadataDrift.Data.status -Message 'Claude metadata drift is a conflict'
+    $claudeMetadataDriftHash = Get-TestSha256File -Path $claudeMetadataPath
+    $claudeMetadataBlockedInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome, '-PlanDigest', [string]$claudeMetadataDrift.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 3 -Actual $claudeMetadataBlockedInstall.ExitCode -Message 'Claude metadata drift is never overwritten'
+    Assert-Equal -Expected $claudeMetadataDriftHash -Actual (Get-TestSha256File -Path $claudeMetadataPath) -Message 'Blocked Claude drift install leaves metadata bytes untouched'
+    Write-Utf8NoBom -Path $claudeMetadataPath -Text $claudeMetadataText
+
+    $claudePayloadPath = Join-Path $claudeDriftTarget 'SKILL.md'
+    $claudePayloadText = [IO.File]::ReadAllText($claudePayloadPath, [Text.Encoding]::UTF8)
+    [IO.File]::AppendAllText($claudePayloadPath, "`n# fixture drift`n", (New-Object Text.UTF8Encoding($false)))
+    $claudePayloadDrift = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome)
+    Assert-Equal -Expected 'Conflict' -Actual $claudePayloadDrift.Data.status -Message 'Claude payload drift is a conflict'
+    Write-Utf8NoBom -Path $claudePayloadPath -Text $claudePayloadText
+
+    $claudeExtraPath = Join-Path $claudeDriftTarget 'unexpected.txt'
+    Write-Utf8NoBom -Path $claudeExtraPath -Text 'unexpected'
+    $claudeExtraDrift = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome)
+    Assert-Equal -Expected 'Conflict' -Actual $claudeExtraDrift.Data.status -Message 'Claude additional-file drift is a conflict'
+    [IO.File]::Move($claudeExtraPath, (Join-Path $fixtureRoot 'quarantined-unexpected.txt'))
+
+    $claudeNestedTarget = Join-Path $fixtureRoot 'claude-nested-reparse-target'
+    $null = New-Item -ItemType Directory -Path $claudeNestedTarget
+    $null = New-Item -ItemType Junction -Path (Join-Path $claudeDriftTarget 'nested-reparse') -Target $claudeNestedTarget
+    $claudeNestedDrift = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeDriftHome)
+    Assert-Equal -Expected 'Conflict' -Actual $claudeNestedDrift.Data.status -Message 'Claude nested reparse drift is a conflict'
+    Assert-True -Condition (@($claudeNestedDrift.Data.errors | Where-Object { $_ -match 'nested reparse point' }).Count -gt 0) -Message 'Claude nested reparse drift reason is explicit'
+
     $emptyHome = Join-Path $fixtureRoot 'empty-home'
     $check = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'All', '-HomeRoot', $emptyHome)
     Assert-Equal -Expected 2 -Actual $check.ExitCode -Message 'Missing targets must be installable'
     Assert-Equal -Expected 'Installable' -Actual $check.Data.status -Message 'Missing target status'
     Assert-Equal -Expected 8 -Actual @($check.Data.sources).Count -Message 'All selects eight canonical skill sources'
     Assert-Equal -Expected 8 -Actual @($check.Data.sources | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All source skill identities are unique'
-    Assert-Equal -Expected 24 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Three canonical junctions per skill'
+    Assert-Equal -Expected 16 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' }).Count -Message 'Agents and AgyStandard retain sixteen canonical junctions'
+    Assert-Equal -Expected 8 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateAdapter' -and $_.role -eq 'Claude' }).Count -Message 'All plans eight Claude physical adapters'
+    Assert-Equal -Expected 24 -Actual @($check.Data.targets | Where-Object { $_.action -in @('CreateJunction', 'CreateAdapter') }).Count -Message 'All retains twenty-four canonical deployment targets'
     Assert-Equal -Expected 8 -Actual @($check.Data.targets | Where-Object { $_.action -eq 'CreateJunction' } | ForEach-Object { $_.skill } | Select-Object -Unique).Count -Message 'All standard targets cover eight skills'
     Assert-True -Condition (-not [IO.Directory]::Exists($emptyHome)) -Message 'Check must not create HomeRoot'
 
@@ -513,7 +595,7 @@ try {
     $tamperRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $tamperHome, '-BackupId', [string]$tamperInstall.Data.backupId)
     Assert-Equal -Expected 3 -Actual $tamperRestoreCheck.ExitCode -Message 'Tampered transaction must fail Restore Check'
     Assert-True -Condition ([string]$tamperRestoreCheck.Data.error -match 'install seal mismatch') -Message 'Tampered transaction seal reason'
-    Assert-Equal -Expected 'Junction' -Actual ([string](Get-Item -LiteralPath $tamperTarget -Force).LinkType) -Message 'Tampered transaction must not remove current junction'
+    Assert-Equal -Expected '' -Actual ([string](Get-Item -LiteralPath $tamperTarget -Force).LinkType) -Message 'Tampered transaction must not remove current Claude adapter'
     Assert-Equal -Expected $reparseSignature -Actual (Get-TreeSignature -Directory $reparseOutside) -Message 'Tampered backup path must not touch outside tree'
 
     $bindingHome = Join-Path $fixtureRoot 'transaction-binding-home'
@@ -595,7 +677,7 @@ try {
     Assert-Equal -Expected 3 -Actual $backupTamperRestoreCheck.ExitCode -Message 'Modified backup must fail Restore Check'
     Assert-Equal -Expected 'Conflict' -Actual $backupTamperRestoreCheck.Data.status -Message 'Modified backup conflict status'
     Assert-True -Condition (@($backupTamperRestoreCheck.Data.errors | Where-Object { $_ -match 'Backup directory was modified' }).Count -gt 0) -Message 'Modified backup reason'
-    Assert-Equal -Expected 'Junction' -Actual ([string](Get-Item -LiteralPath $backupTamperTarget -Force).LinkType) -Message 'Modified backup must not remove current junction'
+    Assert-Equal -Expected '' -Actual ([string](Get-Item -LiteralPath $backupTamperTarget -Force).LinkType) -Message 'Modified backup must not remove current Claude adapter'
 
     $resumeHome = Join-Path $fixtureRoot 'partial-restore-home'
     $resumeCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'goal-cycle', '-HomeRoot', $resumeHome)
@@ -628,7 +710,7 @@ try {
     $directoryResumeTransactionPath = [string]$directoryResumeInstall.Data.transactionPath
     $directoryResumeTransaction = [string]([IO.File]::ReadAllText($directoryResumeTransactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
     $directoryResumeItem = @($directoryResumeTransaction.items | Where-Object { $_.role -eq 'Claude' })[0]
-    [IO.Directory]::Delete([string]$directoryResumeItem.targetPath, $false)
+    Move-FixtureDirectoryExact -SourcePath ([string]$directoryResumeItem.targetPath) -DestinationPath ([string]$directoryResumeItem.adapterRemovalPath)
     $directoryResumeTransaction.status = 'RecoveryRequired'
     Write-Utf8NoBom -Path $directoryResumeTransactionPath -Text ([string]($directoryResumeTransaction | ConvertTo-Json -Depth 16))
     $directoryResumeRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $directoryResumeHome, '-BackupId', [string]$directoryResumeInstall.Data.backupId)
@@ -724,7 +806,7 @@ try {
     $rollbackRecoveryTransactionPath = [string]$rollbackRecoveryInstall.Data.transactionPath
     $rollbackRecoveryTransaction = [string]([IO.File]::ReadAllText($rollbackRecoveryTransactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
     $rollbackRecoveryItem = @($rollbackRecoveryTransaction.items | Where-Object { $_.role -eq 'Claude' })[0]
-    [IO.Directory]::Delete([string]$rollbackRecoveryItem.targetPath, $false)
+    Move-FixtureDirectoryExact -SourcePath ([string]$rollbackRecoveryItem.targetPath) -DestinationPath ([string]$rollbackRecoveryItem.adapterRemovalPath)
     $rollbackRecoveryTransaction.status = 'RecoveryRequired'
     $rollbackRecoveryTransaction.commitSeal = $null
     $rollbackRecoveryTransaction.recoverySeal = $null
@@ -749,7 +831,7 @@ try {
     $tamperedRollbackTransactionPath = [string]$tamperedRollbackInstall.Data.transactionPath
     $tamperedRollbackTransaction = [string]([IO.File]::ReadAllText($tamperedRollbackTransactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
     $tamperedRollbackItem = @($tamperedRollbackTransaction.items | Where-Object { $_.role -eq 'Claude' })[0]
-    [IO.Directory]::Delete([string]$tamperedRollbackItem.targetPath, $false)
+    Move-FixtureDirectoryExact -SourcePath ([string]$tamperedRollbackItem.targetPath) -DestinationPath ([string]$tamperedRollbackItem.adapterRemovalPath)
     [IO.File]::AppendAllText((Join-Path ([string]$tamperedRollbackItem.backupPath) 'SKILL.md'), "`n# tampered rollback`n", (New-Object Text.UTF8Encoding($false)))
     $tamperedRollbackTransaction.status = 'RecoveryRequired'
     $tamperedRollbackTransaction.commitSeal = $null
@@ -785,6 +867,97 @@ try {
     foreach ($functionAst in $topLevelFunctions) {
         . ([scriptblock]::Create([string]$functionAst.Extent.Text))
     }
+
+    $claudeMigrationHome = Join-Path $fixtureRoot 'claude-junction-migration-home'
+    $claudeMigrationSource = Join-Path $repoRoot 'skills\agent-team-operations'
+    $claudeMigrationTarget = Join-Path $claudeMigrationHome '.claude\skills\agent-team-operations'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $claudeMigrationTarget) -Force
+    $claudeMigrationOriginalIdentity = New-CanonicalJunction -Path $claudeMigrationTarget -Target $claudeMigrationSource -AllowedRoot $claudeMigrationHome
+    $claudeMigrationCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeMigrationHome)
+    $claudeMigrationPlanTarget = @($claudeMigrationCheck.Data.targets | Where-Object { $_.role -eq 'Claude' })[0]
+    Assert-Equal -Expected 'ReplaceJunctionWithAdapter' -Actual $claudeMigrationPlanTarget.action -Message 'Matching Claude junction plans identity-preserving adapter migration'
+    Assert-Equal -Expected $claudeMigrationOriginalIdentity -Actual $claudeMigrationPlanTarget.currentJunctionIdentity -Message 'PlanDigest input captures the original Claude junction identity'
+    $claudeMigrationInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeMigrationHome, '-PlanDigest', [string]$claudeMigrationCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $claudeMigrationInstall.ExitCode -Message 'Approved fixture Claude migration passes'
+    $claudeMigrationTransaction = [string]([IO.File]::ReadAllText([string]$claudeMigrationInstall.Data.transactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal -Expected 5 -Actual $claudeMigrationTransaction.schemaVersion -Message 'Claude migration writes transaction schema 5'
+    $claudeMigrationItem = @($claudeMigrationTransaction.items | Where-Object { $_.role -eq 'Claude' })[0]
+    Assert-Equal -Expected 'claude-code-personal-physical-copy' -Actual $claudeMigrationItem.adapterKind -Message 'Schema 5 seals the Claude adapter kind'
+    Assert-True -Condition ([bool]$claudeMigrationItem.junctionPreserved) -Message 'Schema 5 records the exact preserved Claude junction'
+    $claudeMigrationPreserved = Get-PathEntryInfo -Path ([string]$claudeMigrationItem.preservedJunctionPath)
+    Assert-Equal -Expected 'Junction' -Actual $claudeMigrationPreserved.kind -Message 'Original Claude junction is moved into the transaction'
+    Assert-Equal -Expected $claudeMigrationOriginalIdentity -Actual $claudeMigrationPreserved.junctionIdentity -Message 'Migration exact move preserves the NTFS junction identity'
+    $claudeMigrationActive = Get-PathEntryInfo -Path $claudeMigrationTarget
+    Assert-Equal -Expected 'Directory' -Actual $claudeMigrationActive.kind -Message 'Claude active leaf becomes an ordinary directory'
+    $claudeMigrationMetadata = [string]([IO.File]::ReadAllText((Join-Path $claudeMigrationTarget '.yohan-adapter.json'), [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    Assert-Equal -Expected 'claude-code-personal-physical-copy' -Actual $claudeMigrationMetadata.adapterKind -Message 'Claude metadata is bound to its deterministic adapter kind'
+    Assert-True -Condition ($null -eq $claudeMigrationMetadata.PSObject.Properties['createdAt'] -and $null -eq $claudeMigrationMetadata.PSObject.Properties['claudeVersion']) -Message 'Claude metadata excludes timestamps and patch versions'
+    $claudeMigrationRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $claudeMigrationHome, '-BackupId', [string]$claudeMigrationInstall.Data.backupId)
+    Assert-Equal -Expected 'RestoreReady' -Actual $claudeMigrationRestoreCheck.Data.status -Message 'Schema 5 preserved-junction Restore preflight passes'
+    $claudeMigrationRestore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $claudeMigrationHome, '-BackupId', [string]$claudeMigrationInstall.Data.backupId, '-PlanDigest', [string]$claudeMigrationRestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $claudeMigrationRestore.Data.status -Message 'Schema 5 preserved-junction Restore passes'
+    $claudeMigrationRestored = Get-PathEntryInfo -Path $claudeMigrationTarget
+    Assert-Equal -Expected 'Junction' -Actual $claudeMigrationRestored.kind -Message 'Restore returns the original Claude Junction'
+    Assert-Equal -Expected $claudeMigrationOriginalIdentity -Actual $claudeMigrationRestored.junctionIdentity -Message 'Restore keeps the original Claude junction identity'
+
+    $claudeInterruptionHome = Join-Path $fixtureRoot 'claude-migration-interruption-home'
+    $claudeInterruptionSource = Join-Path $repoRoot 'skills\agent-team-operations'
+    $claudeInterruptionTarget = Join-Path $claudeInterruptionHome '.claude\skills\agent-team-operations'
+    $null = New-Item -ItemType Directory -Path (Split-Path -Parent $claudeInterruptionTarget) -Force
+    $claudeInterruptionIdentity = New-CanonicalJunction -Path $claudeInterruptionTarget -Target $claudeInterruptionSource -AllowedRoot $claudeInterruptionHome
+    $claudeInterruptionCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeInterruptionHome)
+    $claudeInterruptionInstall = Invoke-Manager -Arguments @('-Mode', 'Install', '-Skill', 'agent-team-operations', '-HomeRoot', $claudeInterruptionHome, '-PlanDigest', [string]$claudeInterruptionCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 0 -Actual $claudeInterruptionInstall.ExitCode -Message 'Claude interruption fixture install'
+    $claudeInterruptionTransactionPath = [string]$claudeInterruptionInstall.Data.transactionPath
+    $claudeInterruptionTransaction = [string]([IO.File]::ReadAllText($claudeInterruptionTransactionPath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    $claudeInterruptionItem = @($claudeInterruptionTransaction.items | Where-Object { $_.role -eq 'Claude' })[0]
+    Move-FixtureDirectoryExact -SourcePath ([string]$claudeInterruptionItem.targetPath) -DestinationPath ([string]$claudeInterruptionItem.adapterStagingPath)
+    $claudeInterruptionTransaction.status = 'Executing'
+    $claudeInterruptionTransaction.commitSeal = $null
+    $claudeInterruptionTransaction.recoverySeal = $null
+    $claudeInterruptionItem.adapterPrepared = $true
+    $claudeInterruptionItem.createdAdapter = $false
+    $claudeInterruptionItem.junctionPreserved = $false
+    Write-Utf8NoBom -Path $claudeInterruptionTransactionPath -Text ([string]($claudeInterruptionTransaction | ConvertTo-Json -Depth 16))
+    $claudeInterruptionRestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $claudeInterruptionHome, '-BackupId', [string]$claudeInterruptionInstall.Data.backupId)
+    Assert-Equal -Expected 'InstallRollback' -Actual $claudeInterruptionRestoreCheck.Data.recoveryKind -Message 'Interrupted schema 5 migration selects install rollback'
+    Assert-Equal -Expected 'RestorePending' -Actual (@($claudeInterruptionRestoreCheck.Data.itemStates | Where-Object { $_.targetPath -eq [string]$claudeInterruptionItem.targetPath })[0].state) -Message 'Quarantined Junction before adapter activation is recoverable'
+    $claudeInterruptionRestore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $claudeInterruptionHome, '-BackupId', [string]$claudeInterruptionInstall.Data.backupId, '-PlanDigest', [string]$claudeInterruptionRestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $claudeInterruptionRestore.Data.status -Message 'Interrupted schema 5 migration rolls back'
+    Assert-Equal -Expected $claudeInterruptionIdentity -Actual (Get-PathEntryInfo -Path $claudeInterruptionTarget).junctionIdentity -Message 'Interrupted rollback returns the exact original Junction identity'
+
+    $schema4Home = Join-Path $fixtureRoot 'schema4-restore-home'
+    $schema4BackupId = '20260730-010203004-b1c2d3e4'
+    $schema4TransactionRoot = Join-Path $schema4Home ".yohan-skill-backups\$schema4BackupId"
+    $schema4TransactionPath = Join-Path $schema4TransactionRoot 'transaction.json'
+    $schema4Source = Join-Path $repoRoot 'skills\adr-cycle'
+    $schema4Target = Join-Path $schema4Home '.claude\skills\adr-cycle'
+    $null = New-Item -ItemType Directory -Path $schema4TransactionRoot -Force
+    $schema4Identity = New-CanonicalJunction -Path $schema4Target -Target $schema4Source -AllowedRoot $schema4Home
+    $schema4SourceManifest = Get-DirectoryManifest -Directory $schema4Source
+    $schema4Item = [pscustomobject][ordered]@{
+        skill = 'adr-cycle'; role = 'Claude'; deploymentKind = 'Junction'; action = 'CreateJunction'
+        targetPath = $schema4Target; sourcePath = $schema4Source; sourceCommit = (Get-RepositoryCommit -RepoRoot $repoRoot)
+        sourceDigest = $schema4SourceManifest.digest; expectedDigest = $schema4SourceManifest.digest; adapterDigest = $null
+        originalKind = 'Missing'; originalTarget = $null; originalJunctionIdentity = $null; originalDigest = $null
+        backupPath = $null; junctionStagingPath = Join-Path $schema4TransactionRoot 'staging\adr-cycle\Claude'
+        adapterStagingPath = $null; adapterRemovalPath = $null; changed = $true; junctionPrepared = $false
+        createdJunction = $true; junctionIdentity = $schema4Identity; adapterPrepared = $false; createdAdapter = $false
+    }
+    $schema4Transaction = [pscustomobject][ordered]@{
+        schemaVersion = 4; backupId = $schema4BackupId; status = 'Committed'; createdAt = [DateTimeOffset]::Now.ToString('o')
+        planDigest = ('B' * 64); homeRoot = $schema4Home; repositoryRoot = $repoRoot; selection = 'adr-cycle'
+        includeAgyCliFallback = $false; agyCurrentVersion = $null; items = @($schema4Item)
+        installSeal = $null; commitSeal = $null; recoverySeal = $null; error = $null
+    }
+    $schema4Transaction.installSeal = Get-TestTransactionInstallSeal -Transaction $schema4Transaction
+    $schema4Transaction.commitSeal = Get-TestTransactionCommitSeal -Transaction $schema4Transaction
+    Write-Utf8NoBom -Path $schema4TransactionPath -Text ([string]($schema4Transaction | ConvertTo-Json -Depth 16))
+    $schema4RestoreCheck = Invoke-Manager -Arguments @('-Mode', 'Check', '-HomeRoot', $schema4Home, '-BackupId', $schema4BackupId)
+    Assert-Equal -Expected 'RestoreReady' -Actual $schema4RestoreCheck.Data.status -Message 'Schema 4 Claude Junction remains restorable with its historical meaning'
+    $schema4Restore = Invoke-Manager -Arguments @('-Mode', 'Restore', '-HomeRoot', $schema4Home, '-BackupId', $schema4BackupId, '-PlanDigest', [string]$schema4RestoreCheck.Data.planDigest, '-ApproveGlobalHomeWrite')
+    Assert-Equal -Expected 'Restored' -Actual $schema4Restore.Data.status -Message 'Schema 4 Claude Junction Restore compatibility'
+    Assert-True -Condition (-not [IO.Directory]::Exists($schema4Target)) -Message 'Schema 4 Restore returns the original missing state'
 
     $schema3Home = Join-Path $fixtureRoot 'schema3-restore-home'
     $schema3BackupId = '20260730-010203004-a1b2c3d4'

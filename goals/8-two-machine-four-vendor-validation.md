@@ -31,6 +31,7 @@ priority: P0
 - [ ] Antigravity CLI는 네이티브 `agy.exe` Application으로 확인된다.
 - [ ] evidence의 release ID, Git commit, catalog digest, release manifest SHA-256이 설치된 release와 일치한다.
 - [ ] Claude Code, Codex, Cursor, Antigravity에서 지원 capability의 명시·자동·부정 호출 결과가 기록된다.
+- [ ] Claude personal skill의 filesystem `Healthy`와 runtime discovery receipt를 분리하고, [Goal 17](17-claude-skill-deployment.md)의 approved physical-adapter canary와 fresh `--bare` 결과를 연결한다.
 - [ ] 공통 Script, Hook 실패 격리, MCP 인증 실패 격리, rollback 결과가 기록된다.
 - [ ] Antigravity IDE·CLI처럼 표면이 다른 벤더는 각 공식 발견 경로와 지원 capability를 분리해 검증한다.
 - [ ] Marketplace와 canonical 폴더 전환 전후 rollback 문서가 검증된다.
@@ -43,6 +44,7 @@ priority: P0
 - 두 final evidence가 준비되면 `Compare`로 multi-machine verified 상태를 추가한다.
 - 이 후속 검증은 v0.1 출시·Marketplace 전환·canonical 폴더 전환을 차단하지 않는다.
 - Claude Code·Codex·Cursor wrapper 뒤 payload-chain attestation은 [Goal 9](9-vendor-payload-chain-attestation.md)로 추적하며 Goal 8의 완료를 차단하지 않는다.
+- Claude personal skill의 Windows Junction discovery 결함과 physical-adapter rollout은 [Goal 17](17-claude-skill-deployment.md)로 추적한다. Goal 8의 `Healthy`는 그 fresh-session discovery 증거를 대신하지 않는다.
 
 ## 사람 게이트
 

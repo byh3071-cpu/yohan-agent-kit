@@ -65,7 +65,7 @@ Claude Code는 봉인 창보다 빨리 자동 업데이트된다(2026-08-21 실�
 - 판정은 화면 출력이 아니라 **디스크에서 다시 읽은 transcript**로 계산한다.
 - 벤더 CLI가 최종 요약을 돌려주지 않아도 판정 불가로 멈추지 않고 `NO_OUTPUT`으로 기록한다. `TIMEOUT`·`LAUNCH_ERROR`·`AMBIGUOUS`도 마찬가지다.
 
-`AMBIGUOUS`는 스킬이 로드되긴 했으나 검증 대상 release가 아닌 경로에서 해석됐다는 뜻이다. 집 PC에는 `~/.claude/skills/*`가 작업 트리를 가리키는 junction으로 남아 있어 같은 이름의 스킬이 둘 존재할 수 있다. 이 경우 PASS로 올리지 않는다.
+`AMBIGUOUS`는 스킬이 로드되긴 했으나 검증 대상 release가 아닌 경로에서 해석됐다는 뜻이다. Claude personal skill은 [Goal 17](../goals/17-claude-skill-deployment.md)의 승인된 contract 5에서 봉인 physical adapter를 사용하지만, manager의 filesystem `Healthy`만으로 runtime discovery를 PASS로 올리지 않는다. actual HomeRoot의 새 PlanDigest로 설치한 canary가 exact `~/.claude/skills/<name>/SKILL.md`에서 해석되고 repo-local skill·plugin shadow가 없다는 fresh `--bare` receipt가 있어야 한다.
 
 산출물은 `.vhk/smoke/<vendor>/<runId>/`에 남고 Git에 포함하지 않는다.
 

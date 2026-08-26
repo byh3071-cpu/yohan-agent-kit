@@ -3734,6 +3734,30 @@
       ]
     },
     {
+      "id": "script.check-goal-17",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-17.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/17-claude-skill-deployment.md",
+        "docs/decisions/2026-08-26-claude-personal-skill-materialization.md",
+        "docs/plans/goal-17-claude-skill-deployment.md",
+        "scripts/check-goal-17.mjs"
+      ]
+    },
+    {
       "id": "script.get-retrieval-learning-candidate",
       "kind": "script",
       "owner": "yohan-agent-kit",
