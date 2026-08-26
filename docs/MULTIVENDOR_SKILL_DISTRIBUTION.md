@@ -17,11 +17,11 @@
 | 소비자 | 정본 연결 경로 | 함께 검사하는 이전 활성 경로 |
 |---|---|---|
 | Codex·Cursor 공용 | `~/.agents/skills/<name>/` | `~/.codex/skills/<name>/`, `~/.cursor/skills/<name>/` |
-| Claude Code | `~/.claude/skills/<name>/` | 없음 |
+| Claude Code | `~/.claude/skills/<name>/` 봉인 physical adapter | 없음 |
 | Antigravity 표준 | `~/.gemini/config/skills/<name>/` junction | 없음 |
 | Antigravity CLI 조건부 | `~/.gemini/skills/<name>/` 물리 생성 어댑터 | `~/.gemini/antigravity-cli/skills/<name>/`의 실패한 이전 fallback junction |
 
-표준 경로에는 관리자 권한이나 개발자 모드가 필요 없는 directory junction을 사용한다. AGY CLI 1.1.8은 표준 경로와 별도 CLI junction을 새 세션에 주입하지 않고 `~/.gemini/skills`의 물리 디렉터리만 주입한다는 실측 결과가 있어, 유효한 음성 증거가 있을 때만 정본 파일과 `.yohan-adapter.json`을 담은 생성 어댑터를 배포한다. 정본 디렉터리와 생성 어댑터 내부의 reparse point는 manifest 검사에서 실패한다. 사용자 홈 대상과 백업 경로의 **모든 기존 조상**도 reparse point가 아니어야 하며, 부모 junction을 통한 허용 루트 탈출은 작업 전에 거부한다.
+Agents·Antigravity 표준 경로에는 관리자 권한이나 개발자 모드가 필요 없는 directory junction을 사용한다. Claude Code personal 경로에는 contract 5부터 정본 파일과 결정론적 `.yohan-adapter.json`을 담은 ordinary physical directory를 사용한다. AGY CLI 1.1.8은 표준 경로와 별도 CLI junction을 새 세션에 주입하지 않고 `~/.gemini/skills`의 물리 디렉터리만 주입한다는 실측 결과가 있어, 유효한 음성 증거가 있을 때만 별도 생성 어댑터를 배포한다. 정본 디렉터리와 생성 어댑터 내부의 reparse point는 manifest 검사에서 실패한다. 사용자 홈 대상과 백업 경로의 **모든 기존 조상**도 reparse point가 아니어야 하며, 부모 junction을 통한 허용 루트 탈출은 작업 전에 거부한다.
 
 ## Check
 
@@ -36,7 +36,7 @@ Check는 디렉터리·백업·로그를 만들지 않는 읽기 전용 작업�
 - `SKILL.md` frontmatter가 `name`·`description`만 갖는지
 - 전체 파일의 상대 경로·바이트·SHA-256과 baseline manifest가 일치하는지
 - 특정 PC 절대경로가 스킬에 남아 있지 않은지
-- 대상이 올바른 junction인지, 출처 메타데이터와 manifest가 일치하는 AGY 물리 어댑터인지, 같은 manifest의 이관 가능한 일반 디렉터리인지, 내용 충돌인지
+- 대상이 올바른 junction인지, 출처 메타데이터와 manifest가 일치하는 Claude·AGY 물리 어댑터인지, 같은 manifest의 이관 가능한 일반 디렉터리인지, 내용 충돌인지
 - 제품별 활성 발견 경로에 중복본이 있는지
 - 미완료 transaction이나 근거 없는 AGY fallback이 있는지
 - destination 조상·백업 transaction·transaction 파일에 경로 탈출 reparse point가 없는지
@@ -69,7 +69,7 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
 
 정본과 다른 일반 디렉터리, 파일 장애물, 잘못된 junction은 승인 여부와 무관하게 실패한다. `Force`나 불일치 우회 옵션은 없다.
 
-안전한 Install은 HomeRoot별 named mutex로 다른 Install·Restore와 직렬화하고, 사용자 홈의 `.yohan-skill-backups/<BackupId>/`에 schema 4 write-ahead transaction을 기록한다. schema 3 백업은 기존 경로 계약과 seal 계산을 그대로 사용해 계속 복원할 수 있다. 정본 junction은 먼저 transaction 내부의 결정적 staging 경로에 만들고 NTFS file ID·target 기반 객체 지문을 저널에 저장한다. AGY 어댑터는 Check가 계산한 source path·commit·digest·CLI version을 `.yohan-adapter.json`에 기록하고 정본 파일과 합친 전체 manifest를 staging에서 검증한다. 그다음 동일한 기존 디렉터리를 활성 발견 루트 밖으로 이동해 전·후 manifest를 확인하고, staging junction 또는 물리 어댑터를 active leaf로 `[IO.Directory]::Move`한다. 이 이동은 목적지 leaf가 이미 생기면 실패한다. junction은 NTFS file ID를 보존하고, 어댑터는 봉인된 전체 digest로 소유권을 판정한다.
+안전한 Install은 HomeRoot별 named mutex로 다른 Install·Restore와 직렬화하고, 사용자 홈의 `.yohan-skill-backups/<BackupId>/`에 schema 5 write-ahead transaction을 기록한다. schema 3·4 백업은 당시 Claude=Junction 의미와 seal 계산을 그대로 사용해 계속 복원할 수 있다. 정본 junction은 먼저 transaction 내부의 결정적 staging 경로에 만들고 NTFS file ID·target 기반 객체 지문을 저널에 저장한다. Claude·AGY 어댑터는 Check가 계산한 adapter kind·source path·commit·digest를 `.yohan-adapter.json`에 기록하고 정본 파일과 합친 전체 manifest를 staging에서 검증한다. AGY만 검증한 CLI version을 추가로 봉인한다. 동일한 기존 디렉터리는 활성 발견 루트 밖으로 exact move하고, matching Claude Junction migration은 삭제하지 않고 `preserved/<skill>/Claude`로 exact move한 뒤 어댑터를 active leaf로 `[IO.Directory]::Move`한다. 이 이동은 목적지 leaf가 이미 생기면 실패한다. junction은 NTFS file ID를 보존하고, 어댑터는 봉인된 전체 digest로 소유권을 판정한다.
 
 transaction JSON은 같은 디렉터리에 완전한 임시 파일을 쓴다. 최초 생성은 `[IO.File]::Move`, 갱신은 고유한 non-null backup 경로를 제공한 `[IO.File]::Replace`를 사용하고 성공 뒤 임시 backup을 제거한다. 설치 전 고정 메타데이터와 staging·removal binding의 `installSeal`, 커밋 시점의 상태·junction 지문·adapter 상태를 포함한 `commitSeal`이 우발적 transaction 변조를 검출한다. identity가 기록되기 전 프로세스가 죽었거나 현재 junction의 identity가 다르면 같은 target이라도 도구 소유물로 채택하지 않는다. 생성 어댑터 digest가 다를 때도 자동 채택하거나 덮어쓰지 않고 Conflict로 중단한다.
 
@@ -89,9 +89,15 @@ powershell -NoProfile -File scripts\Manage-MultivendorSkills.ps1 `
   -ApproveGlobalHomeWrite
 ```
 
-Restore는 transaction의 HomeRoot·RepositoryRoot·skill·role·source·target·backup·staging·adapter removal 경로를 현재 CLI 입력에서 결정적으로 다시 계산한다. `installSeal`은 항상 검증하고, 완료된 설치는 `commitSeal`도 검증한다. 커밋 전 중단은 봉인된 action과 현재 파일시스템을 함께 읽어 `InstallRollback`으로 분류한다. 완료 여부와 무관하게 active·staging junction은 transaction에 선저널링된 NTFS 객체 지문이 실제 객체와 같을 때만 소유물로 인정한다. 생성 어댑터는 봉인된 digest가 일치할 때만 transaction 내부 `removed/` 경로로 정확히 이동하며 재귀 삭제하지 않는다. 같은 대상을 가리키더라도 삭제 후 다시 만든 junction, identity가 비어 있는 junction, 수정된 어댑터는 제거하지 않는다. Check가 확인한 active·staging·removed 상태는 Restore PlanDigest에 묶인다.
+Restore는 schema 3·4·5 transaction의 HomeRoot·RepositoryRoot·skill·role·source·target·backup·staging·adapter removal·preserved Junction 경로를 transaction schema의 당시 의미로 결정적으로 다시 계산한다. `installSeal`은 항상 검증하고, 완료된 설치는 `commitSeal`도 검증한다. 커밋 전 중단은 봉인된 action과 현재 파일시스템을 함께 읽어 `InstallRollback`으로 분류한다. 완료 여부와 무관하게 active·staging·preserved junction은 transaction에 선저널링된 NTFS 객체 지문이 실제 객체와 같을 때만 소유물로 인정한다. 생성 어댑터는 봉인된 digest가 일치할 때만 transaction 내부 `removed/` 경로로 정확히 이동하며 재귀 삭제하지 않는다. matching Claude Junction은 preserved path에서 active path로 exact move해 원래 file ID를 되돌린다. 같은 대상을 가리키더라도 삭제 후 다시 만든 junction, identity가 비어 있는 junction, 수정된 어댑터는 제거하지 않는다. Check가 확인한 active·staging·removed·preserved 상태는 Restore PlanDigest에 묶인다.
 
-각 항목은 `Original`·`Installed`·`RestorePending`·`Conflict`로 다시 판정한다. junction 제거 뒤 프로세스가 멈춰 target은 없고 유효한 backup만 남은 `RestorePending`도 재개한다. `Restoring`·`RecoveryRequired` transaction은 이미 원복된 항목을 건너뛴다. 모든 항목이 실제 설치 전 상태인지 확인한 뒤에만 `recoverySeal`과 `Restored`를 함께 기록하며, 상태 문자열만 바뀐 경우에는 no-op으로 인정하지 않는다. 백업은 자동 삭제하지 않는다. 복원 뒤 이전 활성 중복본이 다시 나타날 수 있으므로 성공 기준은 일반 Healthy가 아니라 transaction의 설치 전 상태와 일치하는 것이다.
+각 항목은 `Original`·`Installed`·`RestorePending`·`Conflict`로 다시 판정한다. junction 또는 어댑터 activation 사이에 프로세스가 멈춰 target은 없고 유효한 backup·preserved Junction만 남은 `RestorePending`도 재개한다. `Restoring`·`RecoveryRequired` transaction은 이미 원복된 항목을 건너뛴다. 모든 항목이 실제 설치 전 상태인지 확인한 뒤에만 `recoverySeal`과 `Restored`를 함께 기록하며, 상태 문자열만 바뀐 경우에는 no-op으로 인정하지 않는다. 백업은 자동 삭제하지 않는다. 복원 뒤 이전 활성 중복본이 다시 나타날 수 있으므로 성공 기준은 일반 Healthy가 아니라 transaction의 설치 전 상태와 일치하는 것이다.
+
+## Claude Code personal physical adapter
+
+Claude adapter metadata는 `schemaVersion`, `adapterKind=claude-code-personal-physical-copy`, skill, source path, source commit, source manifest digest만 담고 timestamp나 Claude patch version을 담지 않는다. metadata·payload·추가 파일·nested reparse point가 하나라도 달라지면 Conflict이며 Install은 자동 갱신하거나 덮어쓰지 않는다. source가 바뀌어 expected adapter digest가 달라진 경우에도 exact 이전 BackupId Restore → 새 Check → 새 PlanDigest 승인 → Install 순서를 지킨다.
+
+manager의 `Healthy`는 filesystem·provenance·transaction 정합만 뜻한다. personal skill discovery 성공은 [Goal 17](../goals/17-claude-skill-deployment.md)의 실제 HomeRoot canary와 repo/plugin shadow가 없는 fresh `--bare` receipt가 별도로 증명한다. actual HomeRoot Check·Install·Restore와 유료 smoke는 각각 사람 게이트다.
 
 ## Antigravity CLI fallback
 
@@ -134,7 +140,7 @@ powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass `
   -File tests\Manage-MultivendorSkills.Tests.ps1
 ```
 
-테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다. 정상 상태 전이뿐 아니라 부모·목적지 junction 탈출, transaction·backup 변조, 커밋 전 Install 중단 복구, identity 없는 InstallRollback 거부, staging→active 원자 이동의 file ID 보존, HomeRoot 동시 mutation 차단, transaction JSON 원자 교체, `RestorePending` 재개, schema 3 복원 호환성, NTFS file ID 교체, 생성 어댑터 설치·drift·복원, 실패한 이전 fallback 이관과 무증거 이관 거부, 재귀 `git.cmd` wrapper 우회, ignored 파일과 동일 stat의 tracked 파일 주입, Git index 무변경, AGY 실제 CLI·타입·만료·버전 불일치를 실패 고정한다.
+테스트는 저장소의 무시 경로 `tests/.work/` 아래 HomeRoot만 사용한다. 실제 사용자 홈을 테스트 대상으로 사용하지 않는다. 정상 상태 전이뿐 아니라 부모·목적지 junction 탈출, transaction·backup 변조, 커밋 전 Install 중단 복구, identity 없는 InstallRollback 거부, staging→active 원자 이동의 file ID 보존, HomeRoot 동시 mutation 차단, transaction JSON 원자 교체, `RestorePending` 재개, schema 3·4·5 복원 호환성, Claude matching Junction exact-move identity 보존, Claude metadata·payload·추가 파일·nested reparse drift, NTFS file ID 교체, AGY 생성 어댑터 설치·drift·복원, 실패한 이전 fallback 이관과 무증거 이관 거부, 재귀 `git.cmd` wrapper 우회, ignored 파일과 동일 stat의 tracked 파일 주입, Git index 무변경, AGY 실제 CLI·타입·만료·버전 불일치를 실패 고정한다.
 
 ## 운영 한계
 

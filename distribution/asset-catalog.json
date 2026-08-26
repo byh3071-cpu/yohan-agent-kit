@@ -1,5 +1,5 @@
 {
-  "assetCount": 219,
+  "assetCount": 220,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "contentDigest": "31bb922adf3084222aa5510789784922c1ea09551261c3774845423d004d0b0d",
+      "contentDigest": "d623cd31f89a4e64a42bddab8f99a60cd041d90b7818d3cfe2d2a99aebd4d4c8",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -656,7 +656,7 @@
       ]
     },
     {
-      "contentDigest": "17fb798bccb0a0aaa62a22fc4330305bff36ddf7ce3822cc794d5d0e73cecde3",
+      "contentDigest": "e0e308446c62631f67a2a751e29cd4a3d4bbc3584c88256bfa1f5bb0d262b6e6",
       "evidenceRefs": [
         "plugins/yohan-core/hooks"
       ],
@@ -1252,7 +1252,7 @@
       ]
     },
     {
-      "contentDigest": "c144fb56e8b14b59ec411191cd4be75da3b1e9dee7b234d4efaad16d948bc87b",
+      "contentDigest": "914144fc7d8d3aadd727bc013abce551f8e60dceceb98bbec1e5cfe3e550dd3e",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1846,6 +1846,31 @@
       ]
     },
     {
+      "contentDigest": "df67ef154dc47e54abd021342a3f378b64afffde3de3dbcc3bd9d501c1d8e2a5",
+      "evidenceRefs": [
+        "goals/17-claude-skill-deployment.md",
+        "docs/decisions/2026-08-26-claude-personal-skill-materialization.md",
+        "docs/plans/goal-17-claude-skill-deployment.md",
+        "scripts/check-goal-17.mjs"
+      ],
+      "id": "script.check-goal-17",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-17.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "70efb474f206aa681d2ed6d16c1f25e530c01b22fc84a93ae4d76fd5a09d0026",
       "evidenceRefs": [
         "scripts/check-goal-2.mjs"
@@ -2104,7 +2129,7 @@
       ]
     },
     {
-      "contentDigest": "e047a4669caa54ce4414cdaaf02961320efdfaf8bbd67cc4c78ecc1bb98b58b4",
+      "contentDigest": "15d65e5a692ee0de8b56e67b465bfa67f5e82da2cf3feae7b991d6a1e4e47ec3",
       "evidenceRefs": [
         "scripts/Manage-MultivendorSkills.ps1"
       ],
@@ -4586,9 +4611,9 @@
       ]
     }
   ],
-  "catalogDigest": "4f9727a8901abc6288f86c3a3b433b72ae28af79a336377d6323d287eb8cf807",
+  "catalogDigest": "3b60d72a87487a7401fa76680310d373168ec648028d27388497b7b36a3ecf50",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "58a04817fcc798f39996f7c1eaabf42828bd338ba66ad8ead0a0cc7c8f639381",
+  "registryDigest": "6111843fd9d33fa60626df45c5dc63a999a30bb1a378301bc7c28719a2b9ba4f",
   "schemaVersion": 1
 }
