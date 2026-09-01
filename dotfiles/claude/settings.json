@@ -42,7 +42,8 @@
       "source": {
         "source": "github",
         "repo": "byh3071-cpu/yohan-agent-kit"
-      }
+      },
+      "autoUpdate": true
     }
   },
   "permissions": {
