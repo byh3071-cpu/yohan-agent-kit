@@ -12,6 +12,7 @@ function assert(condition, message) {
 const settings = readJson('dotfiles/claude/settings.json')
 const marketplace = readJson('.claude-plugin/marketplace.json')
 const plugin = readJson('plugins/yohan-core/.claude-plugin/plugin.json')
+const mcp = readJson('plugins/yohan-core/.mcp.json')
 const claude = readFileSync('CLAUDE.md', 'utf8')
 
 const source = settings.extraKnownMarketplaces?.['yohan-cc-skills']
@@ -21,6 +22,7 @@ const entry = marketplace.plugins?.find((candidate) => candidate.name === 'yohan
 assert(entry, 'marketplace is missing yohan-core')
 assert(entry.version === plugin.version, 'yohan-core version differs between marketplace.json and plugin.json')
 assert(/^\d+\.\d+\.\d+$/.test(plugin.version), 'yohan-core version must be stable semver')
+assert(!JSON.stringify(mcp).includes('$env:QDRANT_PATH ='), 'MCP launcher must leave Qdrant selection to server configuration; forcing a path conflicts with QDRANT_URL')
 assert(!/(?:Phase|다음 액션):?\s*\*{0,2}FILL\b/.test(claude), 'CLAUDE.md contains an unresolved FILL status')
 
 console.log(`context contract OK: yohan-core ${plugin.version}, marketplace auto-update enabled`)
