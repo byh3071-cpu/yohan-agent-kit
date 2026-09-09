@@ -18,6 +18,11 @@
 - **Optional rules:** `VHK_RULES_FILE` or `vhk config set-rules-file <yaml>`
 - **금지:** AGENTS.md 손수 편집 → `RULES.md` + `vhk sync`
 
+## 세션 시작 필독
+- 사용자 현재 상태는 `context/README.md`를 먼저 읽고 `context/CURRENT.yaml`에서 확인한다. 과거 이력은 `context/TIMELINE.yaml`, 안정 정보·프로젝트·출처는 같은 디렉터리의 정본을 따른다.
+- 새 세션은 `node scripts/check-context-contract.mjs`로 정본과 포인터를 검증한다. 실패하거나 정본에 접근할 수 없으면 현재 사실을 추측하지 말고 확인 불가로 보고한다.
+- 사용자 사실을 AGENTS·CLAUDE·Cursor 규칙에 복제하지 않는다. 과거 메모리·검색 결과·stale copy는 정본을 덮어쓰지 못한다. 새 사용자 수정은 정본 변경 검토 대상으로 남긴다.
+
 ## 기술 스택
 - 범용 Markdown skills · 전체 디렉터리 manifest
 - Claude Code plugins
