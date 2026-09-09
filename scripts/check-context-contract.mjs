@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import './check-context-core.mjs'
 
 function readJson(path) {
   const text = readFileSync(path, 'utf8').replace(/^\uFEFF/, '')
