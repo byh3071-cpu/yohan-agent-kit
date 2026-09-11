@@ -39,3 +39,7 @@
 - [ ] 2026-08-16 Goal 8 재개 계약 supersede — 위의 노트북 필수·two-machine final blocker 지시는 이 항목으로 대체한다. v0.1 완료 blocker는 **집 PC single-machine final evidence**이며, 노트북 Compare는 노트북 첫 실제 사용 시 선택하는 후속 Task다. Goal 9 vendor payload-chain attestation은 P2/nonblocking이고 Goal 8의 resolved entrypoint identity·reported version 범위를 확장하지 않는다. secret fixture 정리 전 로컬 기준선은 13/13 suites·1,377 assertions이며, 다음 순서는 **secret fixture cleanup → clean exact-commit release → real home install/four-vendor sessions → final evidence**다. coordinated final gate 전에는 commit·push·PR Ready·merge를 금지한다. fixture 정리 뒤 회귀 수치가 달라지면 이 행을 수정하지 않고 새 최종 증거 항목을 append한다.
 - [ ] 2026-08-16 Goal 4 Claude Code 전역 세션 제목 자동화 IN_PROGRESS — 플러그인 훅 구현·회귀 검증 후 커밋·푸시.
 - [ ] 2026-08-21 Goal 번호 충돌 해소 — 세션 제목 자동화 goal 을 `Goal 4` 에서 **`Goal 10`** 으로 옮겼다(파일 `goals/10-claude-auto-session-title.md`, 게이트 `scripts/check-goal-10.mjs`). 위 2026-08-16 줄의 "Goal 4" 는 이 항목을 가리키며 번호만 바뀌었다(append-only 라 원문은 그대로 둔다). 사유: `codex/yohan-agent-kit-goals-6-8` 이 08-14 부터 Goal 4~9 를 쓰고 있었고 그쪽 번호는 날짜 박힌 감사 문서와 원장 11줄에 이미 굳어 고칠 수 없다. 이쪽은 참조 3곳뿐이라 이동 비용이 낮다.
+
+## 2026-09-07 현재 조회 규칙 정정
+
+위 항목은 append-only 이력이며 다음 실행 명령이 아니다. 현재 상태는 `CLAUDE.md`의 상태 안내대로 GitHub Issue·PR과 해당 Goal 원본을 대조한다. Goal 5·8·10·17의 `IN_PROGRESS`는 미완료 기록으로 보존하며, 네 작업이 동시에 실행 중임을 뜻하지 않는다. 세션에서는 요청 범위의 작업 하나만 선택하고, 홈 설치·벤더 실증이 남은 Goal을 문서 정리만으로 DONE 처리하지 않는다.
