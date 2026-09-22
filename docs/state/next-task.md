@@ -41,3 +41,5 @@
 - [ ] 2026-08-21 Goal 번호 충돌 해소 — 세션 제목 자동화 goal 을 `Goal 4` 에서 **`Goal 10`** 으로 옮겼다(파일 `goals/10-claude-auto-session-title.md`, 게이트 `scripts/check-goal-10.mjs`). 위 2026-08-16 줄의 "Goal 4" 는 이 항목을 가리키며 번호만 바뀌었다(append-only 라 원문은 그대로 둔다). 사유: `codex/yohan-agent-kit-goals-6-8` 이 08-14 부터 Goal 4~9 를 쓰고 있었고 그쪽 번호는 날짜 박힌 감사 문서와 원장 11줄에 이미 굳어 고칠 수 없다. 이쪽은 참조 3곳뿐이라 이동 비용이 낮다.
 
 - [ ] 2026-09-22 Goal 18 P2 Session Resume packet IN_PROGRESS — branch `codex/p2-session-resume`. 기존 Goal 5·8·10·17 상태는 변경하지 않는다. 다음: packet schema·prepare/verify/ack red fixture부터 구현.
+
+- [ ] 2026-09-22 Goal 18 P2 구현·로컬 교차 프로세스 검증 완료 — Draft PR #115. `REAL_MACHINE_UNVERIFIED` 유지. 다음 사람 게이트: PR Ready·merge 및 Goal 완료 판정. Muse는 project Goal 선택 전 `read_only_until_goal_selected`.

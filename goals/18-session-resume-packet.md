@@ -48,7 +48,7 @@ P1 task-scoped `get_context`는 yohan-mcp PR #84 merge `81ea431ccba4ee93c8836e88
 - [x] workflow handoff가 새 packet 경로와 fail-closed 규칙을 사용하게 연결한다.
 - [x] P1 실제 Muse envelope를 packet으로 변환하고 새 프로세스에서 검증·ACK한다.
 - [x] 전체 회귀·시크릿 검사·독립 검토를 통과한다.
-- [ ] 완료 receipt와 남은 실기기 한계를 기록하고 Draft PR을 만든다.
+- [x] 완료 receipt와 남은 실기기 한계를 기록하고 Draft PR을 만든다.
 
 ## Completion Check
 
