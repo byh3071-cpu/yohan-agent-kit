@@ -1,5 +1,5 @@
 {
-  "assetCount": 221,
+  "assetCount": 226,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -2615,6 +2615,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ],
+      "id": "skill.animate-expo",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "emilkowalski/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/animate-expo",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/johnlindquist/claude@eb37d88"
       ],
       "id": "skill.brainstorm",
@@ -2879,6 +2900,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ],
+      "id": "skill.emil-design-eng",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "emilkowalski/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/emil-design-eng",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a"
       ],
       "id": "skill.find-skills",
@@ -2890,6 +2932,27 @@
       "provenance": "external:https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a",
       "requiredEnv": [],
       "sourcePath": "external://github.com/vercel-labs/skills/skills/find-skills",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624"
+      ],
+      "id": "skill.frontend-design",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "reviewed",
+      "owner": "anthropics/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/anthropics/skills/skills/frontend-design",
       "vendors": [
         "antigravity",
         "claude-code",
@@ -2917,6 +2980,27 @@
         "codex",
         "cursor",
         "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690"
+      ],
+      "id": "skill.hallmark",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "Nutlope/hallmark",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/Nutlope/hallmark/skills/hallmark",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
       ]
     },
     {
@@ -4010,6 +4094,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278"
+      ],
+      "id": "skill.web-design-guidelines",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "vercel-labs/agent-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/vercel-labs/agent-skills/skills/web-design-guidelines",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.web-perf",
@@ -4633,9 +4738,9 @@
       ]
     }
   ],
-  "catalogDigest": "3a922ce3963f103a3331c2ca820d8fd717e5124279d453509768d23dc7e60e47",
+  "catalogDigest": "c6a6d79f105e4556c43949101eb13cfca0c8c879ed4e41013601456cc305e1a6",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "b920e97662f3183b01423148e15318dc50868e21e007a00a302fb73b9d492cc9",
+  "registryDigest": "471bed2ae0c863e6d8a91f88cb990d6b8114f7373333fe8b5ff365859b864c66",
   "schemaVersion": 1
 }

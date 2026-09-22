@@ -4411,6 +4411,106 @@
       "evidenceRefs": [
         "plugins/yohan-core/agents/arch-validator.md"
       ]
+    },
+    {
+      "id": "skill.frontend-design",
+      "kind": "skill",
+      "owner": "anthropics/skills",
+      "sourcePath": "external://github.com/anthropics/skills/skills/frontend-design",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "external:https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624"
+      ]
+    },
+    {
+      "id": "skill.hallmark",
+      "kind": "skill",
+      "owner": "Nutlope/hallmark",
+      "sourcePath": "external://github.com/Nutlope/hallmark/skills/hallmark",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "external:https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690"
+      ]
+    },
+    {
+      "id": "skill.emil-design-eng",
+      "kind": "skill",
+      "owner": "emilkowalski/skills",
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/emil-design-eng",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ]
+    },
+    {
+      "id": "skill.animate-expo",
+      "kind": "skill",
+      "owner": "emilkowalski/skills",
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/animate-expo",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ]
+    },
+    {
+      "id": "skill.web-design-guidelines",
+      "kind": "skill",
+      "owner": "vercel-labs/agent-skills",
+      "sourcePath": "external://github.com/vercel-labs/agent-skills/skills/web-design-guidelines",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "external:https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278"
+      ]
     }
   ]
 }
