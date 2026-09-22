@@ -25,7 +25,7 @@
       "name": "workflow",
       "source": "./plugins/workflow",
       "description": "반복 작업 워크플로 스킬 묶음 — new-repo, parallel, release-gate, dogfood-crosscheck, visualize, handoff, overnight-autoloop, research-loop, ship-plan-to-pr, VHK P0.",
-      "version": "0.3.10"
+      "version": "0.3.11"
     },
     {
       "name": "critical-thinking",
