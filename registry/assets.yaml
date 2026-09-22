@@ -3918,6 +3918,27 @@
       ]
     },
     {
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-context-contract.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ]
+    },
+    {
       "id": "skill.durable-objects",
       "kind": "skill",
       "owner": "cloudflare/skills",
