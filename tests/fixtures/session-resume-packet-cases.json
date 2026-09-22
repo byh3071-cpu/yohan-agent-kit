@@ -1,0 +1,184 @@
+{
+  "schema": "session-resume-test-cases/v1",
+  "now": "2026-09-22T00:10:00Z",
+  "context": {
+    "data": {
+      "task_context": {
+        "schema": "task-context/v1",
+        "status": "complete",
+        "repository": {
+          "id": "yohan-agent-kit",
+          "name": "yohan-agent-kit",
+          "canonical_path": "products/yohan-agent-kit",
+          "remote": "https://example.invalid/yohan-agent-kit.git"
+        },
+        "reason_codes": [],
+        "goals": [
+          {
+            "id": "goal-18",
+            "type": "brain:goal",
+            "title": "P2 Session Resume",
+            "status": "IN_PROGRESS",
+            "snippet": "Resume safely",
+            "source_ref": {
+              "type": "brain:goal",
+              "id": "goal-18",
+              "backend": "memory",
+              "locator": "memory/goals/goal-18.md",
+              "document_id": "brain:memory/goals/goal-18.md",
+              "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        ],
+        "adrs": [],
+        "decisions": [],
+        "evidence_refs": [
+          {
+            "type": "brain:goal",
+            "id": "goal-18",
+            "backend": "memory",
+            "locator": "memory/goals/goal-18.md",
+            "document_id": "brain:memory/goals/goal-18.md",
+            "content_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "blockers": [],
+        "next_actions": ["Implement prepare, verify, and acknowledge"],
+        "freshness": {
+          "index": {
+            "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "generation_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "observed_at": "2026-09-22T00:00:00Z",
+            "fresh": true,
+            "reason_code": "fresh"
+          },
+          "sources": []
+        },
+        "source_refs": {
+          "repository_manifest": {
+            "source": "ops/public-dev-bootstrap/repos.json",
+            "status": "loaded",
+            "reason_code": "loaded"
+          }
+        }
+      },
+      "retrieval_diagnostics": {
+        "schema": "retrieval-diagnostics/v1",
+        "volatile": true,
+        "persisted": false,
+        "runtime": {
+          "repository": "yohan-mcp",
+          "implementation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "source_revision": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+          "source_revision_reason_code": "available"
+        },
+        "query_binding": {
+          "scheme": "sha256-utf8-v1",
+          "digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "index": {
+          "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "generation_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "observed_at": "2026-09-22T00:00:00Z",
+          "corpus_contract_version": "r1",
+          "fresh": true,
+          "reason_code": "fresh"
+        },
+        "recognized_entities": [],
+        "entity_catalog": {
+          "revision": "1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "sources": { "attempted": ["memory"], "used": ["memory"], "errors": {} },
+        "collections": { "requested": [], "available": [], "unavailable": [] },
+        "evidence": [],
+        "graph_edge_count": 0,
+        "supplemental_searches": 0,
+        "budgets": { "character": 8000, "matches": 6 },
+        "latency_ms": { "backends": {}, "index_build": 0, "lexical_query": 0 }
+      },
+      "diagnostics": {
+        "entity_catalog": {
+          "revision": "1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      }
+    },
+    "schema_valid": true,
+    "sources": ["memory"],
+    "errors": []
+  },
+  "actual_partial_task_context": {
+    "schema": "task-context/v1",
+    "status": "partial",
+    "repository": {
+      "id": "yohan-agent-kit",
+      "name": "yohan-agent-kit",
+      "canonical_path": "products/yohan-agent-kit",
+      "remote": "https://example.invalid/yohan-agent-kit.git"
+    },
+    "reason_codes": ["shared_repository_evidence_included", "other_repository_evidence_excluded", "missing_project_goal", "missing_next_action"],
+    "goals": [],
+    "adrs": [],
+    "decisions": [],
+    "evidence_refs": [
+      {
+        "type": "brain:decisions",
+        "id": "p2-roadmap",
+        "backend": "memory",
+        "locator": "memory/decisions/p2-roadmap.md",
+        "document_id": "brain:memory/decisions/p2-roadmap.md",
+        "content_hash": "9999999999999999999999999999999999999999999999999999999999999999"
+      }
+    ],
+    "blockers": [],
+    "next_actions": [],
+    "freshness": {
+      "index": {
+        "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "generation_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "observed_at": "2026-09-22T00:00:00Z",
+        "fresh": true,
+        "reason_code": "fresh"
+      },
+      "sources": []
+    },
+    "source_refs": {
+      "repository_manifest": {
+        "source": "ops/public-dev-bootstrap/repos.json",
+        "status": "loaded",
+        "reason_code": "loaded"
+      }
+    }
+  },
+  "cases": [
+    { "id": "valid", "command": "verify", "expected": "VERIFIED" },
+    { "id": "partial-missing-goal", "command": "verify", "expected": "VERIFIED" },
+    { "id": "omitted-ownership", "command": "verify", "expected": "INVALID" },
+    { "id": "wrong-expected-digest", "command": "verify", "expected": "CONFLICTED" },
+    { "id": "arbitrary-ack-source", "command": "ack", "expected": "CONFLICTED" },
+    { "id": "dirty-prepare", "command": "prepare", "expected": "CONFLICTED" },
+    { "id": "ownership-state-missing", "command": "verify", "expected": "INDETERMINATE" },
+    { "id": "ownership-digest-tampered", "command": "verify", "expected": "INVALID" },
+    { "id": "ownership-state-changed", "command": "verify", "expected": "CONFLICTED" },
+    { "id": "ownership-liveness-unknown", "command": "verify", "expected": "INDETERMINATE" },
+    { "id": "ownership-stale", "command": "verify", "expected": "INDETERMINATE" },
+    { "id": "ownership-from-future", "command": "verify", "expected": "INDETERMINATE" },
+    { "id": "ownership-yielded-read-only", "command": "ack", "expected": "ACKNOWLEDGED" },
+    { "id": "same-sha-branch-drift", "command": "verify", "expected": "CONFLICTED" },
+    { "id": "stale-sha", "command": "verify", "expected": "STALE" },
+    { "id": "evidence-mismatch", "command": "verify", "expected": "INVALID" },
+    { "id": "evidence-missing", "command": "verify", "expected": "INDETERMINATE" },
+    { "id": "evidence-changed", "command": "verify", "expected": "STALE" },
+    { "id": "evidence-duplicate", "command": "prepare", "expected": "INVALID" },
+    { "id": "evidence-document-conflict", "command": "prepare", "expected": "CONFLICTED" },
+    { "id": "dirty-mismatch", "command": "verify", "expected": "CONFLICTED" },
+    { "id": "duplicate-key", "command": "prepare", "expected": "INVALID" },
+    { "id": "corrupt-json", "command": "prepare", "expected": "INVALID" },
+    { "id": "secret-material", "command": "prepare", "expected": "INVALID" },
+    { "id": "absolute-path", "command": "prepare", "expected": "INVALID" },
+    { "id": "writer-epoch-conflict", "command": "verify", "expected": "CONFLICTED" },
+    { "id": "unregistered-repository", "command": "prepare", "expected": "INDETERMINATE" },
+    { "id": "unknown-option", "command": "verify", "expected": "INVALID" },
+    { "id": "linked-output", "command": "prepare", "expected": "INVALID" },
+    { "id": "volatile-provenance", "command": "prepare", "expected": "INVALID" }
+  ]
+}

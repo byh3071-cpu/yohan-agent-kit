@@ -1,5 +1,5 @@
 {
-  "assetCount": 220,
+  "assetCount": 223,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "contentDigest": "d623cd31f89a4e64a42bddab8f99a60cd041d90b7818d3cfe2d2a99aebd4d4c8",
+      "contentDigest": "6cbe728e6cc3bbb4a7ee565062e48a2e3fe0f8e9622e3aed00a1caf5ff85d817",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -423,7 +423,7 @@
       ]
     },
     {
-      "contentDigest": "64c253c5dd41deb30ea699d76220a4feefbad1be58a0a7f05bc0d0a849683410",
+      "contentDigest": "0faa9f19faf2d1448753115517e57eb8b8f2469d207e3fdfb81bd75f7a2eaec6",
       "evidenceRefs": [
         "dotfiles/claude/settings.json"
       ],
@@ -1174,7 +1174,7 @@
       ]
     },
     {
-      "contentDigest": "b6aaedaae9408cb254d042e35cb0c3cdc4f055c20c46e0e0ae2abdeebf099af7",
+      "contentDigest": "599da64c0913bdb860890589121be44a2adcfa29996bdda3aa294c88cf68740e",
       "evidenceRefs": [
         "plugins/yohan-core/.mcp.json"
       ],
@@ -1252,7 +1252,7 @@
       ]
     },
     {
-      "contentDigest": "914144fc7d8d3aadd727bc013abce551f8e60dceceb98bbec1e5cfe3e550dd3e",
+      "contentDigest": "b944d5167058b05a37bd994887cf1dc073d40bb8d260496dae12ab1fe3bb7cd8",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1353,7 +1353,7 @@
       ]
     },
     {
-      "contentDigest": "de9e4e734ece779e30d6d3c3f2eeebf8000206782ea0b7323f833e8e81b01d5b",
+      "contentDigest": "82b18d0724075190d6b2c67e82c477be3d4c385b0ef3f8b6e5ac1865d6ca07cf",
       "evidenceRefs": [
         "CLAUDE.md"
       ],
@@ -1664,6 +1664,28 @@
       ]
     },
     {
+      "contentDigest": "4e0316852f26aa3adaa8651382cff96995d702bbfbb826f4324ffb1d215bb137",
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ],
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-context-contract.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "afb951ef4d1cdf279ccc312dd9f732b12d80bf692fe9542f87748cf0805ed866",
       "evidenceRefs": [
         "scripts/check-goal-1.mjs"
@@ -1862,6 +1884,29 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-goal-17.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "9526013270adbc1fd8c5c884820135588086822d28b4f7c328db53885208cb07",
+      "evidenceRefs": [
+        "goals/18-session-resume-packet.md",
+        "scripts/check-goal-18.mjs"
+      ],
+      "id": "script.check-goal-18",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "candidate",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-goal-18.mjs",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -2369,6 +2414,30 @@
       "requiredEnv": [],
       "sourcePath": "scripts/Scan-AgentAssets.ps1",
       "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "0ef65f9d8d3fcc1bb7e4a1066b865269f435f1ace78fa30e91dbbf0cef0dc858",
+      "evidenceRefs": [
+        "goals/18-session-resume-packet.md",
+        "docs/contracts/session-resume-packet-v1.md",
+        "scripts/SessionResumePacket.mjs"
+      ],
+      "id": "script.session-resume-packet",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "candidate",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/SessionResumePacket.mjs",
+      "vendors": [
+        "agent-plugins",
         "claude-code",
         "codex",
         "cursor",
@@ -4049,7 +4118,7 @@
       ]
     },
     {
-      "contentDigest": "1acbe86144fc871867fd07918fd0233cf7bb42a53f4c844f07e91f18ed3d7439",
+      "contentDigest": "0b5f5fb92e984446fe35c2fb47e7b21366a3700fe4e27748983acfbb765ebbf6",
       "evidenceRefs": [
         "plugins/workflow/skills/handoff"
       ],
@@ -4611,9 +4680,9 @@
       ]
     }
   ],
-  "catalogDigest": "3b60d72a87487a7401fa76680310d373168ec648028d27388497b7b36a3ecf50",
+  "catalogDigest": "470334ffb61b3a1a3d7871a67877712fb3acd449dc9e1cee09e7f09da548a12c",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "6111843fd9d33fa60626df45c5dc63a999a30bb1a378301bc7c28719a2b9ba4f",
+  "registryDigest": "307ff7db82c57ec16b0c5eaca87c6793d370849ae66a6ad1962a24f5e9a854bf",
   "schemaVersion": 1
 }

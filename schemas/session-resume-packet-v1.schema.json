@@ -1,0 +1,324 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yohan.local/schemas/session-resume-packet-v1.schema.json",
+  "title": "Yohan session resume packet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "source_ref", "created_at", "expires_at", "repository", "task", "ownership", "policy", "lineage", "validation", "receipts"],
+  "properties": {
+    "schema": { "const": "session-resume-packet/v1" },
+    "source_ref": { "$ref": "#/$defs/relativePath" },
+    "created_at": { "$ref": "#/$defs/timestamp" },
+    "expires_at": { "$ref": "#/$defs/timestamp" },
+    "repository": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "canonical_path", "manifest_source", "git"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "canonical_path": { "$ref": "#/$defs/relativePath" },
+        "manifest_source": { "$ref": "#/$defs/relativePath" },
+        "git": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sha", "branch", "dirty"],
+          "properties": {
+            "sha": { "$ref": "#/$defs/gitSha" },
+            "branch": { "type": ["string", "null"], "maxLength": 256 },
+            "dirty": { "const": false }
+          }
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal", "current_gate", "next_action", "next_action_source", "blockers"],
+      "properties": {
+        "goal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "id", "status", "title", "source_ref"],
+          "properties": {
+            "state": { "enum": ["selected", "missing"] },
+            "id": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "status": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "title": { "type": ["string", "null"], "minLength": 1, "maxLength": 280 },
+            "source_ref": { "oneOf": [{ "$ref": "#/$defs/contentRef" }, { "type": "null" }] }
+          }
+        },
+        "current_gate": { "type": "string", "minLength": 1, "maxLength": 280 },
+        "next_action": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "next_action_source": { "enum": ["p1_task_context", "explicit_resolution"] },
+        "blockers": { "$ref": "#/$defs/shortList" }
+      }
+    },
+    "ownership": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "content_digest", "active_writer", "writer_epoch", "liveness", "source_ref", "current_gate", "updated_at", "max_age_seconds", "future_skew_seconds", "takeover"],
+      "properties": {
+        "source_path": { "$ref": "#/$defs/relativePath" },
+        "content_digest": { "$ref": "#/$defs/sha256" },
+        "active_writer": { "$ref": "#/$defs/id" },
+        "writer_epoch": { "type": "integer", "minimum": 1 },
+        "liveness": { "enum": ["active", "yielded"] },
+        "source_ref": { "$ref": "#/$defs/relativePath" },
+        "current_gate": { "type": "string", "minLength": 1, "maxLength": 280 },
+        "updated_at": { "$ref": "#/$defs/timestamp" },
+        "max_age_seconds": { "const": 3600 },
+        "future_skew_seconds": { "const": 300 },
+        "takeover": { "const": "forbidden" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["execution_mode", "goal_selection_required", "allowed_work", "forbidden_work", "human_gates"],
+      "properties": {
+        "execution_mode": { "enum": ["scoped_write", "read_only_pending_ownership", "read_only_until_goal_selected"] },
+        "goal_selection_required": { "type": "boolean" },
+        "allowed_work": { "$ref": "#/$defs/nonEmptyShortList" },
+        "forbidden_work": { "$ref": "#/$defs/nonEmptyShortList" },
+        "human_gates": { "$ref": "#/$defs/nonEmptyShortList" }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["context_envelope", "task_context", "runtime", "index", "catalog", "evidence"],
+      "properties": {
+        "context_envelope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["digest", "volatile", "persisted"],
+          "properties": {
+            "digest": { "$ref": "#/$defs/sha256" },
+            "volatile": { "const": true },
+            "persisted": { "const": false }
+          }
+        },
+        "task_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema", "status", "reason_codes"],
+          "properties": {
+            "schema": { "const": "task-context/v1" },
+            "status": { "enum": ["complete", "partial"] },
+            "reason_codes": {
+              "type": "array",
+              "maxItems": 16,
+              "items": { "$ref": "#/$defs/id" }
+            }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository", "implementation_digest", "source_revision"],
+          "properties": {
+            "repository": { "$ref": "#/$defs/id" },
+            "implementation_digest": { "$ref": "#/$defs/sha256" },
+            "source_revision": { "$ref": "#/$defs/gitSha" }
+          }
+        },
+        "index": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["revision", "generation_id", "observed_at", "fresh", "reason_code", "max_age_seconds"],
+          "properties": {
+            "revision": { "$ref": "#/$defs/sha256" },
+            "generation_id": { "$ref": "#/$defs/sha256" },
+            "observed_at": { "$ref": "#/$defs/timestamp" },
+            "fresh": { "const": true },
+            "reason_code": { "$ref": "#/$defs/id" },
+            "max_age_seconds": { "type": "integer", "minimum": 60, "maximum": 604800 }
+          }
+        },
+        "catalog": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["revision"],
+          "properties": { "revision": { "$ref": "#/$defs/sha256" } }
+        },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["document_id", "locator", "content_hash"],
+            "properties": {
+              "document_id": { "$ref": "#/$defs/id" },
+              "locator": { "$ref": "#/$defs/relativePath" },
+              "content_hash": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["machine_status", "reason_code"],
+      "properties": {
+        "machine_status": { "const": "REAL_MACHINE_UNVERIFIED" },
+        "reason_code": { "const": "single_device_fixture_only" }
+      }
+    },
+    "receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content", "delivery"],
+      "properties": {
+        "content": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "canonicalization", "digest"],
+          "properties": {
+            "algorithm": { "const": "sha256" },
+            "canonicalization": { "const": "sorted-json-utf8-v1" },
+            "digest": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "delivery": { "type": "null" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "lineage": { "properties": { "task_context": { "properties": { "status": { "const": "complete" } } } } }
+        }
+      },
+      "then": {
+        "properties": {
+          "task": {
+            "properties": {
+              "goal": {
+                "properties": {
+                  "state": { "const": "selected" },
+                  "id": { "$ref": "#/$defs/id" },
+                  "status": { "$ref": "#/$defs/id" },
+                  "title": { "type": "string" },
+                  "source_ref": { "$ref": "#/$defs/contentRef" }
+                }
+              },
+              "next_action_source": { "const": "p1_task_context" }
+            }
+          },
+          "policy": {
+            "properties": {
+              "goal_selection_required": { "const": false }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "lineage": { "properties": { "task_context": { "properties": { "status": { "const": "partial" } } } } }
+        }
+      },
+      "then": {
+        "properties": {
+          "task": {
+            "properties": {
+              "goal": {
+                "properties": {
+                  "state": { "const": "missing" },
+                  "id": { "type": "null" },
+                  "status": { "type": "null" },
+                  "title": { "type": "null" },
+                  "source_ref": { "type": "null" }
+                }
+              },
+              "next_action_source": { "const": "explicit_resolution" }
+            }
+          },
+          "policy": {
+            "properties": {
+              "execution_mode": { "const": "read_only_until_goal_selected" },
+              "goal_selection_required": { "const": true },
+              "forbidden_work": {
+                "allOf": [
+                  { "contains": { "const": "implementation" } },
+                  { "contains": { "const": "repository_writes" } },
+                  { "contains": { "const": "writer_takeover" } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "allOf": [
+          { "properties": { "lineage": { "properties": { "task_context": { "properties": { "status": { "const": "complete" } } } } } } },
+          { "properties": { "ownership": { "properties": { "liveness": { "const": "active" } } } } }
+        ]
+      },
+      "then": { "properties": { "policy": { "properties": { "execution_mode": { "const": "scoped_write" } } } } }
+    },
+    {
+      "if": {
+        "allOf": [
+          { "properties": { "lineage": { "properties": { "task_context": { "properties": { "status": { "const": "complete" } } } } } } },
+          { "properties": { "ownership": { "properties": { "liveness": { "const": "yielded" } } } } }
+        ]
+      },
+      "then": {
+        "properties": {
+          "policy": {
+            "properties": {
+              "execution_mode": { "const": "read_only_pending_ownership" },
+              "forbidden_work": {
+                "allOf": [
+                  { "contains": { "const": "implementation" } },
+                  { "contains": { "const": "repository_writes" } },
+                  { "contains": { "const": "writer_takeover" } }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "gitSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "timestamp": { "type": "string", "format": "date-time", "pattern": "Z$" },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*:)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*[. ](?:/|$))[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "contentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locator", "content_hash"],
+      "properties": {
+        "locator": { "$ref": "#/$defs/relativePath" },
+        "content_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "shortList": {
+      "type": "array",
+      "maxItems": 16,
+      "items": { "type": "string", "minLength": 1, "maxLength": 280 }
+    },
+    "nonEmptyShortList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "type": "string", "minLength": 1, "maxLength": 280 }
+    }
+  }
+}
