@@ -4390,6 +4390,72 @@
       "evidenceRefs": [
         "plugins/yohan-core/agents/arch-validator.md"
       ]
+    },
+    {
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-context-contract.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ]
+    },
+    {
+      "id": "script.check-goal-18",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-goal-18.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/18-session-resume-packet.md",
+        "scripts/check-goal-18.mjs"
+      ]
+    },
+    {
+      "id": "script.session-resume-packet",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/SessionResumePacket.mjs",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "candidate",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "goals/18-session-resume-packet.md",
+        "docs/contracts/session-resume-packet-v1.md",
+        "scripts/SessionResumePacket.mjs"
+      ]
     }
   ]
 }
