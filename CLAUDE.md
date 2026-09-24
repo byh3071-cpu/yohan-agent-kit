@@ -1,3 +1,5 @@
+@AGENTS.md
+
 # 기록 규칙 (Yohan Agent Kit)
 
 ## 상태 안내
