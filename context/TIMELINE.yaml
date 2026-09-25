@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "timeline",
+  "facts": [
+    {
+      "id": "workplace-sai",
+      "subject": "yohan",
+      "predicate": "workplace",
+      "value": "카페사이",
+      "status": "historical",
+      "valid_from": null,
+      "valid_to": null,
+      "source": "user-confirmed-2026-09-09",
+      "last_verified_at": "2026-09-09"
+    }
+  ]
+}
