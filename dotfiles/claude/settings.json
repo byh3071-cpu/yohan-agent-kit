@@ -54,5 +54,6 @@
       "Read(//**/*.pem)",
       "Read(//**/*.key)"
     ]
-  }
+  },
+  "cleanupPeriodDays": 90
 }
