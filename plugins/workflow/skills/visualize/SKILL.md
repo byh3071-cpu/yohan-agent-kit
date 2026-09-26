@@ -14,6 +14,10 @@ description: Use when the user (a non-developer) wants to SEE something - genera
 
 ## Mode A — 디자인 시안 N개
 1. 방향 먼저: `frontend-design` 스킬 필독 + `lazyweb` 레퍼런스 검색(토스·Linear·Raycast·Hermes 등 사용자가 지목한 레퍼런스 반영).
+   - 랜딩·마케팅 페이지면 `hallmark`도 읽는다. 앱 화면(고정 디자인 시스템이 있는 제품)에는 `hallmark audit`만 쓰고 페이지 구조 규칙은 적용하지 않는다.
+   - 모션이 들어가면 곡선·속도는 `emil-design-eng`(웹) 또는 `animate-expo`(React Native·Expo)로 정한다. 시안마다 다른 곡선을 쓰지 않는다.
+   - 시안을 내놓기 전에 `web-design-guidelines`로 접근성·UX 규칙을 한 번 돌린다. 걸린 건 시안 안에서 고치고, 못 고친 건 시안 라벨 옆에 적는다.
+   - 위 넷은 외부 스킬이다. 설치 좌표는 `registry/assets.yaml`의 `external://` 항목이고 `scripts/Restore-ExternalSkills.ps1`로 복원한다. 없으면 건너뛰되 건너뛰었다고 적는다.
 2. **5~6개**만(10개+ 금지 — 사용자가 "품질 떨어진다"고 명시). 각 시안 `#1`~`#6` 라벨, 한 HTML 안에서 전환(탭/스크롤).
 3. 사용자가 번호 킵 → 그 시안만 변주 반복.
 

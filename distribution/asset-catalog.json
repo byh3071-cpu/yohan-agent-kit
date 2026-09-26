@@ -1,5 +1,5 @@
 {
-  "assetCount": 220,
+  "assetCount": 226,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "contentDigest": "d623cd31f89a4e64a42bddab8f99a60cd041d90b7818d3cfe2d2a99aebd4d4c8",
+      "contentDigest": "b7754ff714bbac7c47322c90893fc9476232b1bd0dbbd019a65e83079f134c3c",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -423,7 +423,7 @@
       ]
     },
     {
-      "contentDigest": "64c253c5dd41deb30ea699d76220a4feefbad1be58a0a7f05bc0d0a849683410",
+      "contentDigest": "0faa9f19faf2d1448753115517e57eb8b8f2469d207e3fdfb81bd75f7a2eaec6",
       "evidenceRefs": [
         "dotfiles/claude/settings.json"
       ],
@@ -638,7 +638,7 @@
       ]
     },
     {
-      "contentDigest": "a102eeca06ace9b05007dbbf67132c3c7091318959624dc98f21216d64e5763e",
+      "contentDigest": "095e67426a9cbd887c9f79b082b4d22c6b3455ad9950f2470dd11e308010459c",
       "evidenceRefs": [
         "plugins/critical-thinking/hooks"
       ],
@@ -1174,7 +1174,7 @@
       ]
     },
     {
-      "contentDigest": "b6aaedaae9408cb254d042e35cb0c3cdc4f055c20c46e0e0ae2abdeebf099af7",
+      "contentDigest": "599da64c0913bdb860890589121be44a2adcfa29996bdda3aa294c88cf68740e",
       "evidenceRefs": [
         "plugins/yohan-core/.mcp.json"
       ],
@@ -1234,7 +1234,7 @@
       ]
     },
     {
-      "contentDigest": "1111c1fdf608bdbffbc4b48ce0fdbe00724b4cd1978f5e035082e8f66e8dbf3b",
+      "contentDigest": "e1fba6704ada8fcee7feebbc99e1b5aa339905054aeadb558898a57aa0504319",
       "evidenceRefs": [
         "plugins/workflow/.claude-plugin/plugin.json"
       ],
@@ -1252,7 +1252,7 @@
       ]
     },
     {
-      "contentDigest": "914144fc7d8d3aadd727bc013abce551f8e60dceceb98bbec1e5cfe3e550dd3e",
+      "contentDigest": "b944d5167058b05a37bd994887cf1dc073d40bb8d260496dae12ab1fe3bb7cd8",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1353,7 +1353,7 @@
       ]
     },
     {
-      "contentDigest": "de9e4e734ece779e30d6d3c3f2eeebf8000206782ea0b7323f833e8e81b01d5b",
+      "contentDigest": "82b18d0724075190d6b2c67e82c477be3d4c385b0ef3f8b6e5ac1865d6ca07cf",
       "evidenceRefs": [
         "CLAUDE.md"
       ],
@@ -1655,6 +1655,28 @@
       "provenance": "repo-authored",
       "requiredEnv": [],
       "sourcePath": "scripts/check-agent-team-operations.mjs",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "4e0316852f26aa3adaa8651382cff96995d702bbfbb826f4324ffb1d215bb137",
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ],
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "PORTABLE",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-context-contract.mjs",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -2593,6 +2615,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ],
+      "id": "skill.animate-expo",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "emilkowalski/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/animate-expo",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/johnlindquist/claude@eb37d88"
       ],
       "id": "skill.brainstorm",
@@ -2857,6 +2900,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3"
+      ],
+      "id": "skill.emil-design-eng",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "emilkowalski/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/emilkowalski/skills@85e8e2363b713506e1d5b6e07a0eb2da66be1bc3",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/emil-design-eng",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a"
       ],
       "id": "skill.find-skills",
@@ -2868,6 +2932,27 @@
       "provenance": "external:https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a",
       "requiredEnv": [],
       "sourcePath": "external://github.com/vercel-labs/skills/skills/find-skills",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624"
+      ],
+      "id": "skill.frontend-design",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "reviewed",
+      "owner": "anthropics/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/anthropics/skills@34040c9c568585f6929bedeaad110ad08f079624",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/anthropics/skills/skills/frontend-design",
       "vendors": [
         "antigravity",
         "claude-code",
@@ -2895,6 +2980,27 @@
         "codex",
         "cursor",
         "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690"
+      ],
+      "id": "skill.hallmark",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "Nutlope/hallmark",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/Nutlope/hallmark/skills/hallmark",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
       ]
     },
     {
@@ -3988,6 +4094,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278"
+      ],
+      "id": "skill.web-design-guidelines",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "reviewed",
+      "owner": "vercel-labs/agent-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/vercel-labs/agent-skills/skills/web-design-guidelines",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.web-perf",
@@ -4292,7 +4419,7 @@
       ]
     },
     {
-      "contentDigest": "abdab6d94eda567ff1bf4bb6f16e9a504c94763902b198ee7ddb930830e72407",
+      "contentDigest": "bdd505a31801b2c89fd02dd1021c45042333f00be990e9727a5f752d9e4e2d21",
       "evidenceRefs": [
         "plugins/workflow/skills/visualize"
       ],
@@ -4611,9 +4738,9 @@
       ]
     }
   ],
-  "catalogDigest": "3b60d72a87487a7401fa76680310d373168ec648028d27388497b7b36a3ecf50",
+  "catalogDigest": "c6a6d79f105e4556c43949101eb13cfca0c8c879ed4e41013601456cc305e1a6",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "6111843fd9d33fa60626df45c5dc63a999a30bb1a378301bc7c28719a2b9ba4f",
+  "registryDigest": "471bed2ae0c863e6d8a91f88cb990d6b8114f7373333fe8b5ff365859b864c66",
   "schemaVersion": 1
 }
