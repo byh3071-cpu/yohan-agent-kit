@@ -8,7 +8,7 @@
   "skipWorkflowUsageWarning": true,
   "skipDangerousModePermissionPrompt": true,
   "theme": "auto",
-  "language": "korea",
+  "language": "korean",
   "agentPushNotifEnabled": true,
   "autoMemoryEnabled": true,
   "autoMemoryDirectory": "~/.claude/memory",
