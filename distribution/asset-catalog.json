@@ -2039,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "01f5f5ce6e3de66d301b6ec491b6bdc29a61300bb728e9ea2bb5389f3ee9f29e",
+      "contentDigest": "3b1b48d980db07f71a886a6f48e6842f284cf3869b40339adc1cc7d610a5a9c7",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -3177,8 +3177,7 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
-        "https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
-        "https://www.npmjs.com/package/@playwright/cli"
+        "https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871"
       ],
       "id": "skill.playwright-cli",
       "kind": "skill",
@@ -4739,9 +4738,9 @@
       ]
     }
   ],
-  "catalogDigest": "3ff78249954ee681cbeeb452f350f7370d23e54e3f274f6ff01631fa6659dae1",
+  "catalogDigest": "783a307b4f177aa17a8872d6c1c05ab1be2ac49ded22ab95fb22890d7bfcf5ee",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "db02a3ae3c4a6756b3449f014f4bd52d773b490937f292b17e1c4a981ad0f8eb",
+  "registryDigest": "05766c11f7d8794eafe713453d8e7b4c33ad33108f77052423c652b79472eb2c",
   "schemaVersion": 1
 }

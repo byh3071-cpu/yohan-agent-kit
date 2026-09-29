@@ -105,12 +105,19 @@ try {
             [ordered]@{ id = 'rule.cursor-ecosystem'; sourcePath = '.cursor/rules/ecosystem.mdc' },
             # 이름 일치 판정: 로컬 파일이 있는 스킬 / 로컬 파일이 없는(external) 스킬
             [ordered]@{ id = 'skill.kit-skill'; sourcePath = 'skills/kit-skill' },
-            [ordered]@{ id = 'skill.ext-skill'; sourcePath = 'external://example/ext-skill' }
+            [ordered]@{ id = 'skill.ext-skill'; sourcePath = 'external://example/ext-skill' },
+            [ordered]@{ id = 'skill.multi-skill'; sourcePath = 'skills/multi-skill' },
+            # 킷 루트 밖을 가리키는 sourcePath 는 비교 대상이 아니다.
+            [ordered]@{ id = 'skill.esc-skill'; sourcePath = '../outside/esc-skill' }
         )
     }
     New-FixtureFile (Join-Path $kitRoot 'registry\assets.yaml') ($registry | ConvertTo-Json -Depth 5)
 
     $kitSkillBody = "---`nname: kit-skill`n---`nkit body`n"
+    $multiBody = "---`nname: multi-skill`n---`nmulti kit body`n"
+    New-FixtureFile (Join-Path $kitRoot 'skills\multi-skill\SKILL.md') $multiBody
+    $escBody = "---`nname: esc-skill`n---`noutside body`n"
+    New-FixtureFile (Join-Path $fixtureRoot 'outside\esc-skill\SKILL.md') $escBody
     New-FixtureFile (Join-Path $kitRoot 'skills\kit-skill\SKILL.md') $kitSkillBody
 
     # ---- 가짜 HomeRoot ----
@@ -142,6 +149,10 @@ try {
     # 킷 파일과 내용이 같지만 CRLF 인 스킬 → 등록, 이름만 같은 external 스킬 → 표시만
     New-FixtureFile (Join-Path $alpha '.claude\skills\kit-skill\SKILL.md') $kitSkillBody.Replace("`n", "`r`n")
     New-SkillAt $alpha '.claude' 'ext-skill'
+    # 벤더 사본 중 하나(.claude)만 킷과 같고 .agents 는 다르다 → 미등록
+    New-FixtureFile (Join-Path $alpha '.claude\skills\multi-skill\SKILL.md') $multiBody
+    New-FixtureFile (Join-Path $alpha '.agents\skills\multi-skill\SKILL.md') "---`nname: multi-skill`n---`nlocal edit`n"
+    New-FixtureFile (Join-Path $alpha '.claude\skills\esc-skill\SKILL.md') $escBody
     # LF(.claude) 와 CRLF(.cursor) 만 있는 단독 그룹
     New-FixtureFile (Join-Path $alpha '.claude\skills\pair\SKILL.md') "---`nname: pair`n---`nP`n"
     New-FixtureFile (Join-Path $alpha '.cursor\skills\pair\SKILL.md') "---`r`nname: pair`r`n---`r`nP`r`n"
@@ -240,6 +251,10 @@ try {
     $extName = (Get-RepoAsset 'alpha' 'skill' 'ext-skill')[0]
     Assert-True (-not $extName.registered -and $extName.nameMatchesKit) '(d) external:// sourcePath cannot be compared, so only flagged'
     Assert-True (-not (Get-RepoAsset 'alpha' 'skill' 'new-skill')[0].nameMatchesKit) '(d) plain unregistered skill has no name match flag'
+    $multi = (Get-RepoAsset 'alpha' 'skill' 'multi-skill')[0]
+    Assert-True (@($multi.vendorDirs).Count -eq 2 -and -not $multi.registered -and $multi.nameMatchesKit) '(1) only one vendor copy equals the kit body: not registered, flagged'
+    $esc = (Get-RepoAsset 'alpha' 'skill' 'esc-skill')[0]
+    Assert-True (-not $esc.registered -and $esc.nameMatchesKit) '(7) a kit sourcePath that escapes the kit root (../) never registers'
     $humanRepos = Invoke-Drift @('-IncludeRepos') $childEnv
     Assert-True ($humanRepos.out.Contains('레포 자산:') -and $humanRepos.out.Contains('없음: gamma')) '(d) Human shows repo section and missing list'
     Assert-True (-not $humanRepos.out.Contains('reg-skill') -and -not $humanRepos.out.Contains('reg-agent')) '(d) registered repo assets are not listed as unregistered'
@@ -266,7 +281,7 @@ try {
     $baselineText = [IO.File]::ReadAllText($baselinePath, $utf8)
     $baseline = $baselineText | ConvertFrom-Json
     $keys = @($baseline.knownUnregisteredRepoAssets)
-    Assert-True ($keys.Count -eq 22) "(c) baseline stores 22 repo asset keys, got $($keys.Count)"
+    Assert-True ($keys.Count -eq 24) "(c) baseline stores 24 repo asset keys, got $($keys.Count)"
     Assert-True ($keys -contains 'skill.new-skill@alpha' -and $keys -contains 'rule.한국어-룰@alpha') '(c) keys use kind.name@repo'
     Assert-True ((@($keys | Sort-Object) -join '|') -ceq ($keys -join '|')) '(c) keys are sorted'
     Assert-True (@($baseline.knownUnregistered) -contains 'skill.home-skill') '(c) legacy knownUnregistered still written'
@@ -280,7 +295,7 @@ try {
     # -IncludeRepos 없는 -UpdateBaseline 은 레포 필드를 보존한다
     $null = Invoke-Drift @('-OutputFormat', 'Hook', '-UpdateBaseline')
     $preserved = [IO.File]::ReadAllText($baselinePath, $utf8) | ConvertFrom-Json
-    Assert-True (@($preserved.knownUnregisteredRepoAssets).Count -eq 22) '(c) -UpdateBaseline without -IncludeRepos preserves the repo field'
+    Assert-True (@($preserved.knownUnregisteredRepoAssets).Count -eq 24) '(c) -UpdateBaseline without -IncludeRepos preserves the repo field'
 
     # 신규 자산 1건만 다시 알린다
     New-SkillAt $alpha '.claude' 'fresh-one'
@@ -304,14 +319,14 @@ try {
     $hookMessage = ($hook.out | ConvertFrom-Json).systemMessage
     Assert-True ($hookMessage.Contains('홈: home-skill; alpha: ')) '(h) message groups names per repo, home first'
     Assert-True ($hookMessage.Contains('한국어-룰')) '(h) Korean asset name survives the round trip'
-    Assert-True ($hookMessage.Contains('자산 24건') -and $hookMessage.Contains('외 14건')) "(h) names capped at 10 with remainder: $hookMessage"
+    Assert-True ($hookMessage.Contains('자산 26건') -and $hookMessage.Contains('외 16건')) "(h) names capped at 10 with remainder: $hookMessage"
 
     # ---- (f) repos.json 없음 / 레포 폴더 없음 ----
     $noRegistry = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', (Join-Path $fixtureRoot 'no-such-dev'))
     Assert-True ($noRegistry.exit -eq 0) '(f) missing repos.json does not fail the hook'
     Assert-True ($noRegistry.err.Contains('repos.json') -and @($noRegistry.err -split "`n").Count -eq 1) '(f) exactly one warning line on stderr'
     $noRegistryMessage = ($noRegistry.out | ConvertFrom-Json).systemMessage
-    Assert-True ($noRegistryMessage -ceq ('새 에이전트 자산 1건이 킷 정본 밖에 있다: 홈: home-skill' + $promptSuffix + ' (레포 스캔 일부 건너뜀 1건)')) '(f) home scan still runs and the skip is reported'
+    Assert-True ($noRegistryMessage -ceq ('새 에이전트 자산 1건이 킷 정본 밖에 있다: 홈: home-skill' + $promptSuffix + ' / 레포 스캔 건너뜀(repos.json 없음)')) '(f) home scan still runs and the whole-scan skip is worded differently'
     $noRegistryJson = (Invoke-Drift @('-OutputFormat', 'Json', '-IncludeRepos', '-DevRoot', (Join-Path $fixtureRoot 'no-such-dev'))).out | ConvertFrom-Json
     Assert-True ($noRegistryJson.repoScan.repos -eq 0 -and @($noRegistryJson.repoScan.warnings).Count -eq 1) '(f) Json carries the warning'
     $badRegistryDev = Join-Path $fixtureRoot 'bad-dev'
@@ -454,6 +469,64 @@ try {
     Assert-True ((($hookCatch.out | ConvertFrom-Json).systemMessage).StartsWith('드리프트 검사 실패:')) '(10) Hook failure message says the check failed'
     $jsonCatch = Invoke-Drift @('-OutputFormat', 'Json') @{} $brokenKit
     Assert-True ($jsonCatch.exit -eq 1 -and $jsonCatch.out.Contains('"error"')) '(10) Json failure keeps exit 1 and the error field'
+
+    # ================= 2차 적대 검증(낮음) 후속 =================
+
+    # ---- 2·6: 대상 레포가 0개면 스캔 실패와 똑같이 기준선을 보존하고, 문구는 "일부 건너뜀"과 다르다 ----
+    $dev5 = Join-Path $fixtureRoot 'pub5\dev'
+    New-DevRootAt $dev5 @([ordered]@{ name = 'only-game'; group = 'games'; lifecycle = 'active' })
+    New-FixtureFile $baselinePath '{"schemaVersion":1,"knownUnregistered":[],"knownUnregisteredRepoAssets":["skill.a@r1","skill.b@r2"]}'
+    $zero = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-UpdateBaseline', '-DevRoot', $dev5)
+    Assert-True ($zero.exit -eq 0 -and $zero.err.Contains('0')) '(2) zero target repos warns and exits 0'
+    Assert-True ((($zero.out | ConvertFrom-Json).systemMessage).EndsWith(' / 레포 스캔 건너뜀(대상 레포 0개)')) '(6) whole-scan skip is worded "건너뜀(원인)" not "일부 건너뜀"'
+    $zeroKeys = @(([IO.File]::ReadAllText($baselinePath, $utf8) | ConvertFrom-Json).knownUnregisteredRepoAssets)
+    Assert-True ($zeroKeys.Count -eq 2 -and ($zeroKeys -contains 'skill.a@r1') -and ($zeroKeys -contains 'skill.b@r2')) '(2) zero target repos keeps the whole repo baseline'
+    $zeroAlone = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $dev5)
+    Assert-True ((($zeroAlone.out | ConvertFrom-Json).systemMessage) -ceq '레포 스캔 건너뜀(대상 레포 0개)') '(6) whole-scan skip message stands alone when nothing is new'
+    Assert-True (-not (($zeroAlone.out | ConvertFrom-Json).systemMessage).Contains('일부')) '(6) whole-scan skip never says partial'
+
+    # ---- 3: 옛 이름이 별칭으로 남은 경우 ----
+    $dev6 = Join-Path $fixtureRoot 'pub6\dev'
+    New-SkillAt (Join-Path $dev6 'products\newname') '.claude' 's6'
+    New-DevRootAt $dev6 @(
+        [ordered]@{ name = 'newname'; group = 'products'; lifecycle = 'active'; aliases = @('oldname') },
+        [ordered]@{ name = 'gone6'; group = 'automation'; lifecycle = 'active'; aliases = @('oldgone') })
+    New-FixtureFile $baselinePath '{"schemaVersion":1,"knownUnregistered":["skill.home-skill"],"knownUnregisteredRepoAssets":["skill.s6@oldname","skill.g@oldgone"]}'
+    $aliasQuiet = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $dev6)
+    Assert-True ($aliasQuiet.exit -eq 0 -and $aliasQuiet.out -ceq '{"suppressOutput":true}') '(3) a key stored under the old repo name still counts as known (inBaseline via alias)'
+    $null = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-UpdateBaseline', '-DevRoot', $dev6)
+    $aliasKeys = @(([IO.File]::ReadAllText($baselinePath, $utf8) | ConvertFrom-Json).knownUnregisteredRepoAssets)
+    Assert-True ($aliasKeys.Count -eq 2 -and ($aliasKeys -contains 'skill.s6@newname') -and ($aliasKeys -contains 'skill.g@gone6')) '(3) saved keys are rewritten to the current repo name (scanned and preserved alike)'
+
+    # ---- 4: 비대상(archived) 레포의 별칭 때문에 활성 레포가 건너뛰어지지 않는다 ----
+    $dev7 = Join-Path $fixtureRoot 'pub7\dev'
+    New-SkillAt (Join-Path $dev7 'products\act7') '.claude' 's7'
+    New-DevRootAt $dev7 @(
+        [ordered]@{ name = 'act7'; group = 'products'; lifecycle = 'active'; aliases = @('shared7') },
+        [ordered]@{ name = 'arch7'; group = 'products'; lifecycle = 'archived'; aliases = @('shared7') })
+    $rs7 = ((Invoke-Drift @('-OutputFormat', 'Json', '-IncludeRepos', '-DevRoot', $dev7)).out | ConvertFrom-Json).repoScan
+    Assert-True (@($rs7.failedRepos).Count -eq 0 -and @($rs7.warnings).Count -eq 0 -and @($rs7.assets | Where-Object { $_.name -eq 's7' }).Count -eq 1) '(4) an archived repo sharing an alias does not block the active repo'
+
+    # ---- 7: 링크 레포·벤더 링크 레포의 기존 키는 -UpdateBaseline 뒤에도 남는다 ----
+    $dev8 = Join-Path $fixtureRoot 'pub8\dev'
+    New-SkillAt (Join-Path $dev8 'products\okrepo8') '.claude' 's8'
+    New-SkillAt (Join-Path $dev8 'products\vlink') '.claude' 'vs'
+    $null = New-Item -ItemType Junction -Path (Join-Path $dev8 'products\vlink\.cursor') -Target $cursorTarget
+    $extraLinks.Add((Join-Path $dev8 'products\vlink\.cursor'))
+    $linkRepoTarget = Join-Path $fixtureRoot 'link8-target'
+    New-SkillAt $linkRepoTarget '.claude' 'l'
+    $null = New-Item -ItemType Junction -Path (Join-Path $dev8 'products\linkrepo') -Target $linkRepoTarget
+    $extraLinks.Add((Join-Path $dev8 'products\linkrepo'))
+    New-DevRootAt $dev8 @(
+        [ordered]@{ name = 'okrepo8'; group = 'products'; lifecycle = 'active' },
+        [ordered]@{ name = 'linkrepo'; group = 'products'; lifecycle = 'active' },
+        [ordered]@{ name = 'vlink'; group = 'products'; lifecycle = 'active' })
+    New-FixtureFile $baselinePath '{"schemaVersion":1,"knownUnregistered":[],"knownUnregisteredRepoAssets":["skill.l@linkrepo","skill.v@vlink","skill.stale@okrepo8"]}'
+    $null = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-UpdateBaseline', '-DevRoot', $dev8)
+    $linkKeys = @(([IO.File]::ReadAllText($baselinePath, $utf8) | ConvertFrom-Json).knownUnregisteredRepoAssets)
+    Assert-True ($linkKeys -contains 'skill.l@linkrepo') '(7) a linked repo root keeps its previous baseline key'
+    Assert-True (($linkKeys -contains 'skill.v@vlink') -and ($linkKeys -contains 'skill.vs@vlink')) '(7) a repo with a linked vendor folder keeps old keys and gains the scanned one'
+    Assert-True (($linkKeys -contains 'skill.s8@okrepo8') -and -not ($linkKeys -contains 'skill.stale@okrepo8')) '(7) fully scanned repos are refreshed (stale key dropped)'
     Write-Output "PASS: $script:assertions assertions"
 }
 finally {

@@ -2,7 +2,7 @@
 
 # 사용자 홈에 설치된 에이전트 자산 중 킷 레지스트리가 모르는 것을 찾는다.
 # 읽기 전용 — 홈과 Git index를 바꾸지 않는다. Intake Scan 은 사람이 승인 후 실행한다.
-# exit 0 = 미등록 없음 / 2 = 미등록 발견 / 1 = 오류
+# exit 0 = 미등록 없음 / 2 = 미등록 발견 / 1 = 오류. Hook 모드는 항상 exit 0(오류는 systemMessage 로 알린다).
 # -IncludeRepos 를 주면 repos.json 의 활성 프로젝트 레포 루트도 함께 본다(옵트인, 읽기 전용).
 
 [CmdletBinding()]
@@ -306,12 +306,27 @@ function Get-RepoAssetEntries {
 
 # 스캔 실패 결과를 만든다. scanFailed=true 면 호출부는 기존 레포 기준선을 그대로 보존해야 한다.
 function New-RepoScanFailure {
-    param([string]$DevRootPath, [string]$Message)
+    param([string]$DevRootPath, [string]$Message, [string]$Reason = '')
 
     return [pscustomobject][ordered]@{
         devRoot = $DevRootPath; repos = 0; missingRepos = @(); linkedRepos = @(); failedRepos = @()
-        skippedLinks = @(); preserveRepos = @(); scanFailed = $true; warnings = @($Message); assets = @(); groups = @()
+        skippedLinks = @(); preserveRepos = @(); preserveTokenMap = @{}; scanFailed = $true; failureReason = $Reason
+        warnings = @($Message); assets = @(); groups = @()
     }
+}
+
+# 레포의 이름 + 별칭(대소문자 무시 중복 제거).
+function Get-RepoTokens {
+    param($Repo)
+
+    $tokens = New-Object 'System.Collections.Generic.List[string]'
+    $seen = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+    $repoName = [string](Get-OptionalProperty $Repo 'name')
+    if (-not [string]::IsNullOrWhiteSpace($repoName) -and $seen.Add($repoName)) { $tokens.Add($repoName) }
+    foreach ($alias in @(Get-OptionalProperty $Repo 'aliases')) {
+        if ($alias -and $seen.Add([string]$alias)) { $tokens.Add([string]$alias) }
+    }
+    return @($tokens.ToArray())
 }
 
 # repos.json → 대상 레포를 스캔해 (레포,종류,이름) 단위 자산·사본 그룹을 만든다.
@@ -326,23 +341,23 @@ function Invoke-RepoScan {
 
     $registryFile = Join-Path $DevRootPath 'repos.json'
     if ([string]::IsNullOrWhiteSpace($DevRootPath) -or -not [IO.File]::Exists($registryFile)) {
-        return (New-RepoScanFailure $DevRootPath "repos.json 을 찾지 못해 레포 스캔을 건너뜀: $registryFile")
+        return (New-RepoScanFailure $DevRootPath "repos.json 을 찾지 못해 레포 스캔을 건너뜀: $registryFile" 'repos.json 없음')
     }
 
     $repoRegistry = $null
     try { $repoRegistry = [string]([IO.File]::ReadAllText($registryFile, [Text.Encoding]::UTF8)) | ConvertFrom-Json }
     catch {
-        return (New-RepoScanFailure $DevRootPath "repos.json 을 읽지 못해 레포 스캔을 건너뜀: $($_.Exception.Message)")
+        return (New-RepoScanFailure $DevRootPath "repos.json 을 읽지 못해 레포 스캔을 건너뜀: $($_.Exception.Message)" 'repos.json 읽기 실패')
     }
     # 최상위가 객체가 아니거나(null·배열·문자열) repos 가 배열이 아니면 스캔하지 않고 경고한다.
     if ($null -eq $repoRegistry -or $repoRegistry -isnot [pscustomobject]) {
-        return (New-RepoScanFailure $DevRootPath 'repos.json 형식이 올바르지 않아 레포 스캔을 건너뜀: 최상위가 객체가 아님')
+        return (New-RepoScanFailure $DevRootPath 'repos.json 형식이 올바르지 않아 레포 스캔을 건너뜀: 최상위가 객체가 아님' 'repos.json 형식 오류')
     }
     # 함수 반환은 배열을 풀어 1개짜리를 객체로 바꾸므로 속성 값을 직접 읽는다.
     $repoItems = $null
     if ($null -ne $repoRegistry.PSObject.Properties['repos']) { $repoItems = $repoRegistry.PSObject.Properties['repos'].Value }
     if ($null -eq $repoItems -or $repoItems -isnot [array]) {
-        return (New-RepoScanFailure $DevRootPath 'repos.json 형식이 올바르지 않아 레포 스캔을 건너뜀: repos 배열이 없음')
+        return (New-RepoScanFailure $DevRootPath 'repos.json 형식이 올바르지 않아 레포 스캔을 건너뜀: repos 배열이 없음' 'repos.json 형식 오류')
     }
 
     $warnings = New-Object 'System.Collections.Generic.List[string]'
@@ -367,14 +382,15 @@ function Invoke-RepoScan {
     $kitDigestCache = @{}
 
     # 이름·별칭 충돌(다른 레포와 겹치거나 이름 중복)을 미리 센다. 충돌한 레포는 건너뛴다.
+    # 충돌 계산은 스캔 대상(대상 group + active)끼리만 한다. archived 같은 비대상 레포는 영향을 주지 않는다.
     $tokenCount = @{}
     foreach ($repo in $repoItems) {
-        $tokens = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
         $repoName = [string](Get-OptionalProperty $repo 'name')
-        if (-not [string]::IsNullOrWhiteSpace($repoName)) { $null = $tokens.Add($repoName) }
-        foreach ($alias in @(Get-OptionalProperty $repo 'aliases')) { if ($alias) { $null = $tokens.Add([string]$alias) } }
-        foreach ($token in $tokens) { $tokenCount[$token.ToLowerInvariant()] = 1 + $(if ($tokenCount.ContainsKey($token.ToLowerInvariant())) { $tokenCount[$token.ToLowerInvariant()] } else { 0 }) }
+        if ($allowedGroups -notcontains [string](Get-OptionalProperty $repo 'group') -or [string](Get-OptionalProperty $repo 'lifecycle') -ne 'active' -or [string]::IsNullOrWhiteSpace($repoName)) { continue }
+        foreach ($token in @(Get-RepoTokens $repo)) { $tokenCount[$token.ToLowerInvariant()] = 1 + $(if ($tokenCount.ContainsKey($token.ToLowerInvariant())) { $tokenCount[$token.ToLowerInvariant()] } else { 0 }) }
     }
+    # 기준선 보존용: 별칭(옛 이름) → 현재 이름. 스캔 못 한 레포의 옛 키를 현재 이름 키로 바꿔 저장한다.
+    $tokenToName = @{}
 
     $missing = New-Object 'System.Collections.Generic.List[string]'
     $linked = New-Object 'System.Collections.Generic.List[string]'
@@ -392,6 +408,7 @@ function Invoke-RepoScan {
         if ($allowedGroups -notcontains $group -or $lifecycle -ne 'active' -or [string]::IsNullOrWhiteSpace($name)) { continue }
 
         $repoCount++
+        foreach ($token in @(Get-RepoTokens $repo)) { $tokenToName[$token.ToLowerInvariant()] = $name }
         # 레포 단위로 격리한다: 한 레포의 예외가 나머지 스캔을 막지 않는다.
         try {
             $aliases = @(Get-OptionalProperty $repo 'aliases' | Where-Object { $_ } | ForEach-Object { [string]$_ })
@@ -422,6 +439,11 @@ function Invoke-RepoScan {
         }
     }
 
+    # 대상 레포가 0개면 "성공"이 아니다: 기준선을 전부 지우지 않도록 스캔 실패와 똑같이 다룬다.
+    if ($repoCount -eq 0) {
+        return (New-RepoScanFailure $DevRootPath '스캔 대상 레포(대상 group + active)가 0개라 레포 스캔을 건너뜀' '대상 레포 0개')
+    }
+
     # (레포,종류,이름) 단위로 묶어 자산 1건으로 센다. 벤더 폴더별 사본은 vendorDirs 로 모은다.
     $vendorRank = @{}
     for ($i = 0; $i -lt $script:RepoVendorDirs.Count; $i++) { $vendorRank[$script:RepoVendorDirs[$i]] = $i }
@@ -443,16 +465,19 @@ function Invoke-RepoScan {
         # (3) 스캔 대상이 킷 자신이면 일반 상대 sourcePath 일치. 이름만 같은 스킬은 등록으로 보지 않고 표시만 한다.
         $isRegistered = $false
         $nameMatches = $false
-        foreach ($member in $members) {
-            if ($member.kind -eq 'skill') {
-                $skillId = "skill.$($member.name)"
-                if ($sourceById.ContainsKey($skillId)) {
-                    $cacheKey = $skillId.ToLowerInvariant()
-                    if (-not $kitDigestCache.ContainsKey($cacheKey)) { $kitDigestCache[$cacheKey] = Get-KitSkillDigest -KitRoot $KitRoot -SourcePath $sourceById[$skillId] }
-                    if ($kitDigestCache[$cacheKey] -and $member.digest -and $kitDigestCache[$cacheKey] -ceq $member.digest) { $isRegistered = $true }
-                    else { $nameMatches = $true }
-                }
+        # 스킬 id 판정은 자산 단위다: 해시가 있는 벤더 사본이 전부 킷 본문과 같을 때만 등록. 하나라도 다르면 표시만.
+        if ($first.kind -eq 'skill') {
+            $skillId = "skill.$($first.name)"
+            if ($sourceById.ContainsKey($skillId)) {
+                $cacheKey = $skillId.ToLowerInvariant()
+                if (-not $kitDigestCache.ContainsKey($cacheKey)) { $kitDigestCache[$cacheKey] = Get-KitSkillDigest -KitRoot $KitRoot -SourcePath $sourceById[$skillId] }
+                $kitDigest = $kitDigestCache[$cacheKey]
+                $hashed = @($members | Where-Object { $_.digest })
+                if ($kitDigest -and $hashed.Count -gt 0 -and @($hashed | Where-Object { $_.digest -cne $kitDigest }).Count -eq 0) { $isRegistered = $true }
+                else { $nameMatches = $true }
             }
+        }
+        foreach ($member in $members) {
             foreach ($token in $repoTokens[$member.repo]) {
                 if ($registeredSources.Contains("$token/$($member.relativePath)")) { $isRegistered = $true }
                 if ($kitSelfNames -contains $token.ToLowerInvariant() -and $relativeSources.Contains($member.relativePath)) { $isRegistered = $true }
@@ -469,7 +494,8 @@ function Invoke-RepoScan {
                 digest        = $(if ($digestOwner.Count -gt 0) { $digestOwner[0].digest } else { '' })
                 registered    = $isRegistered
                 nameMatchesKit = ($nameMatches -and -not $isRegistered)
-                inBaseline    = $BaselineKeys.Contains($displayKey)
+                # 레포 이름이 바뀌어 옛 이름이 별칭으로 남은 경우, 옛 이름 키도 같은 자산으로 인정한다.
+                inBaseline    = (@(@($repoTokens[$first.repo]) | Where-Object { $BaselineKeys.Contains(('{0}.{1}@{2}' -f $first.kind, $first.name, $_)) }).Count -gt 0)
                 linkedOnly    = (@($members | Where-Object { -not $_.linkedOnly }).Count -eq 0)
                 key           = $displayKey
             })
@@ -500,6 +526,7 @@ function Invoke-RepoScan {
     $preserve = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
     foreach ($list in @($missing, $linked, $failed, $partial)) { foreach ($item in $list) { $null = $preserve.Add($item) } }
 
+    $result.preserveTokenMap = $tokenToName
     $result.repos = $repoCount
     $result.missingRepos = @($missing.ToArray() | Sort-Object)
     $result.linkedRepos = @($linked.ToArray() | Sort-Object)
@@ -510,6 +537,26 @@ function Invoke-RepoScan {
     $result.assets = @($assets.ToArray() | Sort-Object -Property repo, kind, name)
     $result.groups = @($groups.ToArray() | Sort-Object -Property kind, name)
     return $result
+}
+
+# 기준선 읽기. 쓰는 쪽이 임시 파일을 교체하는 순간 읽는 쪽은 "파일 없음"이나 공유 위반(IOException)을 볼 수 있어
+# 짧게 재시도한다(최대 3회 × 50ms). 교체가 진행 중이 아니면(임시 파일 없음) 없는 파일은 곧바로 null 이다.
+function Read-BaselineText {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $directory = Split-Path -Parent $Path
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        try {
+            if ([IO.File]::Exists($Path)) { return [string][IO.File]::ReadAllText($Path, [Text.Encoding]::UTF8) }
+            $replacing = [IO.Directory]::Exists($directory) -and @([IO.Directory]::GetFiles($directory, ([IO.Path]::GetFileName($Path) + '.tmp-*'))).Count -gt 0
+            if (-not $replacing) { return $null }
+        }
+        catch [IO.IOException] {
+            if ($attempt -eq 3) { throw }
+        }
+        Start-Sleep -Milliseconds 50
+    }
+    return $null
 }
 
 try {
@@ -537,8 +584,9 @@ try {
     $baselineIds = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
     $baselineRepoKeys = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
     $baselineHasRepoField = $false
-    if ([IO.File]::Exists($baselinePath)) {
-        $baseline = [string]([IO.File]::ReadAllText($baselinePath, [Text.Encoding]::UTF8)) | ConvertFrom-Json
+    $baselineText = Read-BaselineText -Path $baselinePath
+    if ($null -ne $baselineText) {
+        $baseline = [string]$baselineText | ConvertFrom-Json
         foreach ($knownId in @($baseline.knownUnregistered)) {
             $null = $baselineIds.Add([string]$knownId)
         }
@@ -568,7 +616,7 @@ try {
             $repoScan = Invoke-RepoScan -DevRootPath $DevRoot -DevRootExplicit $devRootExplicit -KitRoot $RepositoryRoot -RegisteredIds $registeredIds -BaselineKeys $baselineRepoKeys
         }
         catch {
-            $repoScan = New-RepoScanFailure ([string]$DevRoot) "레포 스캔 실패로 건너뜀: $($_.Exception.Message)"
+            $repoScan = New-RepoScanFailure ([string]$DevRoot) "레포 스캔 실패로 건너뜀: $($_.Exception.Message)" '스캔 예외'
         }
         # Human 은 본문 섹션에 경고를 싣는다. stderr 는 기계 출력(Hook/Json)일 때만 쓴다(중복 방지).
         if ($OutputFormat -ne 'Human') {
@@ -597,7 +645,10 @@ try {
             foreach ($item in $repoUnregistered) { $null = $keys.Add([string]$item.key) }
             foreach ($oldKey in $baselineRepoKeys) {
                 $at = $oldKey.LastIndexOf('@')
-                if ($at -ge 0 -and $keep.Contains($oldKey.Substring($at + 1))) { $null = $keys.Add($oldKey) }
+                if ($at -lt 0) { continue }
+                # 옛 이름(별칭)으로 저장된 키도 같은 레포로 보고, 저장할 때는 현재 이름 키로 바꾼다.
+                $currentName = $repoScan.preserveTokenMap[$oldKey.Substring($at + 1).ToLowerInvariant()]
+                if ($null -ne $currentName -and $keep.Contains([string]$currentName)) { $null = $keys.Add($oldKey.Substring(0, $at + 1) + $currentName) }
             }
             $fields['knownUnregisteredRepoAssets'] = @($keys | Sort-Object)
         }
@@ -606,7 +657,7 @@ try {
             $fields['knownUnregisteredRepoAssets'] = @($baselineRepoKeys | Sort-Object)
         }
         $snapshot = [pscustomobject]$fields
-        # 임시 파일에 쓴 뒤 교체한다. 동시에 읽는 쪽이 반쪽 파일을 보지 않는다.
+        # 임시 파일에 쓴 뒤 교체한다(원자적). 읽는 쪽은 교체 순간 없음·공유 위반을 볼 수 있어 재시도한다(Read-BaselineText).
         $temporaryPath = "$baselinePath.tmp-$PID"
         try {
             [IO.File]::WriteAllText($temporaryPath, ($snapshot | ConvertTo-Json -Depth 4), (New-Object Text.UTF8Encoding($false)))
@@ -620,8 +671,9 @@ try {
 
     # 훅 출력은 Claude Code 계약을 따른다. 신규가 없으면 조용히 통과한다.
     if ($OutputFormat -eq 'Hook') {
-        $skipCount = $(if ($IncludeRepos) { @($repoScan.warnings).Count } else { 0 })
-        if ($reported.Count -eq 0 -and $repoReported.Count -eq 0 -and $skipCount -eq 0) {
+        # 스캔 전체 실패("레포 스캔 건너뜀(원인)")와 일부 실패("일부 건너뜀 N건")를 문구로 구분한다.
+        $skipText = $(if (-not $IncludeRepos) { '' } elseif ($repoScan.scanFailed) { "레포 스캔 건너뜀($($repoScan.failureReason))" } elseif (@($repoScan.warnings).Count -gt 0) { "레포 스캔 일부 건너뜀 $(@($repoScan.warnings).Count)건" } else { '' })
+        if ($reported.Count -eq 0 -and $repoReported.Count -eq 0 -and $skipText -eq '') {
             Write-Output '{"suppressOutput":true}'
         }
         elseif (-not $IncludeRepos) {
@@ -631,7 +683,7 @@ try {
         }
         elseif ($reported.Count -eq 0 -and $repoReported.Count -eq 0) {
             # 신규는 없지만 스캔이 일부 건너뛰어졌으면 그 사실만 알린다(조용히 넘기지 않는다).
-            Write-Output (ConvertTo-AsciiJson -Value ([pscustomobject][ordered]@{ systemMessage = "레포 스캔 일부 건너뜀 $($skipCount)건" }))
+            Write-Output (ConvertTo-AsciiJson -Value ([pscustomobject][ordered]@{ systemMessage = $skipText }))
         }
         else {
             # 홈 + 레포 신규를 한 메시지로 합친다. 이름은 최대 10개까지만 나열하고 나머지는 "외 N건".
@@ -653,7 +705,7 @@ try {
             $more = $total - (10 - $remaining)
             if ($more -gt 0) { $list += " 외 $($more)건" }
             $message = "새 에이전트 자산 $($total)건이 킷 정본 밖에 있다: $list — Intake 후보로 올릴지 판단 필요"
-            if ($skipCount -gt 0) { $message += " (레포 스캔 일부 건너뜀 $($skipCount)건)" }
+            if ($skipText) { $message += $(if ($repoScan.scanFailed) { " / $skipText" } else { " ($skipText)" }) }
             Write-Output (ConvertTo-AsciiJson -Value ([pscustomobject][ordered]@{ systemMessage = $message }))
         }
         exit 0
