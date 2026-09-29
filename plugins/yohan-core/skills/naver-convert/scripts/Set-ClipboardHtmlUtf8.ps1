@@ -2,6 +2,9 @@
 # PS 5.1 Set-Clipboard -AsHtml의 ANSI 인코딩 버그 우회.
 param([Parameter(Mandatory=$true)][string]$Path)
 
+# 에이전트가 결과 줄을 읽을 때 한국어가 깨지지 않게, 파이프로 넘길 때만 UTF-8 로 낸다(PAT-002).
+if ([Console]::IsOutputRedirected) { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) }
+
 Add-Type -AssemblyName System.Windows.Forms
 
 $rawHtml = Get-Content -Raw -Encoding UTF8 $Path
