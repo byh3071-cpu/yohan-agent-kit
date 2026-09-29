@@ -22,7 +22,8 @@ if (existsSync(join(repoRoot, '.vhk', 'HARD_STOP'))) {
 const required = [
   'goals/4-agent-asset-registry.md', 'registry/assets.yaml', 'distribution/asset-catalog.json',
   'scripts/Build-AssetCatalog.mjs', 'scripts/Scan-AgentAssets.ps1',
-  'tests/Scan-AgentAssets.Tests.ps1', 'docs/audits/agent-assets-home-2026-08-14.md'
+  'tests/Scan-AgentAssets.Tests.ps1', 'scripts/Get-AgentAssetDrift.ps1', 'tests/Get-AgentAssetDrift.Tests.ps1',
+  'docs/audits/agent-assets-home-2026-08-14.md'
 ]
 for (const path of required) gate(`required artifact ${path}`, existsSync(join(repoRoot, path)))
 
@@ -57,6 +58,17 @@ try {
 } catch (error) {
   console.log(`${error.stdout || ''}${error.stderr || ''}`.trim())
   gate('read-only home scanner contract', false, `exit ${error.status ?? 'unknown'}`)
+}
+
+try {
+  const output = execFileSync('powershell.exe', [
+    '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+    '-File', 'tests/Get-AgentAssetDrift.Tests.ps1'
+  ], { cwd: repoRoot, encoding: 'utf8', timeout: 180_000, windowsHide: true, env: getWindowsPowerShellEnv(process.env) }).trim()
+  gate('opt-in repo-scan drift detector contract', /^PASS:\s+\d+ assertions$/m.test(output), output.split(/\r?\n/).at(-1))
+} catch (error) {
+  console.log(`${error.stdout || ''}${error.stderr || ''}`.trim())
+  gate('opt-in repo-scan drift detector contract', false, `exit ${error.status ?? 'unknown'}`)
 }
 
 try {

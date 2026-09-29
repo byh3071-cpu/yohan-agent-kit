@@ -44,6 +44,8 @@ powershell -NoProfile -NonInteractive -File scripts\Get-AgentAssetDrift.ps1 -New
 
 `-NewOnly`는 기준선에 없는 신규만 보고한다. 기준선은 `~/.yohan-agent-kit/asset-drift-baseline.json`이며 `-UpdateBaseline`을 명시할 때만 갱신된다(유일한 쓰기 동작). `-OutputFormat Hook`은 Claude Code 훅 계약에 맞춘 JSON을 내보내며 신규가 없으면 조용히 통과한다. 탐지된 자산을 정본으로 올리는 경로는 [노하우 Intake](docs/AGENT_KIT_INTAKE.md)를 따르고, 승격 상한은 `reviewed`다.
 
+`-IncludeRepos`(옵트인)를 주면 `repos.json`(`-DevRoot` 또는 `$PUBLICdev`)의 활성 프로젝트 레포(`yohan-ecosystem`·`products`·`automation`) 루트 바로 아래 `.claude|.agents|.codex|.cursor/skills`, `.claude/agents`, `.claude/commands`, `.cursor/rules`도 읽기 전용으로 스캔한다. 레포 자산은 `<kind>.<name>@<repo>` 키로 추적하며(기준선 `knownUnregisteredRepoAssets`), 레지스트리 `project://<repo>/<상대경로>` 등록분은 제외하고, 여러 레포·벤더 폴더의 사본은 `identical`/`diverged`로 묶어 보인다.
+
 ### 외부 스킬 복원
 
 남이 만든 스킬은 파일을 정본으로 복사하지 않는다. 원본 저장소가 정본이고 킷은 **출처·커밋·라이선스만** `registry/assets.yaml`에 `external://` 자산으로 기록한다. 업스트림 갱신 경로를 끊지 않기 위해서다. 새 머신에서는 레지스트리를 읽어 재설치한다.
