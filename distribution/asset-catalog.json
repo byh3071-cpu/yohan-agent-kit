@@ -1,5 +1,5 @@
 {
-  "assetCount": 225,
+  "assetCount": 226,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -3177,6 +3177,28 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
+        "https://www.npmjs.com/package/@playwright/cli"
+      ],
+      "id": "skill.playwright-cli",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "microsoft/playwright-cli",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/microsoft/playwright-cli/skills/playwright-cli",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/johnlindquist/claude@eb37d88"
       ],
       "id": "skill.research",
@@ -4717,9 +4739,9 @@
       ]
     }
   ],
-  "catalogDigest": "a92afe50510f7f5f6c13530e8ec2098b1e19d4d870eeb9f2858543c147a0276f",
+  "catalogDigest": "3ff78249954ee681cbeeb452f350f7370d23e54e3f274f6ff01631fa6659dae1",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "034d9cbfcfa0adfaa693c6d8efa21b49610ee5e53e6f7ccd4dc22770774c2cd1",
+  "registryDigest": "db02a3ae3c4a6756b3449f014f4bd52d773b490937f292b17e1c4a981ad0f8eb",
   "schemaVersion": 1
 }

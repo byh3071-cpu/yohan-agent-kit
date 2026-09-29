@@ -2801,6 +2801,27 @@
       ]
     },
     {
+      "id": "skill.playwright-cli",
+      "kind": "skill",
+      "owner": "microsoft/playwright-cli",
+      "sourcePath": "external://github.com/microsoft/playwright-cli/skills/playwright-cli",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
+        "https://www.npmjs.com/package/@playwright/cli"
+      ]
+    },
+    {
       "id": "skill.thinking-bounded-rationality",
       "kind": "skill",
       "owner": "tjboudreaux/cc-thinking-skills",
