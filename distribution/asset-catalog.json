@@ -1,5 +1,5 @@
 {
-  "assetCount": 220,
+  "assetCount": 224,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "contentDigest": "d623cd31f89a4e64a42bddab8f99a60cd041d90b7818d3cfe2d2a99aebd4d4c8",
+      "contentDigest": "4146f234c8ce2b9841be4f212c1a80096b615ce51fd02ff7b5c5914d28bba79a",
       "evidenceRefs": [
         ".claude-plugin/marketplace.json"
       ],
@@ -423,7 +423,7 @@
       ]
     },
     {
-      "contentDigest": "64c253c5dd41deb30ea699d76220a4feefbad1be58a0a7f05bc0d0a849683410",
+      "contentDigest": "82de48ba5a22e29e5770f04f2a2dccef3d452ce94f17c20c6044a34dfeacb34d",
       "evidenceRefs": [
         "dotfiles/claude/settings.json"
       ],
@@ -656,7 +656,7 @@
       ]
     },
     {
-      "contentDigest": "e0e308446c62631f67a2a751e29cd4a3d4bbc3584c88256bfa1f5bb0d262b6e6",
+      "contentDigest": "44efc439ceef59b979ac0de8337ba6900af22dd9a9fad52ef10a32378da58678",
       "evidenceRefs": [
         "plugins/yohan-core/hooks"
       ],
@@ -1174,7 +1174,7 @@
       ]
     },
     {
-      "contentDigest": "b6aaedaae9408cb254d042e35cb0c3cdc4f055c20c46e0e0ae2abdeebf099af7",
+      "contentDigest": "599da64c0913bdb860890589121be44a2adcfa29996bdda3aa294c88cf68740e",
       "evidenceRefs": [
         "plugins/yohan-core/.mcp.json"
       ],
@@ -1252,7 +1252,7 @@
       ]
     },
     {
-      "contentDigest": "914144fc7d8d3aadd727bc013abce551f8e60dceceb98bbec1e5cfe3e550dd3e",
+      "contentDigest": "a9efa562ead0791821c8f4197a2f80f74b50391a0f0949085afb4e4199752a63",
       "evidenceRefs": [
         "plugins/yohan-core/.claude-plugin/plugin.json"
       ],
@@ -1353,7 +1353,7 @@
       ]
     },
     {
-      "contentDigest": "de9e4e734ece779e30d6d3c3f2eeebf8000206782ea0b7323f833e8e81b01d5b",
+      "contentDigest": "6469b0b889fe921ae8d0ca7dd6b16efb4afd3845bb47c6146ee70062a3364af7",
       "evidenceRefs": [
         "CLAUDE.md"
       ],
@@ -1657,6 +1657,27 @@
       "sourcePath": "scripts/check-agent-team-operations.mjs",
       "vendors": [
         "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": "4e0316852f26aa3adaa8651382cff96995d702bbfbb826f4324ffb1d215bb137",
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ],
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "approved",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/check-context-contract.mjs",
+      "vendors": [
         "claude-code",
         "codex",
         "cursor",
@@ -2018,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "b7ca05b3146e1b32c9291b63c994d58be9191bce3d82bbd1822218d89c14c722",
+      "contentDigest": "85778d43f890ad7443a515b575646bff39ba06643c0aac291fea849cf6e60979",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -2309,7 +2330,7 @@
       ]
     },
     {
-      "contentDigest": "d89e41472cb19e657dd7435ad485d96ca12e9a17c33524c1a64e6df5c1429ecf",
+      "contentDigest": "5f0c0c7f5e52efb5fc9e05d334c3b5e9b6395741699a5c7b23fbfdfb0c0cd6e4",
       "evidenceRefs": [
         "scripts/Restore-ExternalSkills.ps1"
       ],
@@ -2857,6 +2878,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128"
+      ],
+      "id": "skill.emil-design-eng",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "emilkowalski/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/emilkowalski/skills@d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/emil-design-eng",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/vercel-labs/skills@435076e78988e1e6ec40d00b0b1d76bdbbc5419a"
       ],
       "id": "skill.find-skills",
@@ -2974,6 +3016,28 @@
       "provenance": "external:https://github.com/danielrosehill/Claude-Ideation-Planning-Plugin@2be1922",
       "requiredEnv": [],
       "sourcePath": "external://github.com/danielrosehill/Claude-Ideation-Planning-Plugin/skills/new-workspace",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@626547c06881a20b3322bdc2ed6e6451b33a4fb6"
+      ],
+      "id": "skill.nextjs-on-cloudflare",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "cloudflare/skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/cloudflare/skills@626547c06881a20b3322bdc2ed6e6451b33a4fb6",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/cloudflare/skills/skills/nextjs-on-cloudflare",
       "vendors": [
         "agent-plugins",
         "claude-code",
@@ -3988,6 +4052,27 @@
     {
       "contentDigest": null,
       "evidenceRefs": [
+        "https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278"
+      ],
+      "id": "skill.web-design-guidelines",
+      "kind": "skill",
+      "license": "UNKNOWN",
+      "lifecycle": "approved",
+      "owner": "vercel-labs/agent-skills",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/vercel-labs/agent-skills/skills/web-design-guidelines",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
       ],
       "id": "skill.web-perf",
@@ -4437,7 +4522,7 @@
       ]
     },
     {
-      "contentDigest": "0aaa14b5e0931fba544bdaa04b5b54a2f494e1ae72930297c034b25c3b9ae11d",
+      "contentDigest": "198459fb5c3fdf40f407f89c192318810d645830b478af0b9d9bb07aaec00563",
       "evidenceRefs": [
         "plugins/yohan-core/skills/naver-convert"
       ],
@@ -4611,9 +4696,9 @@
       ]
     }
   ],
-  "catalogDigest": "3b60d72a87487a7401fa76680310d373168ec648028d27388497b7b36a3ecf50",
+  "catalogDigest": "a111811dd3ecae66b123bfa27f3598434ffe81d56f41f39b976c80452357d289",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "6111843fd9d33fa60626df45c5dc63a999a30bb1a378301bc7c28719a2b9ba4f",
+  "registryDigest": "ad5efb8b2a0ea52a9f9ff9b091f856c5dc6289f8380bd2b82285ce43383fcc83",
   "schemaVersion": 1
 }

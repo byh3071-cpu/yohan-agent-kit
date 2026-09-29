@@ -2741,6 +2741,46 @@
       ]
     },
     {
+      "id": "skill.web-design-guidelines",
+      "kind": "skill",
+      "owner": "vercel-labs/agent-skills",
+      "sourcePath": "external://github.com/vercel-labs/agent-skills/skills/web-design-guidelines",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278",
+      "license": "UNKNOWN",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/vercel-labs/agent-skills@063bee94c3f4df8453406c830b0a7df0f2860278"
+      ]
+    },
+    {
+      "id": "skill.emil-design-eng",
+      "kind": "skill",
+      "owner": "emilkowalski/skills",
+      "sourcePath": "external://github.com/emilkowalski/skills/skills/emil-design-eng",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/emilkowalski/skills@d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/emilkowalski/skills@d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128"
+      ]
+    },
+    {
       "id": "skill.thinking-bounded-rationality",
       "kind": "skill",
       "owner": "tjboudreaux/cc-thinking-skills",
@@ -3878,6 +3918,26 @@
       ]
     },
     {
+      "id": "script.check-context-contract",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/check-context-contract.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/check-context-contract.mjs"
+      ]
+    },
+    {
       "id": "script.get-agent-asset-drift",
       "kind": "script",
       "owner": "yohan-agent-kit",
@@ -3957,6 +4017,27 @@
       "requiredEnv": [],
       "evidenceRefs": [
         "https://github.com/cloudflare/skills@f96bff754e428838818017f75817f0f9428acd48"
+      ]
+    },
+    {
+      "id": "skill.nextjs-on-cloudflare",
+      "kind": "skill",
+      "owner": "cloudflare/skills",
+      "sourcePath": "external://github.com/cloudflare/skills/skills/nextjs-on-cloudflare",
+      "portability": "PORTABLE",
+      "vendors": [
+        "agent-plugins",
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/cloudflare/skills@626547c06881a20b3322bdc2ed6e6451b33a4fb6",
+      "license": "Apache-2.0",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/cloudflare/skills@626547c06881a20b3322bdc2ed6e6451b33a4fb6"
       ]
     },
     {

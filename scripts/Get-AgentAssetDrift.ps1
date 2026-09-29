@@ -23,6 +23,10 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
+# 파이프·파일로 넘길 때만 UTF-8 로 낸다. PS 5.1 기본(CP949)이면 받는 쪽에서 한국어가 깨진다(PAT-002).
+# 콘솔에 직접 찍을 때는 건드리지 않아 사용자 터미널 코드페이지가 바뀌지 않는다.
+if ([Console]::IsOutputRedirected) { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) }
+
 function Get-NormalizedFullPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -32,6 +36,15 @@ function Get-NormalizedFullPath {
         $full = $full.TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar)
     }
     return $full
+}
+
+# 기계가 읽는 JSON 출력은 ASCII 로만 낸다. PS 5.1 표준출력은 OEM 코드페이지(CP949)라
+# 한국어를 그대로 쓰면 UTF-8 로 읽는 Claude Code 에서 깨진다. \uXXXX 이스케이프는 인코딩과 무관하다.
+function ConvertTo-AsciiJson {
+    param($Value, [int]$Depth = 6)
+
+    $json = [string]($Value | ConvertTo-Json -Depth $Depth -Compress)
+    return [regex]::Replace($json, '[^\x00-\x7F]', { param($Match) return ('\u{0:x4}' -f [int][char]$Match.Value) })
 }
 
 # 스캔 대상: 벤더별 홈 스킬 경로. Manage-MultivendorSkills.ps1 의 배포 경로와 같은 집합.
@@ -167,7 +180,7 @@ try {
         else {
             $names = (@($reported | ForEach-Object { $_.name }) -join ', ')
             $message = "새 에이전트 자산 $($reported.Count)건이 킷 정본 밖에 있다: $names — Intake 후보로 올릴지 판단 필요"
-            Write-Output (([pscustomobject][ordered]@{ systemMessage = $message }) | ConvertTo-Json -Compress)
+            Write-Output (ConvertTo-AsciiJson -Value ([pscustomobject][ordered]@{ systemMessage = $message }))
         }
         exit 0
     }
@@ -187,7 +200,7 @@ try {
                 }
             })
         }
-        Write-Output ($payload | ConvertTo-Json -Depth 6 -Compress)
+        Write-Output (ConvertTo-AsciiJson -Value $payload)
     }
     else {
         $scope = $(if ($NewOnly) { '신규' } else { '미등록' })
@@ -212,7 +225,7 @@ try {
 }
 catch {
     if ($OutputFormat -eq 'Json') {
-        Write-Output (([pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Drift'; error = [string]$_.Exception.Message }) | ConvertTo-Json -Compress)
+        Write-Output (ConvertTo-AsciiJson -Value ([pscustomobject][ordered]@{ schemaVersion = 1; mode = 'Drift'; error = [string]$_.Exception.Message }))
     }
     else {
         Write-Output "드리프트 검사 실패: $($_.Exception.Message)"

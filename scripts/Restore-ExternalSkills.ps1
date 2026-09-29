@@ -24,6 +24,10 @@ param(
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
 
+# 파이프·파일로 넘길 때만 UTF-8 로 낸다. PS 5.1 기본(CP949)이면 받는 쪽에서 한국어가 깨진다(PAT-002).
+# 콘솔에 직접 찍을 때는 건드리지 않아 사용자 터미널 코드페이지가 바뀌지 않는다.
+if ([Console]::IsOutputRedirected) { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) }
+
 function Get-NormalizedFullPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
