@@ -2039,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "6e0d5815d50bb390469a4488968dadb3d0f341cc58744cebc6baf2ba3b5fc613",
+      "contentDigest": "01f5f5ce6e3de66d301b6ec491b6bdc29a61300bb728e9ea2bb5389f3ee9f29e",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -4717,7 +4717,7 @@
       ]
     }
   ],
-  "catalogDigest": "385b9576a3cf4958f10714cbb142d41e24ef3c920db7c2b96362414505653eed",
+  "catalogDigest": "a92afe50510f7f5f6c13530e8ec2098b1e19d4d870eeb9f2858543c147a0276f",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "034d9cbfcfa0adfaa693c6d8efa21b49610ee5e53e6f7ccd4dc22770774c2cd1",
