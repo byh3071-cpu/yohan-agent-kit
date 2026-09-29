@@ -2781,6 +2781,26 @@
       ]
     },
     {
+      "id": "skill.hallmark",
+      "kind": "skill",
+      "owner": "Nutlope/hallmark",
+      "sourcePath": "external://github.com/Nutlope/hallmark/skills/hallmark",
+      "portability": "PORTABLE",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ],
+      "lifecycle": "approved",
+      "provenance": "external:https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690",
+      "license": "MIT",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690"
+      ]
+    },
+    {
       "id": "skill.thinking-bounded-rationality",
       "kind": "skill",
       "owner": "tjboudreaux/cc-thinking-skills",
