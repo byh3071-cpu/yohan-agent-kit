@@ -1,5 +1,5 @@
 {
-  "assetCount": 224,
+  "assetCount": 225,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -2940,6 +2940,27 @@
       ]
     },
     {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690"
+      ],
+      "id": "skill.hallmark",
+      "kind": "skill",
+      "license": "MIT",
+      "lifecycle": "approved",
+      "owner": "Nutlope/hallmark",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/Nutlope/hallmark@13ac0ec7e148655948100b6396439e481361d690",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/Nutlope/hallmark/skills/hallmark",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "cursor"
+      ]
+    },
+    {
       "contentDigest": "c1c243afcd75c40cd0ae2fa9fd1c48d99bfad05f6b3b3b53496dfb9a5a10c16a",
       "evidenceRefs": [
         "skills/html-doc",
@@ -4696,9 +4717,9 @@
       ]
     }
   ],
-  "catalogDigest": "a111811dd3ecae66b123bfa27f3598434ffe81d56f41f39b976c80452357d289",
+  "catalogDigest": "d9dee8c678ac2211b274cc5ca5ed5ce8966f7ff32c1898d5ffd1c59280d9c0a1",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "ad5efb8b2a0ea52a9f9ff9b091f856c5dc6289f8380bd2b82285ce43383fcc83",
+  "registryDigest": "034d9cbfcfa0adfaa693c6d8efa21b49610ee5e53e6f7ccd4dc22770774c2cd1",
   "schemaVersion": 1
 }
