@@ -1,5 +1,5 @@
 {
-  "assetCount": 225,
+  "assetCount": 226,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -1934,7 +1934,7 @@
       ]
     },
     {
-      "contentDigest": "eb5642336f0785e2ede434364abe958820ae885e0108fefe261fda711f22968d",
+      "contentDigest": "0bfbec1899f35300b14ae3fbe8be61fcba9b227ec1e288b4b042c2d2bc2e9876",
       "evidenceRefs": [
         "scripts/check-goal-4.mjs"
       ],
@@ -2039,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "85778d43f890ad7443a515b575646bff39ba06643c0aac291fea849cf6e60979",
+      "contentDigest": "3b1b48d980db07f71a886a6f48e6842f284cf3869b40339adc1cc7d610a5a9c7",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -3171,6 +3171,27 @@
       "requiredEnv": [],
       "sourcePath": "skills/planning-diagrams",
       "vendors": [
+        "cursor"
+      ]
+    },
+    {
+      "contentDigest": null,
+      "evidenceRefs": [
+        "https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871"
+      ],
+      "id": "skill.playwright-cli",
+      "kind": "skill",
+      "license": "Apache-2.0",
+      "lifecycle": "approved",
+      "owner": "microsoft/playwright-cli",
+      "portability": "PORTABLE",
+      "provenance": "external:https://github.com/microsoft/playwright-cli@b85c7a736bb473bf55b584e54a09ffa698d6d871",
+      "requiredEnv": [],
+      "sourcePath": "external://github.com/microsoft/playwright-cli/skills/playwright-cli",
+      "vendors": [
+        "antigravity",
+        "claude-code",
+        "codex",
         "cursor"
       ]
     },
@@ -4717,9 +4738,9 @@
       ]
     }
   ],
-  "catalogDigest": "d9dee8c678ac2211b274cc5ca5ed5ce8966f7ff32c1898d5ffd1c59280d9c0a1",
+  "catalogDigest": "783a307b4f177aa17a8872d6c1c05ab1be2ac49ded22ab95fb22890d7bfcf5ee",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "034d9cbfcfa0adfaa693c6d8efa21b49610ee5e53e6f7ccd4dc22770774c2cd1",
+  "registryDigest": "05766c11f7d8794eafe713453d8e7b4c33ad33108f77052423c652b79472eb2c",
   "schemaVersion": 1
 }
