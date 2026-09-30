@@ -922,7 +922,7 @@
       ]
     },
     {
-      "contentDigest": "8170fca2ed54994ccb711999c9b4641eef62162599392e22c4faecb13772101d",
+      "contentDigest": "35e948fa8206160250a776c577cf679201172a94ca496701c7946b7fed474c3e",
       "evidenceRefs": [
         "distribution/manifests/overnight-vhk-auto.json"
       ],
@@ -1132,7 +1132,7 @@
       ]
     },
     {
-      "contentDigest": "cb666e99b5047901d65c2b31ad5ca16abbf580767951e10bd466a6a3fade069c",
+      "contentDigest": "2876fc0604ea6c3ad8e64d8a9924e960b6f523dafe39ed1c38b41a6d45b51891",
       "evidenceRefs": [
         "distribution/manifests/vhk-auto.json"
       ],
@@ -3134,18 +3134,19 @@
       ]
     },
     {
-      "contentDigest": "ec6de25da4c189483e049bf4bec8cee140e1b26f5bdba79560913666bea434db",
+      "contentDigest": "ba1e3f534e371a83912938dc5ca0db3630f90edda9512726ff5336ef54a880d2",
       "evidenceRefs": [
         "skills/overnight-vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/overnight-vhk-auto.json"
       ],
       "id": "skill.overnight-vhk-auto",
       "kind": "skill",
-      "license": "UNLICENSED",
+      "license": "MIT",
       "lifecycle": "approved",
       "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
-      "provenance": "local-authored:agents-home",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
       "requiredEnv": [],
       "sourcePath": "skills/overnight-vhk-auto",
       "vendors": [
@@ -4070,18 +4071,19 @@
       ]
     },
     {
-      "contentDigest": "657155ab91deebe05d5f14d00b2f9a0050cc2a6f6b603c1f6b0b5c2a76cef9b4",
+      "contentDigest": "ad25eabfa2da9badeea6efea26e6fb94a123ea5e2e2a75b2d933e2023a9546cd",
       "evidenceRefs": [
         "skills/vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/vhk-auto.json"
       ],
       "id": "skill.vhk-auto",
       "kind": "skill",
-      "license": "UNLICENSED",
+      "license": "MIT",
       "lifecycle": "approved",
       "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
-      "provenance": "local-authored:agents-home",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
       "requiredEnv": [],
       "sourcePath": "skills/vhk-auto",
       "vendors": [
@@ -4738,9 +4740,9 @@
       ]
     }
   ],
-  "catalogDigest": "527c1e1cafe49783802b4567639be50eb70b7a3b8c845a9b198a6e9d713f7c77",
+  "catalogDigest": "a1b93e6b8e2119e14ba831688a831be9caf5f132d447fb8b0fd49fab2c8d87af",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "05766c11f7d8794eafe713453d8e7b4c33ad33108f77052423c652b79472eb2c",
+  "registryDigest": "0839a487b2b5c617e3ba9f004568b502baad7925422b835656a55cb4e07c7e72",
   "schemaVersion": 1
 }
