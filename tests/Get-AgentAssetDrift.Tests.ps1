@@ -604,6 +604,28 @@ try {
     $null = New-Item -ItemType Junction -Path (Join-Path $r13 '.cursor\skills\linkcase') -Target $lk13
     $extraLinks.Add((Join-Path $r13 '.cursor\skills\linkcase'))
 
+    # m14~m16: 짝이 빠진 마커 / 마커 없는 .codex 사본 → 관리 아님
+    New-FixtureFile (Join-Path (& $addRepo 'm14') '.cursor\rules\agent-roster.mdc') "앞`n<!-- YOHAN-ROSTER-CARD:BEGIN (managed by yohan-brain) -->`n카드 본문`n"
+    New-FixtureFile (Join-Path (& $addRepo 'm15') '.cursor\rules\ecosystem.mdc') "<!-- ECOSYSTEM-MDC:START v3 (vhk template) -->`n경계 규칙`n"
+    $r16 = & $addRepo 'm16'
+    New-FixtureFile (Join-Path $r16 '.claude\skills\codexcopy\SKILL.md') (New-ProjectedText 'codexcopy' (& $skillBody 'codexcopy'))
+    New-FixtureFile (Join-Path $r16 '.codex\skills\codexcopy\SKILL.md') (& $skillBody 'codexcopy')
+    # m17: VHK parseManagedContent 는 마지막 비어 있지 않은 줄만 보므로 펜스·인라인 코드가 앞에 있어도 유효하다
+    $r17 = & $addRepo 'm17'
+    $fenceCases = @{
+        fenceopen  = "---`nname: fenceopen`n---`n${fence}text`n닫히지 않은 펜스`n"
+        tildefence = "---`nname: tildefence`n---`n~~~`n물결 펜스`n"
+        indentfence = "---`nname: indentfence`n---`n${fence}`n코드`n    ${fence}`n들여쓴 닫는 펜스`n"
+        inlinecode = "---`nname: inlinecode`n---`n``인라인 코드`` 로 시작하는 줄`n"
+    }
+    foreach ($name in $fenceCases.Keys) {
+        New-FixtureFile (Join-Path $r17 ".claude\skills\$name\SKILL.md") (New-ProjectedText $name $fenceCases[$name])
+    }
+    # BOM: 파일 앞 BOM 은 본문 첫 글자라 해시에 들어간다(VHK 와 같음). 마커 sha 가 BOM 없는 본문 기준이면 불일치, BOM 포함 본문 기준이면 유효.
+    $bom = [string][char]0xFEFF
+    New-FixtureFile (Join-Path $r17 '.claude\skills\bomfront\SKILL.md') ($bom + (New-ProjectedText 'bomfront' (& $skillBody 'bomfront')))
+    New-FixtureFile (Join-Path $r17 '.claude\skills\bomself\SKILL.md') (New-ProjectedText 'bomself' ($bom + (& $skillBody 'bomself')))
+
     New-DevRootAt $dev9 $repoList.ToArray()
     New-FixtureFile $baselinePath '{"schemaVersion":1,"knownUnregistered":["skill.home-skill"]}'
     $scan9 = Invoke-Drift @('-OutputFormat', 'Json', '-IncludeRepos', '-DevRoot', $dev9)
@@ -626,6 +648,9 @@ try {
         Assert-True ((& $managedOf $odd 'ecosystem').managedVersion -ceq 'unknown') "managed: unparsable template version in $odd is unknown"
     }
 
+    foreach ($okName in @('fenceopen', 'tildefence', 'indentfence', 'inlinecode', 'bomself')) {
+        Assert-True ((& $managedOf 'm17' $okName).managedBy -ceq 'vhk-projection') "managed: projection '$okName' is valid like VHK (last non-empty line only, BOM counted in the hash)"
+    }
     $rejects = @(
         @('m5', 'half', 'unmarked-copy:.cursor'), @('m5', 'agentsdiff', 'unmarked-copy:.agents'), @('m5', 'copyname', 'name-mismatch'),
         @('m5', 'tampered', 'sha-mismatch'), @('m5', 'notlast', 'invalid-marker'), @('m5', 'badproj', 'invalid-marker'),
@@ -633,19 +658,21 @@ try {
         @('m5', 'begin-only', ''), @('m5', 'other-card', ''), @('m5', 'eco-end', ''), @('m5', 'prose', 'wrong-file'), @('m5', 'suffix', 'wrong-file'),
         @('m6', 'agent-roster', 'invalid-marker'), @('m6', 'ecosystem', 'invalid-marker'),
         @('m7', 'agent-roster', 'invalid-marker'), @('m7', 'ecosystem', 'invalid-marker'),
-        @('m13', 'linkcase', 'linked-copy:.cursor'))
+        @('m13', 'linkcase', 'linked-copy:.cursor'),
+        @('m14', 'agent-roster', 'invalid-marker'), @('m15', 'ecosystem', 'invalid-marker'), @('m16', 'codexcopy', 'unmarked-copy:.codex'),
+        @('m17', 'bomfront', 'sha-mismatch'))
     foreach ($case in $rejects) {
         $asset = & $managedOf $case[0] $case[1]
         Assert-True ($asset.managedBy -ceq '' -and $asset.managedRejectReason -ceq $case[2]) "managed: $($case[0])/$($case[1]) is NOT managed (reason '$($case[2])')"
     }
-    Assert-True ($rs9.managedCount -eq 11) 'managed: Json managedCount counts only valid assets'
-    Assert-True ($rs9.unregisteredCount -eq 20 -and @($rs9.warnings).Count -eq 0) 'managed: managed assets are removed from the unregistered count and nothing crashes'
+    Assert-True ($rs9.managedCount -eq 16) 'managed: Json managedCount counts only valid assets'
+    Assert-True ($rs9.unregisteredCount -eq 24 -and @($rs9.warnings).Count -eq 0) 'managed: managed assets are removed from the unregistered count and nothing crashes'
     $tpl = @($rs9.managedSummary | Where-Object { $_.managedBy -eq 'vhk-template' })
     Assert-True ($tpl.Count -eq 1 -and $tpl[0].count -eq 9 -and $tpl[0].latestVersion -ceq 'v3' -and (@($tpl[0].outdatedRepos) -join ',') -ceq 'm3') 'managed: version mix marks only the older repo (m3) as outdated; unknown is not outdated'
     $human9 = Invoke-Drift @('-IncludeRepos', '-DevRoot', $dev9)
     Assert-True ($human9.out.Contains('VHK 경계 규칙 v3 4곳 · v2 1곳(m3) · 버전 불명 4곳(')) 'managed: Human shows the version distribution, the old repo and the unknown group'
-    Assert-True ($human9.out.Contains('yohan-brain 라우팅 카드 1건') -and $human9.out.Contains('VHK 스킬 투영본 1건')) 'managed: Human lists roster and projection counts'
-    Assert-True ($human9.out.Contains('(관리 해제: name-mismatch)')) 'managed: Human shows why a marker was rejected'
+    Assert-True ($human9.out.Contains('yohan-brain 라우팅 카드 1건') -and $human9.out.Contains('VHK 스킬 투영본 6건')) 'managed: Human lists roster and projection counts'
+    Assert-True ($human9.out.Contains('(관리 표식 무효: name-mismatch)')) 'managed: Human shows why a marker was rejected'
 
     # 종류 섞임 규칙은 종류·이름 제한 때문에 파일 픽스처로 만들 수 없어 함수 단위로 확인한다.
     $parsed = [Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
@@ -657,7 +684,7 @@ try {
     $same = Resolve-ManagedState -Members @((& $mk 'vhk-template' '.cursor'), (& $mk 'vhk-template' '.claude'))
     Assert-True ($same.by -ceq 'vhk-template') 'managed: same marker kind on every copy is managed'
 
-    # Hook: 관리 자산은 알림에서 빠지고, 마커가 무효라 다시 뜨는 자산은 "관리 해제"로 구분한다
+    # Hook: 관리 자산은 알림에서 빠지고, 마커가 무효라 다시 뜨는 자산은 "관리 표식 무효"로 구분한다
     $devH = Join-Path $fixtureRoot 'pubH\dev'
     $h1 = Join-Path $devH 'products\hk'
     New-FixtureFile (Join-Path $h1 '.cursor\rules\agent-roster.mdc') $rosterBlock
@@ -667,7 +694,7 @@ try {
     New-FixtureFile (Join-Path $h1 '.claude\skills\tampered\SKILL.md') ((New-ProjectedText 'tampered' (& $skillBody 'tampered')).Replace('본문', '수정'))
     New-DevRootAt $devH @([ordered]@{ name = 'hk'; group = 'products'; lifecycle = 'active' })
     $msgH = ((Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $devH)).out | ConvertFrom-Json).systemMessage
-    Assert-True ($msgH.Contains('plain-one') -and $msgH.Contains('tampered(관리 해제)') -and -not $msgH.Contains('plain-one(관리 해제)')) 'managed: Hook marks a rejected marker as 관리 해제 and leaves plain assets alone'
+    Assert-True ($msgH.Contains('plain-one') -and $msgH.Contains('tampered(관리 표식 무효)') -and -not $msgH.Contains('plain-one(관리 표식 무효)')) 'managed: Hook marks a rejected marker as 관리 표식 무효 and leaves plain assets alone'
     Assert-True (-not $msgH.Contains('ecosystem') -and -not $msgH.Contains('agent-roster') -and $msgH -notmatch '(^|[ :,])proj([,; (]|$)') 'managed: managed assets are left out of the Hook alert'
     # 관리 자산만 있는 개발 루트는 Hook 이 조용해야 한다
     $dev10 = Join-Path $fixtureRoot 'pub10\dev'

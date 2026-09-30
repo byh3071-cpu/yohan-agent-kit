@@ -179,10 +179,12 @@ function Get-TextDigest {
 #                      `<!-- vhk-agent-skill: <name>@<n> source=.agents/skills sha256=<64hex> -->` 이고, name 이 폴더 이름과 같고,
 #                      마커를 뺀 본문(CRLF→LF, 끝 개행 보장)의 SHA256 이 sha256 과 같아야 한다.
 function Read-NormalizedText {
-    param([Parameter(Mandatory = $true)][string]$Path)
+    param([Parameter(Mandatory = $true)][string]$Path, [switch]$KeepBom)
 
     $text = (New-Object Text.UTF8Encoding($false)).GetString([IO.File]::ReadAllBytes($Path))
-    return $text.TrimStart([char]0xFEFF).Replace("`r`n", "`n")
+    # 투영본 판정·해시는 VHK 와 똑같이 BOM 을 떼지 않는다(파일 앞 BOM 은 본문의 첫 글자로 해시에 들어간다).
+    if (-not $KeepBom) { $text = $text.TrimStart([char]0xFEFF) }
+    return $text.Replace("`r`n", "`n")
 }
 
 # VHK canonicalContent + contentHash: CRLF→LF 후 끝 개행을 보장하고 SHA256(소문자 hex).
@@ -202,8 +204,11 @@ function Get-ManagedMarker {
     param([Parameter(Mandatory = $true)][string]$Path, [string]$Kind = '', [string]$Name = '')
 
     $none = [pscustomobject][ordered]@{ by = ''; version = ''; source = ''; sha = ''; reject = '' }
-    try { $text = Read-NormalizedText -Path $Path } catch { return $none }
+    try { $rawText = Read-NormalizedText -Path $Path -KeepBom } catch { return $none }
+    $text = $rawText.TrimStart([char]0xFEFF)
     $lines = $text.Split("`n")
+    # 투영본은 VHK parseManagedContent 처럼 BOM 을 남긴 원문 줄로 본다.
+    $rawLines = $rawText.Split("`n")
 
     # 코드 펜스 밖의 줄만 live.
     $live = New-Object 'bool[]' $lines.Count
@@ -249,7 +254,7 @@ function Get-ManagedMarker {
             $null = $lines[$start] -cmatch '^<!-- ECOSYSTEM-MDC:START(?![\w-])(?:[ \t]+(?!-->)(?<tok>\S+))?.*-->[ \t]*$'
             $token = $(if ($Matches.ContainsKey('tok')) { [string]$Matches['tok'] } else { '' })
             # 해석할 수 없는 표기(V3, v3.1, 버전 없음, 10자리 이상)는 'unknown'. v03 은 v3 으로 정규화한다.
-            $version = $(if ($token -cmatch '^v(\d{1,9})$') { 'v' + [int]$Matches[1] } else { 'unknown' })
+            $version = $(if ($token -cmatch '^v([0-9]{1,9})$') { 'v' + [int]$Matches[1] } else { 'unknown' })
             return [pscustomobject][ordered]@{ by = 'vhk-template'; version = $version; source = ''; sha = ''; reject = '' }
         }
         if ($hasTemplate -and $reject -eq '') { $reject = 'invalid-marker' }
@@ -259,14 +264,14 @@ function Get-ManagedMarker {
     # --- vhk-projection ---
     $hasProjection = $text.Contains('vhk-agent-skill:')
     if ($Kind -eq 'skill') {
-        $last = $lines.Count - 1
-        while ($last -ge 0 -and $lines[$last] -eq '') { $last-- }
-        if ($last -ge 0 -and $lines[$last] -cmatch '^<!-- vhk-agent-skill: ([a-z0-9-]+)@(\d+) source=\.agents/skills sha256=([a-f0-9]{64}) -->$') {
+        # VHK 는 마지막 비어 있지 않은 줄만 본다. 코드 펜스 여부는 따지지 않는다(roster·template 과 다르다).
+        $last = $rawLines.Count - 1
+        while ($last -ge 0 -and $rawLines[$last] -eq '') { $last-- }
+        if ($last -ge 0 -and $rawLines[$last] -cmatch '^<!-- vhk-agent-skill: ([a-z0-9-]+)@([0-9]+) source=\.agents/skills sha256=([a-f0-9]{64}) -->$') {
             $markerName = $Matches[1]
             $markerSha = $Matches[3]
-            if (-not $live[$last]) { if ($reject -eq '') { $reject = 'invalid-marker' } }
-            elseif ($markerName -cne $Name) { if ($reject -eq '') { $reject = 'name-mismatch' } }
-            elseif ((Get-CanonicalTextHash -Text ($(if ($last -gt 0) { @($lines[0..($last - 1)]) -join "`n" } else { '' }))) -cne $markerSha) { if ($reject -eq '') { $reject = 'sha-mismatch' } }
+            if ($markerName -cne $Name) { if ($reject -eq '') { $reject = 'name-mismatch' } }
+            elseif ((Get-CanonicalTextHash -Text ($(if ($last -gt 0) { @($rawLines[0..($last - 1)]) -join "`n" } else { '' }))) -cne $markerSha) { if ($reject -eq '') { $reject = 'sha-mismatch' } }
             else {
                 return [pscustomobject][ordered]@{ by = 'vhk-projection'; version = ''; source = '.agents/skills'; sha = $markerSha; reject = '' }
             }
@@ -395,7 +400,7 @@ function Get-RepoAssetEntries {
         param($Kind, $Name, $VendorDir, $Relative, $FullPath, $DigestSource, $IsLink)
         $marker = $(if ($IsLink) { $null } else { Get-ManagedMarker -Path $DigestSource -Kind $Kind -Name $Name })
         $canonHash = ''
-        if (-not $IsLink -and $Kind -eq 'skill') { try { $canonHash = Get-CanonicalTextHash -Text (Read-NormalizedText -Path $DigestSource) } catch { $canonHash = '' } }
+        if (-not $IsLink -and $Kind -eq 'skill') { try { $canonHash = Get-CanonicalTextHash -Text (Read-NormalizedText -Path $DigestSource -KeepBom) } catch { $canonHash = '' } }
         $entries.Add([pscustomobject][ordered]@{
                 managedBy      = $(if ($marker) { $marker.by } else { '' })
                 managedVersion = $(if ($marker) { $marker.version } else { '' })
@@ -717,7 +722,7 @@ function Get-ManagedSummary {
     foreach ($byGroup in @($ManagedAssets | Group-Object -Property managedBy | Sort-Object -Property Name)) {
         $versionEntries = New-Object 'System.Collections.Generic.List[object]'
         foreach ($versionGroup in @($byGroup.Group | Group-Object -Property managedVersion)) {
-            $number = $(if ($versionGroup.Name -match '^v(\d{1,9})$') { [int]$Matches[1] } else { -1 })
+            $number = $(if ($versionGroup.Name -match '^v([0-9]{1,9})$') { [int]$Matches[1] } else { -1 })
             $versionEntries.Add([pscustomobject][ordered]@{
                     version = [string]$versionGroup.Name
                     number  = $number
@@ -908,7 +913,7 @@ try {
             }
             foreach ($repoGroup in @($repoReported | Group-Object -Property repo)) {
                 if ($remaining -le 0) { break }
-                $take = @($repoGroup.Group | Select-Object -First $remaining | ForEach-Object { $_.name + $(if ($_.managedRejectReason) { '(관리 해제)' } else { '' }) })
+                $take = @($repoGroup.Group | Select-Object -First $remaining | ForEach-Object { $_.name + $(if ($_.managedRejectReason) { '(관리 표식 무효)' } else { '' }) })
                 $remaining -= $take.Count
                 $parts.Add("$($repoGroup.Name): " + ($take -join ', '))
             }
@@ -1000,7 +1005,7 @@ try {
             foreach ($repoGroup in @($repoReported | Group-Object -Property repo)) {
                 Write-Output "  [$($repoGroup.Name)] 미등록:"
                 foreach ($item in $repoGroup.Group) {
-                    Write-Output "    - $($item.kind) $($item.name)  [$(@($item.vendorDirs) -join ', ')]$(if ($item.linkedOnly) { ' (링크)' })$(if ($item.nameMatchesKit) { ' (킷과 이름만 같음)' })$(if ($item.managedRejectReason) { " (관리 해제: $($item.managedRejectReason))" })"
+                    Write-Output "    - $($item.kind) $($item.name)  [$(@($item.vendorDirs) -join ', ')]$(if ($item.linkedOnly) { ' (링크)' })$(if ($item.nameMatchesKit) { ' (킷과 이름만 같음)' })$(if ($item.managedRejectReason) { " (관리 표식 무효: $($item.managedRejectReason))" })"
                 }
             }
             if ($repoManagedSummary.Count -gt 0) {
