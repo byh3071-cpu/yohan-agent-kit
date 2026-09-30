@@ -168,6 +168,67 @@ function Get-TextDigest {
     catch { return '' }
 }
 
+# 다른 도구가 관리하는 파일의 마커. 줄 맨 앞(공백·탭 허용)에서 시작하는 HTML 주석만 인정한다.
+# 산문 속 인용·코드 조각 안 언급(줄 중간)은 마커가 아니다. 마커는 파일 어디에 있어도 된다(CRLF 도 허용).
+#   yohan-brain-roster : <!-- YOHAN-ROSTER-CARD:BEGIN ...
+#   vhk-template       : <!-- ECOSYSTEM-MDC:START v<N> ...      (버전 N 은 managedVersion 'vN')
+#   vhk-projection     : <!-- vhk-agent-skill: <name>@<n> source=<dir> sha256=<hex> -->
+$script:ManagedMarkerRules = @(
+    [pscustomobject]@{ by = 'yohan-brain-roster'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*YOHAN-ROSTER-CARD:BEGIN(?![\w-])') },
+    [pscustomobject]@{ by = 'vhk-template'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*ECOSYSTEM-MDC:START(?![\w-])(?:[ \t]+v(?<ver>\d+)(?![\w.]))?') },
+    [pscustomobject]@{ by = 'vhk-projection'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*vhk-agent-skill:[ \t]*(?<name>[^\s@]+)@(?<n>\S+)[ \t]+source=(?<src>\S+)[ \t]+sha256=(?<sha>[0-9A-Fa-f]+)[ \t]*-->') }
+)
+
+# 파일 한 개에서 관리 마커를 찾는다. 없으면 $null. 여러 종류가 섞여 있으면 첫 규칙(위 순서)을 쓴다.
+function Get-ManagedMarker {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    try {
+        $text = (New-Object Text.UTF8Encoding($false)).GetString([IO.File]::ReadAllBytes($Path))
+    }
+    catch { return $null }
+    foreach ($rule in $script:ManagedMarkerRules) {
+        $match = $rule.regex.Match($text)
+        if (-not $match.Success) { continue }
+        $version = ''
+        $source = ''
+        if ($rule.by -eq 'vhk-template' -and $match.Groups['ver'].Success) { $version = 'v' + $match.Groups['ver'].Value }
+        if ($rule.by -eq 'vhk-projection') { $source = $match.Groups['src'].Value }
+        return [pscustomobject][ordered]@{ by = $rule.by; version = $version; source = $source }
+    }
+    return $null
+}
+
+# 자산(벤더 사본 묶음) 단위 관리 판정. 규칙:
+#  - 마커가 하나도 없으면 관리 아님.
+#  - 마커 종류가 사본끼리 다르면 모호하므로 관리 아님(미등록으로 남겨 사람이 본다).
+#  - vhk-projection: 마커 없는 사본은 VHK 정본 폴더(.agents)에만 허용한다. 그 밖의 폴더(.claude·.codex·.cursor)에
+#    마커 없는 사본이 있으면 사람이 만든 사본이 섞인 것이므로 관리 아님.
+#  - 그 외(roster·template): 존재하는 모든 사본에 마커가 있어야 관리. 일부만 있으면 관리 아님.
+#  - 링크만 있는(digest 없음) 사본은 읽지 못했으므로 마커 없는 사본으로 친다.
+function Resolve-ManagedState {
+    param([Parameter(Mandatory = $true)]$Members)
+
+    $none = [pscustomobject][ordered]@{ by = ''; version = ''; source = ''; partial = $false }
+    $marked = @($Members | Where-Object { $_.managedBy })
+    if ($marked.Count -eq 0) { return $none }
+    $kinds = @($marked | ForEach-Object { $_.managedBy } | Sort-Object -Unique)
+    if ($kinds.Count -gt 1) { $none.partial = $true; return $none }
+    $unmarked = @($Members | Where-Object { -not $_.managedBy })
+    $allowed = @($unmarked | Where-Object { $kinds[0] -eq 'vhk-projection' -and $_.vendorDir -eq '.agents' })
+    if ($unmarked.Count -gt $allowed.Count) { $none.partial = $true; return $none }
+    $withVersion = @($marked | Where-Object { $_.managedVersion })
+
+    $withSource = @($marked | Where-Object { $_.managedSource })
+    return [pscustomobject][ordered]@{
+        by      = [string]$kinds[0]
+        # 사본끼리 버전이 다르면 대표 항목(벤더 우선순위 첫 사본)의 값을 쓴다.
+        version = $(if ($withVersion.Count -gt 0) { [string]$withVersion[0].managedVersion } else { '' })
+        source  = $(if ($withSource.Count -gt 0) { [string]$withSource[0].managedSource } else { '' })
+        partial = $false
+    }
+}
+
 # 킷 레지스트리 JSON 을 한 번만 읽는다.
 function Read-KitRegistry {
     param([Parameter(Mandatory = $true)][string]$RepoRoot)
@@ -243,7 +304,11 @@ function Get-RepoAssetEntries {
 
     $add = {
         param($Kind, $Name, $VendorDir, $Relative, $FullPath, $DigestSource, $IsLink)
+        $marker = $(if ($IsLink) { $null } else { Get-ManagedMarker -Path $DigestSource })
         $entries.Add([pscustomobject][ordered]@{
+                managedBy      = $(if ($marker) { $marker.by } else { '' })
+                managedVersion = $(if ($marker) { $marker.version } else { '' })
+                managedSource  = $(if ($marker) { $marker.source } else { '' })
                 repo         = $RepoName
                 kind         = $Kind
                 name         = $Name
@@ -485,6 +550,7 @@ function Invoke-RepoScan {
         }
 
         $digestOwner = @($members | Where-Object { $_.digest })
+        $managed = Resolve-ManagedState -Members $members
         $assets.Add([pscustomobject][ordered]@{
                 repo          = $first.repo
                 kind          = $first.kind
@@ -497,6 +563,10 @@ function Invoke-RepoScan {
                 # 레포 이름이 바뀌어 옛 이름이 별칭으로 남은 경우, 옛 이름 키도 같은 자산으로 인정한다.
                 inBaseline    = (@(@($repoTokens[$first.repo]) | Where-Object { $BaselineKeys.Contains(('{0}.{1}@{2}' -f $first.kind, $first.name, $_)) }).Count -gt 0)
                 linkedOnly    = (@($members | Where-Object { -not $_.linkedOnly }).Count -eq 0)
+                managedBy      = $managed.by
+                managedVersion = $managed.version
+                managedSource  = $managed.source
+                markerPartial  = [bool]$managed.partial
                 key           = $displayKey
             })
     }
@@ -537,6 +607,44 @@ function Invoke-RepoScan {
     $result.assets = @($assets.ToArray() | Sort-Object -Property repo, kind, name)
     $result.groups = @($groups.ToArray() | Sort-Object -Property kind, name)
     return $result
+}
+
+$script:ManagedLabels = @{
+    'yohan-brain-roster' = 'yohan-brain 라우팅 카드'
+    'vhk-template'       = 'VHK 경계 규칙'
+    'vhk-projection'     = 'VHK 스킬 투영본'
+}
+
+# 관리 주체별 건수·버전 분포. 버전이 섞이면 최신(숫자 최대)보다 낮은 버전의 레포를 outdated 로 표시한다.
+function Get-ManagedSummary {
+    param($ManagedAssets)
+
+    $items = New-Object 'System.Collections.Generic.List[object]'
+    foreach ($byGroup in @($ManagedAssets | Group-Object -Property managedBy | Sort-Object -Property Name)) {
+        $versionEntries = New-Object 'System.Collections.Generic.List[object]'
+        foreach ($versionGroup in @($byGroup.Group | Group-Object -Property managedVersion)) {
+            $number = $(if ($versionGroup.Name -match '^v(\d+)$') { [int]$Matches[1] } else { -1 })
+            $versionEntries.Add([pscustomobject][ordered]@{
+                    version = [string]$versionGroup.Name
+                    number  = $number
+                    count   = $versionGroup.Count
+                    repos   = @($versionGroup.Group | ForEach-Object { $_.repo } | Sort-Object -Unique)
+                })
+        }
+        $ordered = @($versionEntries.ToArray() | Sort-Object -Property @{ Expression = { $_.number }; Descending = $true }, version)
+        $latest = @($ordered | Where-Object { $_.number -ge 0 } | Select-Object -First 1)
+        $latestNumber = $(if ($latest.Count -gt 0) { $latest[0].number } else { -1 })
+        $outdated = @($ordered | Where-Object { $latestNumber -ge 0 -and $_.number -ge 0 -and $_.number -lt $latestNumber } | ForEach-Object { $_.repos } | Sort-Object -Unique)
+        $items.Add([pscustomobject][ordered]@{
+                managedBy      = [string]$byGroup.Name
+                label          = [string]$script:ManagedLabels[[string]$byGroup.Name]
+                count          = $byGroup.Count
+                versions       = @($ordered | ForEach-Object { [pscustomobject][ordered]@{ version = $_.version; count = $_.count; repos = @($_.repos) } })
+                latestVersion  = $(if ($latest.Count -gt 0) { $latest[0].version } else { '' })
+                outdatedRepos  = @($outdated)
+            })
+    }
+    return @($items.ToArray())
 }
 
 # 기준선 읽기. 쓰는 쪽이 임시 파일을 교체하는 순간 읽는 쪽은 "파일 없음"이나 공유 위반(IOException)을 볼 수 있어
@@ -607,6 +715,8 @@ try {
     $repoScan = $null
     $repoUnregistered = @()
     $repoReported = @()
+    $repoManaged = @()
+    $repoManagedSummary = @()
     if ($IncludeRepos) {
         $devRootExplicit = $PSBoundParameters.ContainsKey('DevRoot')
         if ([string]::IsNullOrWhiteSpace($DevRoot) -and -not [string]::IsNullOrWhiteSpace($env:PUBLIC)) {
@@ -623,7 +733,10 @@ try {
             foreach ($warning in @($repoScan.warnings)) { [Console]::Error.WriteLine("경고: $warning") }
         }
 
-        $repoUnregistered = @($repoScan.assets | Where-Object { -not $_.registered })
+        # 등록되지 않았어도 다른 도구가 관리하는 자산(마커 있음)은 미등록 수·Hook 알림에서 뺀다.
+        $repoManaged = @($repoScan.assets | Where-Object { -not $_.registered -and $_.managedBy })
+        $repoManagedSummary = @(Get-ManagedSummary -ManagedAssets $repoManaged)
+        $repoUnregistered = @($repoScan.assets | Where-Object { -not $_.registered -and -not $_.managedBy })
         $repoNew = @($repoUnregistered | Where-Object { -not $_.inBaseline })
         $repoReported = @($(if ($NewOnly -or $OutputFormat -eq 'Hook') { $repoNew } else { $repoUnregistered }))
     }
@@ -737,6 +850,8 @@ try {
                     scanFailed        = [bool]$repoScan.scanFailed
                     warnings          = @($repoScan.warnings)
                     unregisteredCount = $repoReported.Count
+                    managedCount      = $repoManaged.Count
+                    managedSummary    = @($repoManagedSummary)
                     assets            = @($repoScan.assets | ForEach-Object {
                         [pscustomobject][ordered]@{
                             repo         = $_.repo
@@ -749,6 +864,9 @@ try {
                             nameMatchesKit = [bool]$_.nameMatchesKit
                             inBaseline   = [bool]$_.inBaseline
                             linkedOnly   = [bool]$_.linkedOnly
+                            managedBy    = [string]$_.managedBy
+                            managedVersion = [string]$_.managedVersion
+                            managedSource = [string]$_.managedSource
                         }
                     })
                     groups            = @($repoScan.groups)
@@ -775,7 +893,7 @@ try {
 
         if ($IncludeRepos) {
             Write-Output ''
-            Write-Output "레포 자산: 대상 $($repoScan.repos)개 / 자산 $(@($repoScan.assets).Count)건 / 전체 미등록: $($repoUnregistered.Count)건 / $scope 보고: $($repoReported.Count)건"
+            Write-Output "레포 자산: 대상 $($repoScan.repos)개 / 자산 $(@($repoScan.assets).Count)건 / 전체 미등록: $($repoUnregistered.Count)건 / $scope 보고: $($repoReported.Count)건 / 다른 도구가 관리함: $($repoManaged.Count)건"
             foreach ($warning in @($repoScan.warnings)) { Write-Output "  경고: $warning" }
             if (@($repoScan.missingRepos).Count -gt 0) { Write-Output "  없음: $(@($repoScan.missingRepos) -join ', ')" }
             if (@($repoScan.linkedRepos).Count -gt 0) { Write-Output "  링크라 건너뜀: $(@($repoScan.linkedRepos) -join ', ')" }
@@ -784,6 +902,19 @@ try {
                 Write-Output "  [$($repoGroup.Name)] 미등록:"
                 foreach ($item in $repoGroup.Group) {
                     Write-Output "    - $($item.kind) $($item.name)  [$(@($item.vendorDirs) -join ', ')]$(if ($item.linkedOnly) { ' (링크)' })$(if ($item.nameMatchesKit) { ' (킷과 이름만 같음)' })"
+                }
+            }
+            if ($repoManagedSummary.Count -gt 0) {
+                Write-Output '  다른 도구가 관리함 (킷 미등록으로 세지 않음):'
+                foreach ($summary in $repoManagedSummary) {
+                    $detail = $(if (@($summary.versions | Where-Object { $_.version }).Count -gt 0) {
+                            (@($summary.versions | ForEach-Object {
+                                        $label = $(if ($_.version) { $_.version } else { '버전 없음' })
+                                        $old = $(if ($summary.outdatedRepos.Count -gt 0 -and @($_.repos | Where-Object { $summary.outdatedRepos -contains $_ }).Count -gt 0) { "($(@($_.repos | Where-Object { $summary.outdatedRepos -contains $_ }) -join ', '))" } else { '' })
+                                        "$label $($_.count)곳$old"
+                                    }) -join ' · ')
+                        } else { "$($summary.count)건" })
+                    Write-Output "    - $($summary.label) $detail"
                 }
             }
             $repoGroups = @($repoScan.groups)
