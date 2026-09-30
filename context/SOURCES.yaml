@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "sources",
+  "sources": [
+    {
+      "id": "brain-soul-profile",
+      "authority": "project_sot",
+      "reference": "https://github.com/byh3071-cpu/yohan-brain/blob/main/memory/soul.yaml",
+      "last_verified_at": "2026-09-09",
+      "confidence": 1
+    },
+    {
+      "id": "user-confirmed-2026-09-09",
+      "authority": "user_explicit",
+      "reference": "https://github.com/byh3071-cpu/yohan-agent-kit/issues/108",
+      "last_verified_at": "2026-09-09",
+      "confidence": 1
+    },
+    {
+      "id": "issue-108-context-architecture",
+      "authority": "project_sot",
+      "reference": "https://github.com/byh3071-cpu/yohan-agent-kit/issues/108",
+      "last_verified_at": "2026-09-09",
+      "confidence": 1
+    }
+  ]
+}

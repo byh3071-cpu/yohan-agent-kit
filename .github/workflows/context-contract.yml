@@ -18,3 +18,4 @@ jobs:
         with:
           node-version: "22"
       - run: node scripts/check-context-contract.mjs
+      - run: node --test scripts/test-context-core.mjs

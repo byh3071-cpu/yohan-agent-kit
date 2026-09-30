@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "projects",
+  "facts": [
+    {
+      "id": "context-core-project",
+      "subject": "yohan-agent-kit",
+      "predicate": "context_owner",
+      "value": "https://github.com/byh3071-cpu/yohan-agent-kit",
+      "status": "current",
+      "valid_from": "2026-09-09",
+      "valid_to": null,
+      "source": "issue-108-context-architecture",
+      "last_verified_at": "2026-09-09"
+    }
+  ]
+}

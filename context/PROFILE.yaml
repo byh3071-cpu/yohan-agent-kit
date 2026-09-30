@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "kind": "profile",
+  "facts": [
+    {
+      "id": "profile-name",
+      "subject": "yohan",
+      "predicate": "name",
+      "value": "백요한",
+      "status": "current",
+      "valid_from": "2026-09-09",
+      "valid_to": null,
+      "source": "brain-soul-profile",
+      "last_verified_at": "2026-09-09"
+    }
+  ]
+}
