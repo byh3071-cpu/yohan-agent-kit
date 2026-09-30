@@ -2961,7 +2961,7 @@
       ]
     },
     {
-      "contentDigest": "c1c243afcd75c40cd0ae2fa9fd1c48d99bfad05f6b3b3b53496dfb9a5a10c16a",
+      "contentDigest": "103c4132b88792c86519c47e7ac9ee3a7d6749194de1f927ff78e9a0ed200912",
       "evidenceRefs": [
         "skills/html-doc",
         "distribution/manifests/html-doc.json"
@@ -4740,7 +4740,7 @@
       ]
     }
   ],
-  "catalogDigest": "f8ca414ded98253fd1918adfb7ba17386e41a31fae07cc72aa29047a33b0b89c",
+  "catalogDigest": "eb35c477e7f10a502f48998f2ee3fd2197e7cab059de7ca5a0b2713a9b61af84",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "0839a487b2b5c617e3ba9f004568b502baad7925422b835656a55cb4e07c7e72",
