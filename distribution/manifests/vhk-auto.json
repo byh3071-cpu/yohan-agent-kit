@@ -3,10 +3,15 @@
     "skill":  "vhk-auto",
     "files":  [
                   {
+                      "path":  "references/review-adapters.md",
+                      "bytes":  876,
+                      "sha256":  "2D4298D934C1EB5261C5E1F9AFBD519E07FE8A89879271FD3FFCFBACAAA1B34F"
+                  },
+                  {
                       "path":  "SKILL.md",
-                      "bytes":  5632,
-                      "sha256":  "03422EF49689822B16E318649728C195402E1FCDA807FF9015F2801B106A6CA5"
+                      "bytes":  9760,
+                      "sha256":  "41B28BAA366DC0C6CD2B52772EE03DE868E8B883F4E032A832CCF361A179EFF7"
                   }
               ],
-    "digest":  "17E73E1FFA0BEF66BFD91D8BCE0286F5F5CDF219D5A2977E9C94F3DBA2C0DE97"
+    "digest":  "35ABA090FDD27E14430A85C04922161D3AD50DC45E8CDAFDD16DF1721FFB5E67"
 }

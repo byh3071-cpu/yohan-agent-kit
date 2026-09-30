@@ -2507,11 +2507,12 @@
         "cursor"
       ],
       "lifecycle": "approved",
-      "provenance": "local-authored:agents-home",
-      "license": "UNLICENSED",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
+      "license": "MIT",
       "requiredEnv": [],
       "evidenceRefs": [
         "skills/overnight-vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/overnight-vhk-auto.json"
       ]
     },
@@ -2633,11 +2634,12 @@
         "cursor"
       ],
       "lifecycle": "approved",
-      "provenance": "local-authored:agents-home",
-      "license": "UNLICENSED",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
+      "license": "MIT",
       "requiredEnv": [],
       "evidenceRefs": [
         "skills/vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/vhk-auto.json"
       ]
     },

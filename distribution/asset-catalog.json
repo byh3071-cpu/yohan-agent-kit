@@ -922,7 +922,7 @@
       ]
     },
     {
-      "contentDigest": "8170fca2ed54994ccb711999c9b4641eef62162599392e22c4faecb13772101d",
+      "contentDigest": "b4f0d0905cf73157b318cc417f2b28e62e6d3783a6d5024e40bdb7f0a343d550",
       "evidenceRefs": [
         "distribution/manifests/overnight-vhk-auto.json"
       ],
@@ -1132,7 +1132,7 @@
       ]
     },
     {
-      "contentDigest": "cb666e99b5047901d65c2b31ad5ca16abbf580767951e10bd466a6a3fade069c",
+      "contentDigest": "db184fb2d5da0df97ba964ed97d7524411e4db8a868f89f153b0a5c44799a96d",
       "evidenceRefs": [
         "distribution/manifests/vhk-auto.json"
       ],
@@ -2039,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "3b1b48d980db07f71a886a6f48e6842f284cf3869b40339adc1cc7d610a5a9c7",
+      "contentDigest": "9b2b0ebd34ac025aa07888af75e064a791c60a5ffc8754e89555921b73fb8e26",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -3134,18 +3134,19 @@
       ]
     },
     {
-      "contentDigest": "ec6de25da4c189483e049bf4bec8cee140e1b26f5bdba79560913666bea434db",
+      "contentDigest": "ba1e3f534e371a83912938dc5ca0db3630f90edda9512726ff5336ef54a880d2",
       "evidenceRefs": [
         "skills/overnight-vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/overnight-vhk-auto.json"
       ],
       "id": "skill.overnight-vhk-auto",
       "kind": "skill",
-      "license": "UNLICENSED",
+      "license": "MIT",
       "lifecycle": "approved",
       "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
-      "provenance": "local-authored:agents-home",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
       "requiredEnv": [],
       "sourcePath": "skills/overnight-vhk-auto",
       "vendors": [
@@ -4070,18 +4071,19 @@
       ]
     },
     {
-      "contentDigest": "657155ab91deebe05d5f14d00b2f9a0050cc2a6f6b603c1f6b0b5c2a76cef9b4",
+      "contentDigest": "ad25eabfa2da9badeea6efea26e6fb94a123ea5e2e2a75b2d933e2023a9546cd",
       "evidenceRefs": [
         "skills/vhk-auto",
+        "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
         "distribution/manifests/vhk-auto.json"
       ],
       "id": "skill.vhk-auto",
       "kind": "skill",
-      "license": "UNLICENSED",
+      "license": "MIT",
       "lifecycle": "approved",
       "owner": "yohan-agent-kit",
       "portability": "PORTABLE",
-      "provenance": "local-authored:agents-home",
+      "provenance": "external:https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
       "requiredEnv": [],
       "sourcePath": "skills/vhk-auto",
       "vendors": [
@@ -4738,9 +4740,9 @@
       ]
     }
   ],
-  "catalogDigest": "a66cd849a622f49beb4095da7d4de62302e8b8f8316e8b4ec8f0af9354ab5af0",
+  "catalogDigest": "eb35c477e7f10a502f48998f2ee3fd2197e7cab059de7ca5a0b2713a9b61af84",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "05766c11f7d8794eafe713453d8e7b4c33ad33108f77052423c652b79472eb2c",
+  "registryDigest": "0839a487b2b5c617e3ba9f004568b502baad7925422b835656a55cb4e07c7e72",
   "schemaVersion": 1
 }
