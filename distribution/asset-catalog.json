@@ -922,7 +922,7 @@
       ]
     },
     {
-      "contentDigest": "35e948fa8206160250a776c577cf679201172a94ca496701c7946b7fed474c3e",
+      "contentDigest": "b4f0d0905cf73157b318cc417f2b28e62e6d3783a6d5024e40bdb7f0a343d550",
       "evidenceRefs": [
         "distribution/manifests/overnight-vhk-auto.json"
       ],
@@ -1132,7 +1132,7 @@
       ]
     },
     {
-      "contentDigest": "2876fc0604ea6c3ad8e64d8a9924e960b6f523dafe39ed1c38b41a6d45b51891",
+      "contentDigest": "db184fb2d5da0df97ba964ed97d7524411e4db8a868f89f153b0a5c44799a96d",
       "evidenceRefs": [
         "distribution/manifests/vhk-auto.json"
       ],
@@ -2039,7 +2039,7 @@
       ]
     },
     {
-      "contentDigest": "98db90724ae5b60955f41f0a4feff740fc81202601784e28c023cbb882d82d42",
+      "contentDigest": "2f04a67881cc876d041e4410fbc9d2e82b717895ad2a4778ffe133df746381bc",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
       ],
@@ -4740,7 +4740,7 @@
       ]
     }
   ],
-  "catalogDigest": "a1b93e6b8e2119e14ba831688a831be9caf5f132d447fb8b0fd49fab2c8d87af",
+  "catalogDigest": "0b72b7a07fb4447dbd376fe61a14ef9dedc6b8f37230eee7eff660078fb19f58",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
   "registryDigest": "0839a487b2b5c617e3ba9f004568b502baad7925422b835656a55cb4e07c7e72",

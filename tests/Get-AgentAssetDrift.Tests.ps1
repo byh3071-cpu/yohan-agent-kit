@@ -528,69 +528,150 @@ try {
     Assert-True (($linkKeys -contains 'skill.v@vlink') -and ($linkKeys -contains 'skill.vs@vlink')) '(7) a repo with a linked vendor folder keeps old keys and gains the scanned one'
     Assert-True (($linkKeys -contains 'skill.s8@okrepo8') -and -not ($linkKeys -contains 'skill.stale@okrepo8')) '(7) fully scanned repos are refreshed (stale key dropped)'
     # ================= 관리 마커(다른 도구가 관리하는 자산) =================
-    $rosterBlock = "---`nalwaysApply: true`n---`n앞 내용`n<!-- YOHAN-ROSTER-CARD:BEGIN sha=abc -->`n카드 본문`n<!-- YOHAN-ROSTER-CARD:END -->`n뒤 내용`n"
-    $ecoBlock = { param($v) "<!-- ECOSYSTEM-MDC:START v$v -->`n경계 규칙`n<!-- ECOSYSTEM-MDC:END -->`n" }
-    $projMarker = '<!-- vhk-agent-skill: proj@2 source=.agents/skills/proj sha256=0123abcdEF -->'
+    function Get-TestSha {
+        param([string]$Text)
+        $sha = [Security.Cryptography.SHA256]::Create()
+        try { return (($sha.ComputeHash($utf8.GetBytes($Text)) | ForEach-Object { $_.ToString('x2') }) -join '') } finally { $sha.Dispose() }
+    }
+    # VHK managedContent 와 같은 방식: 본문(끝 개행 보장) + 마커 한 줄.
+    function New-ProjectedText {
+        param([string]$Name, [string]$Body)
+        $canon = $Body.Replace("`r`n", "`n")
+        if (-not $canon.EndsWith("`n")) { $canon += "`n" }
+        return $canon + "<!-- vhk-agent-skill: $Name@2 source=.agents/skills sha256=$(Get-TestSha $canon) -->`n"
+    }
+    $skillBody = { param($n) "---`nname: $n`n---`n본문 $n`n" }
+    $rosterBlock = "---`nalwaysApply: true`n---`n앞 내용`n<!-- YOHAN-ROSTER-CARD:BEGIN (managed by yohan-brain) -->`n카드 본문`n<!-- YOHAN-ROSTER-CARD:END -->`n뒤 내용`n"
+    $ecoBlock = { param($v) "<!-- ECOSYSTEM-MDC:START $v (vhk template) -->`n경계 규칙`n<!-- ECOSYSTEM-MDC:END -->`n" }
+    $fence = '```'
     $dev9 = Join-Path $fixtureRoot 'pub9\dev'
-    $r1 = Join-Path $dev9 'products\m1'
-    # 로스터 카드: 파일 중간에 마커 + CRLF
+    $repoList = New-Object 'System.Collections.Generic.List[object]'
+    $addRepo = { param($n) $repoList.Add([ordered]@{ name = $n; group = 'products'; lifecycle = 'active' }); return (Join-Path $dev9 "products\$n") }
+
+    # m1: 정상 관리본 — 로스터(파일 중간·CRLF), 템플릿 v3, 투영본(CRLF) + .agents 정본(마커 없음, 같은 본문)
+    $r1 = & $addRepo 'm1'
     New-FixtureFile (Join-Path $r1 '.cursor\rules\agent-roster.mdc') $rosterBlock.Replace("`n", "`r`n")
-    New-FixtureFile (Join-Path $r1 '.cursor\rules\ecosystem.mdc') (& $ecoBlock 3)
-    # 투영본: .claude 에 마커, .agents(VHK 정본)엔 마커 없음 → 관리
-    New-FixtureFile (Join-Path $r1 '.claude\skills\proj\SKILL.md') "---`nname: proj`n---`n$projMarker`n본문`n"
-    New-FixtureFile (Join-Path $r1 '.agents\skills\proj\SKILL.md') "---`nname: proj`n---`n본문`n"
+    New-FixtureFile (Join-Path $r1 '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v3')
+    New-FixtureFile (Join-Path $r1 '.claude\skills\proj\SKILL.md') ((New-ProjectedText 'proj' (& $skillBody 'proj')).Replace("`n", "`r`n"))
+    New-FixtureFile (Join-Path $r1 '.agents\skills\proj\SKILL.md') (& $skillBody 'proj')
     New-SkillAt $r1 '.claude' 'plain-one'
-    New-FixtureFile (Join-Path $dev9 'products\m2\.cursor\rules\ecosystem.mdc') ((& $ecoBlock 3).Replace("`n", "`r`n"))
-    New-FixtureFile (Join-Path $dev9 'products\m3\.cursor\rules\ecosystem.mdc') (& $ecoBlock 2)
-    New-FixtureFile (Join-Path $dev9 'products\m4\.cursor\rules\ecosystem.mdc') (& $ecoBlock 3)
-    # 마커가 일부 사본에만 있음(.cursor 에 마커 없는 사본) → 관리 아님
-    $r5 = Join-Path $dev9 'products\m5'
-    New-FixtureFile (Join-Path $r5 '.claude\skills\half\SKILL.md') "---`nname: half`n---`n$projMarker`n"
+    New-FixtureFile (Join-Path (& $addRepo 'm2') '.cursor\rules\ecosystem.mdc') ((& $ecoBlock 'v3').Replace("`n", "`r`n"))
+    New-FixtureFile (Join-Path (& $addRepo 'm3') '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v2')
+    New-FixtureFile (Join-Path (& $addRepo 'm4') '.cursor\rules\ecosystem.mdc') ([string][char]0xFEFF + (& $ecoBlock 'v3'))
+    # 버전 표기: v03 → v3, 해석 불가(V3·v3.1·없음·너무 큼)는 unknown
+    New-FixtureFile (Join-Path (& $addRepo 'm8') '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v03')
+    New-FixtureFile (Join-Path (& $addRepo 'm9') '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'V3')
+    New-FixtureFile (Join-Path (& $addRepo 'm10') '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v3.1')
+    New-FixtureFile (Join-Path (& $addRepo 'm11') '.cursor\rules\ecosystem.mdc') "<!-- ECOSYSTEM-MDC:START -->`n본문`n<!-- ECOSYSTEM-MDC:END -->`n"
+    New-FixtureFile (Join-Path (& $addRepo 'm12') '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v99999999999')
+
+    # m5: 관리 아님이어야 하는 것들
+    $r5 = & $addRepo 'm5'
+    New-FixtureFile (Join-Path $r5 '.claude\skills\half\SKILL.md') (New-ProjectedText 'half' (& $skillBody 'half'))
     New-FixtureFile (Join-Path $r5 '.cursor\skills\half\SKILL.md') "---`nname: half`n---`n사람이 만든 사본`n"
-    # 비슷하지만 다른 문자열 → 인식하지 않음
+    New-FixtureFile (Join-Path $r5 '.claude\skills\agentsdiff\SKILL.md') (New-ProjectedText 'agentsdiff' (& $skillBody 'agentsdiff'))
+    New-FixtureFile (Join-Path $r5 '.agents\skills\agentsdiff\SKILL.md') "---`nname: agentsdiff`n---`n다른 본문`n"
+    # 마커를 복사해 왔지만 이름이 다름(폴더 copyname, 마커는 proj)
+    New-FixtureFile (Join-Path $r5 '.claude\skills\copyname\SKILL.md') (New-ProjectedText 'proj' (& $skillBody 'proj'))
+    # 마커 뒤에 본문을 고쳐 sha 불일치
+    New-FixtureFile (Join-Path $r5 '.claude\skills\tampered\SKILL.md') ((New-ProjectedText 'tampered' (& $skillBody 'tampered')).Replace('본문', '수정'))
+    # 마커가 마지막 줄이 아님
+    New-FixtureFile (Join-Path $r5 '.claude\skills\notlast\SKILL.md') ((New-ProjectedText 'notlast' (& $skillBody 'notlast')) + "뒤에 붙은 글`n")
+    New-FixtureFile (Join-Path $r5 '.claude\skills\badproj\SKILL.md') "---`nname: badproj`n---`n<!-- vhk-agent-skill: badproj@1 source=x -->`n"
+    # 다른 규칙 파일에 로스터 블록 / agent·command 파일에 템플릿 마커
+    New-FixtureFile (Join-Path $r5 '.cursor\rules\other-rule.mdc') $rosterBlock
+    New-FixtureFile (Join-Path $r5 '.claude\agents\tpl-agent.md') (& $ecoBlock 'v3')
+    New-FixtureFile (Join-Path $r5 '.claude\commands\tpl-cmd.md') (& $ecoBlock 'v3')
+    # 비슷하지만 다른 문자열
     New-FixtureFile (Join-Path $r5 '.cursor\rules\begin-only.mdc') "<!-- BEGIN -->`n본문`n"
     New-FixtureFile (Join-Path $r5 '.cursor\rules\other-card.mdc') "<!-- ROSTER-CARD:BEGIN -->`n본문`n"
     New-FixtureFile (Join-Path $r5 '.cursor\rules\eco-end.mdc') "<!-- ECOSYSTEM-MDC:END v3 -->`n본문`n"
     New-FixtureFile (Join-Path $r5 '.cursor\rules\prose.mdc') "설명: ``<!-- YOHAN-ROSTER-CARD:BEGIN`` 마커를 쓴다`n"
     New-FixtureFile (Join-Path $r5 '.cursor\rules\suffix.mdc') "<!-- YOHAN-ROSTER-CARD:BEGINNING -->`n"
-    New-FixtureFile (Join-Path $r5 '.claude\skills\badproj\SKILL.md') "---`nname: badproj`n---`n<!-- vhk-agent-skill: badproj@1 source=x -->`n"
-    New-DevRootAt $dev9 @(
-        [ordered]@{ name = 'm1'; group = 'products'; lifecycle = 'active' },
-        [ordered]@{ name = 'm2'; group = 'products'; lifecycle = 'active' },
-        [ordered]@{ name = 'm3'; group = 'products'; lifecycle = 'active' },
-        [ordered]@{ name = 'm4'; group = 'products'; lifecycle = 'active' },
-        [ordered]@{ name = 'm5'; group = 'products'; lifecycle = 'active' })
+    # m6: 닫히지 않은 주석 / 코드 펜스 안 예시. m7: 4칸 들여쓴 예시 / 닫히지 않은 펜스
+    $r6 = & $addRepo 'm6'
+    New-FixtureFile (Join-Path $r6 '.cursor\rules\agent-roster.mdc') "앞`n<!-- YOHAN-ROSTER-CARD:BEGIN (닫는 표시 없음`n카드`n<!-- YOHAN-ROSTER-CARD:END -->`n"
+    New-FixtureFile (Join-Path $r6 '.cursor\rules\ecosystem.mdc') "예시:`n${fence}md`n<!-- ECOSYSTEM-MDC:START v3 -->`n본문`n<!-- ECOSYSTEM-MDC:END -->`n${fence}`n"
+    $r7 = & $addRepo 'm7'
+    New-FixtureFile (Join-Path $r7 '.cursor\rules\agent-roster.mdc') "예시:`n`n    <!-- YOHAN-ROSTER-CARD:BEGIN (x) -->`n    카드`n    <!-- YOHAN-ROSTER-CARD:END -->`n"
+    New-FixtureFile (Join-Path $r7 '.cursor\rules\ecosystem.mdc') "${fence}md`n<!-- ECOSYSTEM-MDC:START v3 -->`n본문`n<!-- ECOSYSTEM-MDC:END -->`n"
+    # m13: 마커 사본은 정상이지만 .cursor 쪽 사본이 링크 → 관리 아님
+    $r13 = & $addRepo 'm13'
+    New-FixtureFile (Join-Path $r13 '.claude\skills\linkcase\SKILL.md') (New-ProjectedText 'linkcase' (& $skillBody 'linkcase'))
+    $lk13 = Join-Path $fixtureRoot 'lk13-target'
+    New-FixtureFile (Join-Path $lk13 'SKILL.md') (& $skillBody 'linkcase')
+    $null = New-Item -ItemType Directory -Path (Join-Path $r13 '.cursor\skills') -Force
+    $null = New-Item -ItemType Junction -Path (Join-Path $r13 '.cursor\skills\linkcase') -Target $lk13
+    $extraLinks.Add((Join-Path $r13 '.cursor\skills\linkcase'))
+
+    New-DevRootAt $dev9 $repoList.ToArray()
     New-FixtureFile $baselinePath '{"schemaVersion":1,"knownUnregistered":["skill.home-skill"]}'
     $scan9 = Invoke-Drift @('-OutputFormat', 'Json', '-IncludeRepos', '-DevRoot', $dev9)
     $rs9 = ($scan9.out | ConvertFrom-Json).repoScan
     $byName = { param($repo, $name) , @($rs9.assets | Where-Object { $_.repo -eq $repo -and $_.name -eq $name }) }
-    $roster = & $byName 'm1' 'agent-roster'
-    Assert-True ($roster.Count -eq 1 -and $roster[0].managedBy -ceq 'yohan-brain-roster' -and $roster[0].managedVersion -ceq '') 'managed: roster marker in the middle of a CRLF file is recognized'
-    $eco3 = & $byName 'm1' 'ecosystem'
-    Assert-True ($eco3.Count -eq 1 -and $eco3[0].managedBy -ceq 'vhk-template' -and $eco3[0].managedVersion -ceq 'v3') 'managed: ECOSYSTEM-MDC marker gives template version v3'
-    $eco2 = & $byName 'm2' 'ecosystem'
-    Assert-True ($eco2[0].managedBy -ceq 'vhk-template' -and $eco2[0].managedVersion -ceq 'v3') 'managed: CRLF ecosystem file is recognized'
-    Assert-True ((& $byName 'm3' 'ecosystem')[0].managedVersion -ceq 'v2') 'managed: version is parsed per file (v2 is not forced to v3)'
-    $proj = & $byName 'm1' 'proj'
-    Assert-True ($proj.Count -eq 1 -and $proj[0].managedBy -ceq 'vhk-projection' -and $proj[0].managedSource -ceq '.agents/skills/proj' -and (@($proj[0].vendorDirs) -join ',') -ceq '.claude,.agents') 'managed: vhk projection with unmarked .agents canonical copy is managed and keeps source'
-    Assert-True ((& $byName 'm1' 'plain-one')[0].managedBy -ceq '') 'managed: an asset without any marker stays unmanaged'
-    Assert-True ((& $byName 'm5' 'half')[0].managedBy -ceq '') 'managed: marker on only some copies (unmarked non-.agents copy) is NOT managed'
-    foreach ($fake in @('begin-only', 'other-card', 'eco-end', 'prose', 'suffix', 'badproj')) {
-        Assert-True ((& $byName 'm5' $fake)[0].managedBy -ceq '') "managed: lookalike '$fake' is not recognized"
+    $managedOf = { param($repo, $name) (& $byName $repo $name)[0] }
+
+    $roster = & $managedOf 'm1' 'agent-roster'
+    Assert-True ($roster.managedBy -ceq 'yohan-brain-roster' -and $roster.managedVersion -ceq '') 'managed: roster block in the middle of a CRLF agent-roster.mdc is recognized'
+    $eco = & $managedOf 'm1' 'ecosystem'
+    Assert-True ($eco.managedBy -ceq 'vhk-template' -and $eco.managedVersion -ceq 'v3') 'managed: ecosystem.mdc with START and END gives template version v3'
+    Assert-True ((& $managedOf 'm2' 'ecosystem').managedBy -ceq 'vhk-template') 'managed: CRLF ecosystem file is recognized'
+    Assert-True ((& $managedOf 'm3' 'ecosystem').managedVersion -ceq 'v2') 'managed: version is parsed per file (v2 is not forced to v3)'
+    Assert-True ((& $managedOf 'm4' 'ecosystem').managedBy -ceq 'vhk-template') 'managed: a BOM before the marker is stripped'
+    $proj = & $managedOf 'm1' 'proj'
+    Assert-True ($proj.managedBy -ceq 'vhk-projection' -and $proj.managedSource -ceq '.agents/skills' -and (@($proj.vendorDirs) -join ',') -ceq '.claude,.agents') 'managed: projection with valid name+sha and an identical unmarked .agents copy is managed'
+    Assert-True ((& $managedOf 'm1' 'plain-one').managedBy -ceq '') 'managed: an asset without any marker stays unmanaged'
+    Assert-True ((& $managedOf 'm8' 'ecosystem').managedVersion -ceq 'v3') 'managed: v03 is normalized to v3'
+    foreach ($odd in @('m9', 'm10', 'm11', 'm12')) {
+        Assert-True ((& $managedOf $odd 'ecosystem').managedVersion -ceq 'unknown') "managed: unparsable template version in $odd is unknown"
     }
-    Assert-True ($rs9.managedCount -eq 6) 'managed: Json managedCount counts only recognized assets (roster, 4 ecosystem, proj)'
-    Assert-True ($rs9.unregisteredCount -eq 8) 'managed: managed assets are removed from the unregistered count'
+
+    $rejects = @(
+        @('m5', 'half', 'unmarked-copy:.cursor'), @('m5', 'agentsdiff', 'unmarked-copy:.agents'), @('m5', 'copyname', 'name-mismatch'),
+        @('m5', 'tampered', 'sha-mismatch'), @('m5', 'notlast', 'invalid-marker'), @('m5', 'badproj', 'invalid-marker'),
+        @('m5', 'other-rule', 'wrong-file'), @('m5', 'tpl-agent', 'wrong-file'), @('m5', 'tpl-cmd', 'wrong-file'),
+        @('m5', 'begin-only', ''), @('m5', 'other-card', ''), @('m5', 'eco-end', ''), @('m5', 'prose', 'wrong-file'), @('m5', 'suffix', 'wrong-file'),
+        @('m6', 'agent-roster', 'invalid-marker'), @('m6', 'ecosystem', 'invalid-marker'),
+        @('m7', 'agent-roster', 'invalid-marker'), @('m7', 'ecosystem', 'invalid-marker'),
+        @('m13', 'linkcase', 'linked-copy:.cursor'))
+    foreach ($case in $rejects) {
+        $asset = & $managedOf $case[0] $case[1]
+        Assert-True ($asset.managedBy -ceq '' -and $asset.managedRejectReason -ceq $case[2]) "managed: $($case[0])/$($case[1]) is NOT managed (reason '$($case[2])')"
+    }
+    Assert-True ($rs9.managedCount -eq 11) 'managed: Json managedCount counts only valid assets'
+    Assert-True ($rs9.unregisteredCount -eq 20 -and @($rs9.warnings).Count -eq 0) 'managed: managed assets are removed from the unregistered count and nothing crashes'
     $tpl = @($rs9.managedSummary | Where-Object { $_.managedBy -eq 'vhk-template' })
-    Assert-True ($tpl.Count -eq 1 -and $tpl[0].count -eq 4 -and $tpl[0].latestVersion -ceq 'v3' -and (@($tpl[0].outdatedRepos) -join ',') -ceq 'm3') 'managed: version mix marks the older repo (m3) as outdated'
+    Assert-True ($tpl.Count -eq 1 -and $tpl[0].count -eq 9 -and $tpl[0].latestVersion -ceq 'v3' -and (@($tpl[0].outdatedRepos) -join ',') -ceq 'm3') 'managed: version mix marks only the older repo (m3) as outdated; unknown is not outdated'
     $human9 = Invoke-Drift @('-IncludeRepos', '-DevRoot', $dev9)
-    Assert-True ($human9.out.Contains('다른 도구가 관리함') -and $human9.out.Contains('VHK 경계 규칙 v3 3곳 · v2 1곳(m3)')) 'managed: Human shows the version distribution with the old repo'
+    Assert-True ($human9.out.Contains('VHK 경계 규칙 v3 4곳 · v2 1곳(m3) · 버전 불명 4곳(')) 'managed: Human shows the version distribution, the old repo and the unknown group'
     Assert-True ($human9.out.Contains('yohan-brain 라우팅 카드 1건') -and $human9.out.Contains('VHK 스킬 투영본 1건')) 'managed: Human lists roster and projection counts'
-    $hook9 = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $dev9)
-    $msg9 = ($hook9.out | ConvertFrom-Json).systemMessage
-    Assert-True ($msg9.Contains('plain-one') -and -not $msg9.Contains('ecosystem') -and -not $msg9.Contains('agent-roster') -and ($msg9 -notmatch '(^|[ :,])proj([,; ]|$)')) 'managed: managed assets are left out of the Hook alert'
+    Assert-True ($human9.out.Contains('(관리 해제: name-mismatch)')) 'managed: Human shows why a marker was rejected'
+
+    # 종류 섞임 규칙은 종류·이름 제한 때문에 파일 픽스처로 만들 수 없어 함수 단위로 확인한다.
+    $parsed = [Management.Automation.Language.Parser]::ParseFile($script, [ref]$null, [ref]$null)
+    $fnAst = $parsed.Find({ param($a) $a -is [Management.Automation.Language.FunctionDefinitionAst] -and $a.Name -eq 'Resolve-ManagedState' }, $true)
+    . ([scriptblock]::Create($fnAst.Extent.Text))
+    $mk = { param($by, $vendor) [pscustomobject]@{ managedBy = $by; managedVersion = ''; managedSource = ''; managedSha = ''; managedRejectReason = ''; canonHash = ''; vendorDir = $vendor; linkedOnly = $false } }
+    $mixed = Resolve-ManagedState -Members @((& $mk 'vhk-template' '.cursor'), (& $mk 'yohan-brain-roster' '.claude'))
+    Assert-True ($mixed.by -ceq '' -and $mixed.reason -ceq 'mixed-marker-kinds') 'managed: different marker kinds among copies is NOT managed'
+    $same = Resolve-ManagedState -Members @((& $mk 'vhk-template' '.cursor'), (& $mk 'vhk-template' '.claude'))
+    Assert-True ($same.by -ceq 'vhk-template') 'managed: same marker kind on every copy is managed'
+
+    # Hook: 관리 자산은 알림에서 빠지고, 마커가 무효라 다시 뜨는 자산은 "관리 해제"로 구분한다
+    $devH = Join-Path $fixtureRoot 'pubH\dev'
+    $h1 = Join-Path $devH 'products\hk'
+    New-FixtureFile (Join-Path $h1 '.cursor\rules\agent-roster.mdc') $rosterBlock
+    New-FixtureFile (Join-Path $h1 '.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v3')
+    New-FixtureFile (Join-Path $h1 '.claude\skills\proj\SKILL.md') (New-ProjectedText 'proj' (& $skillBody 'proj'))
+    New-SkillAt $h1 '.claude' 'plain-one'
+    New-FixtureFile (Join-Path $h1 '.claude\skills\tampered\SKILL.md') ((New-ProjectedText 'tampered' (& $skillBody 'tampered')).Replace('본문', '수정'))
+    New-DevRootAt $devH @([ordered]@{ name = 'hk'; group = 'products'; lifecycle = 'active' })
+    $msgH = ((Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $devH)).out | ConvertFrom-Json).systemMessage
+    Assert-True ($msgH.Contains('plain-one') -and $msgH.Contains('tampered(관리 해제)') -and -not $msgH.Contains('plain-one(관리 해제)')) 'managed: Hook marks a rejected marker as 관리 해제 and leaves plain assets alone'
+    Assert-True (-not $msgH.Contains('ecosystem') -and -not $msgH.Contains('agent-roster') -and $msgH -notmatch '(^|[ :,])proj([,; (]|$)') 'managed: managed assets are left out of the Hook alert'
     # 관리 자산만 있는 개발 루트는 Hook 이 조용해야 한다
     $dev10 = Join-Path $fixtureRoot 'pub10\dev'
-    New-FixtureFile (Join-Path $dev10 'products\only\.cursor\rules\ecosystem.mdc') (& $ecoBlock 3)
+    New-FixtureFile (Join-Path $dev10 'products\only\.cursor\rules\ecosystem.mdc') (& $ecoBlock 'v3')
     New-DevRootAt $dev10 @([ordered]@{ name = 'only'; group = 'products'; lifecycle = 'active' })
     $quiet10 = Invoke-Drift @('-OutputFormat', 'Hook', '-IncludeRepos', '-DevRoot', $dev10)
     Assert-True ($quiet10.out -ceq '{"suppressOutput":true}') 'managed: a repo with only managed assets keeps the Hook silent'

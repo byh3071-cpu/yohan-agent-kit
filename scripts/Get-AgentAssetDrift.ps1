@@ -168,66 +168,155 @@ function Get-TextDigest {
     catch { return '' }
 }
 
-# 다른 도구가 관리하는 파일의 마커. 줄 맨 앞(공백·탭 허용)에서 시작하는 HTML 주석만 인정한다.
-# 산문 속 인용·코드 조각 안 언급(줄 중간)은 마커가 아니다. 마커는 파일 어디에 있어도 된다(CRLF 도 허용).
-#   yohan-brain-roster : <!-- YOHAN-ROSTER-CARD:BEGIN ...
-#   vhk-template       : <!-- ECOSYSTEM-MDC:START v<N> ...      (버전 N 은 managedVersion 'vN')
-#   vhk-projection     : <!-- vhk-agent-skill: <name>@<n> source=<dir> sha256=<hex> -->
-$script:ManagedMarkerRules = @(
-    [pscustomobject]@{ by = 'yohan-brain-roster'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*YOHAN-ROSTER-CARD:BEGIN(?![\w-])') },
-    [pscustomobject]@{ by = 'vhk-template'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*ECOSYSTEM-MDC:START(?![\w-])(?:[ \t]+v(?<ver>\d+)(?![\w.]))?') },
-    [pscustomobject]@{ by = 'vhk-projection'; regex = New-Object Text.RegularExpressions.Regex('(?m)^[ \t]*<!--[ \t]*vhk-agent-skill:[ \t]*(?<name>[^\s@]+)@(?<n>\S+)[ \t]+source=(?<src>\S+)[ \t]+sha256=(?<sha>[0-9A-Fa-f]+)[ \t]*-->') }
-)
-
-# 파일 한 개에서 관리 마커를 찾는다. 없으면 $null. 여러 종류가 섞여 있으면 첫 규칙(위 순서)을 쓴다.
-function Get-ManagedMarker {
+# 다른 도구가 관리하는 파일의 마커. 주인 도구의 실제 규칙을 그대로 옮긴다.
+#  공통: 마커는 줄 맨 앞(들여쓰기 없음)에서 시작해 같은 줄에서 '-->' 로 닫혀야 한다. 코드 펜스(``` / ~~~) 안의 줄은
+#        마커가 아니다(닫히지 않은 펜스는 파일 끝까지). 예시·인용은 이 조건에서 걸러진다.
+#  yohan-brain-roster: kind=rule, name=agent-roster 인 파일에서 BEGIN 뒤에 END 가 있을 때만
+#                      (근거: yohan-brain ops/propagation/propagate-roster-card.ps1 이 이 .mdc 를 통째로 생성).
+#  vhk-template      : kind=rule, name=ecosystem 인 파일에서 ECOSYSTEM-MDC:START 뒤에 END 가 있을 때만
+#                      (근거: vhk src/commands/sync.ts isVhkTemplate = START·END 둘 다 포함). 버전은 START 뒤 첫 토큰 v<1~9자리>.
+#  vhk-projection    : kind=skill. VHK parseManagedContent 규칙 그대로 — 마지막 비어 있지 않은 줄이
+#                      `<!-- vhk-agent-skill: <name>@<n> source=.agents/skills sha256=<64hex> -->` 이고, name 이 폴더 이름과 같고,
+#                      마커를 뺀 본문(CRLF→LF, 끝 개행 보장)의 SHA256 이 sha256 과 같아야 한다.
+function Read-NormalizedText {
     param([Parameter(Mandatory = $true)][string]$Path)
 
-    try {
-        $text = (New-Object Text.UTF8Encoding($false)).GetString([IO.File]::ReadAllBytes($Path))
+    $text = (New-Object Text.UTF8Encoding($false)).GetString([IO.File]::ReadAllBytes($Path))
+    return $text.TrimStart([char]0xFEFF).Replace("`r`n", "`n")
+}
+
+# VHK canonicalContent + contentHash: CRLF→LF 후 끝 개행을 보장하고 SHA256(소문자 hex).
+function Get-CanonicalTextHash {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
+
+    $canonical = $Text.Replace("`r`n", "`n")
+    if (-not $canonical.EndsWith("`n")) { $canonical += "`n" }
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { $hash = $sha.ComputeHash((New-Object Text.UTF8Encoding($false)).GetBytes($canonical)) }
+    finally { $sha.Dispose() }
+    return (($hash | ForEach-Object { $_.ToString('x2') }) -join '')
+}
+
+# 파일 한 개의 관리 마커 판정. 항상 객체를 돌려준다(by='' 이면 관리 아님, reject 는 마커 후보가 있었는데 거절한 이유).
+function Get-ManagedMarker {
+    param([Parameter(Mandatory = $true)][string]$Path, [string]$Kind = '', [string]$Name = '')
+
+    $none = [pscustomobject][ordered]@{ by = ''; version = ''; source = ''; sha = ''; reject = '' }
+    try { $text = Read-NormalizedText -Path $Path } catch { return $none }
+    $lines = $text.Split("`n")
+
+    # 코드 펜스 밖의 줄만 live.
+    $live = New-Object 'bool[]' $lines.Count
+    $fenceChar = ''
+    $fenceLen = 0
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+        if ($fenceChar -ne '') {
+            if ($line -match '^ {0,3}(`{3,}|~{3,})[ \t]*$' -and $Matches[1].Substring(0, 1) -ceq $fenceChar -and $Matches[1].Length -ge $fenceLen) { $fenceChar = '' }
+            continue
+        }
+        if ($line -match '^ {0,3}(`{3,}|~{3,})') {
+            $fenceChar = $Matches[1].Substring(0, 1)
+            $fenceLen = $Matches[1].Length
+            continue
+        }
+        $live[$i] = $true
     }
-    catch { return $null }
-    foreach ($rule in $script:ManagedMarkerRules) {
-        $match = $rule.regex.Match($text)
-        if (-not $match.Success) { continue }
-        $version = ''
-        $source = ''
-        if ($rule.by -eq 'vhk-template' -and $match.Groups['ver'].Success) { $version = 'v' + $match.Groups['ver'].Value }
-        if ($rule.by -eq 'vhk-projection') { $source = $match.Groups['src'].Value }
-        return [pscustomobject][ordered]@{ by = $rule.by; version = $version; source = $source }
+    $findLive = {
+        param($Pattern, $From)
+        for ($j = $From; $j -lt $lines.Count; $j++) { if ($live[$j] -and $lines[$j] -cmatch $Pattern) { return $j } }
+        return -1
     }
-    return $null
+
+    $reject = ''
+
+    # --- yohan-brain-roster ---
+    $hasRoster = $text.Contains('YOHAN-ROSTER-CARD:BEGIN')
+    if ($Kind -eq 'rule' -and $Name -ieq 'agent-roster') {
+        $begin = & $findLive '^<!-- YOHAN-ROSTER-CARD:BEGIN(?![\w-]).*-->[ \t]*$' 0
+        if ($begin -ge 0 -and (& $findLive '^<!-- YOHAN-ROSTER-CARD:END -->[ \t]*$' ($begin + 1)) -ge 0) {
+            return [pscustomobject][ordered]@{ by = 'yohan-brain-roster'; version = ''; source = ''; sha = ''; reject = '' }
+        }
+        if ($hasRoster -and $reject -eq '') { $reject = 'invalid-marker' }
+    }
+    elseif ($hasRoster -and $reject -eq '') { $reject = 'wrong-file' }
+
+    # --- vhk-template ---
+    $hasTemplate = $text.Contains('ECOSYSTEM-MDC:START')
+    if ($Kind -eq 'rule' -and $Name -ieq 'ecosystem') {
+        $start = & $findLive '^<!-- ECOSYSTEM-MDC:START(?![\w-])(?:[ \t]+(?!-->)(?<tok>\S+))?.*-->[ \t]*$' 0
+        if ($start -ge 0 -and (& $findLive '^<!-- ECOSYSTEM-MDC:END(?![\w-]).*-->[ \t]*$' ($start + 1)) -ge 0) {
+            $null = $lines[$start] -cmatch '^<!-- ECOSYSTEM-MDC:START(?![\w-])(?:[ \t]+(?!-->)(?<tok>\S+))?.*-->[ \t]*$'
+            $token = $(if ($Matches.ContainsKey('tok')) { [string]$Matches['tok'] } else { '' })
+            # 해석할 수 없는 표기(V3, v3.1, 버전 없음, 10자리 이상)는 'unknown'. v03 은 v3 으로 정규화한다.
+            $version = $(if ($token -cmatch '^v(\d{1,9})$') { 'v' + [int]$Matches[1] } else { 'unknown' })
+            return [pscustomobject][ordered]@{ by = 'vhk-template'; version = $version; source = ''; sha = ''; reject = '' }
+        }
+        if ($hasTemplate -and $reject -eq '') { $reject = 'invalid-marker' }
+    }
+    elseif ($hasTemplate -and $reject -eq '') { $reject = 'wrong-file' }
+
+    # --- vhk-projection ---
+    $hasProjection = $text.Contains('vhk-agent-skill:')
+    if ($Kind -eq 'skill') {
+        $last = $lines.Count - 1
+        while ($last -ge 0 -and $lines[$last] -eq '') { $last-- }
+        if ($last -ge 0 -and $lines[$last] -cmatch '^<!-- vhk-agent-skill: ([a-z0-9-]+)@(\d+) source=\.agents/skills sha256=([a-f0-9]{64}) -->$') {
+            $markerName = $Matches[1]
+            $markerSha = $Matches[3]
+            if (-not $live[$last]) { if ($reject -eq '') { $reject = 'invalid-marker' } }
+            elseif ($markerName -cne $Name) { if ($reject -eq '') { $reject = 'name-mismatch' } }
+            elseif ((Get-CanonicalTextHash -Text ($(if ($last -gt 0) { @($lines[0..($last - 1)]) -join "`n" } else { '' }))) -cne $markerSha) { if ($reject -eq '') { $reject = 'sha-mismatch' } }
+            else {
+                return [pscustomobject][ordered]@{ by = 'vhk-projection'; version = ''; source = '.agents/skills'; sha = $markerSha; reject = '' }
+            }
+        }
+        elseif ($hasProjection -and $reject -eq '') { $reject = 'invalid-marker' }
+    }
+    elseif ($hasProjection -and $reject -eq '') { $reject = 'wrong-file' }
+
+    $none.reject = $reject
+    return $none
 }
 
 # 자산(벤더 사본 묶음) 단위 관리 판정. 규칙:
-#  - 마커가 하나도 없으면 관리 아님.
-#  - 마커 종류가 사본끼리 다르면 모호하므로 관리 아님(미등록으로 남겨 사람이 본다).
-#  - vhk-projection: 마커 없는 사본은 VHK 정본 폴더(.agents)에만 허용한다. 그 밖의 폴더(.claude·.codex·.cursor)에
-#    마커 없는 사본이 있으면 사람이 만든 사본이 섞인 것이므로 관리 아님.
-#  - 그 외(roster·template): 존재하는 모든 사본에 마커가 있어야 관리. 일부만 있으면 관리 아님.
-#  - 링크만 있는(digest 없음) 사본은 읽지 못했으므로 마커 없는 사본으로 친다.
+#  - 유효한 마커 사본이 하나도 없으면 관리 아님(마커 후보가 있었으면 그 거절 이유를 남긴다).
+#  - 마커 종류가 사본끼리 다르면 관리 아님(mixed-marker-kinds).
+#  - 마커 없는 사본이 있으면 관리 아님. 단 vhk-projection 의 '.agents' 사본은 예외로, 그 정규화 해시가
+#    형제 마커 사본의 sha256 과 같을 때만 허용한다(VHK 정본과 투영본이 같은 본문임이 증명될 때).
+#  - 링크만 있는(읽지 못한) 사본은 마커 없는 사본으로 친다(linked-copy).
 function Resolve-ManagedState {
     param([Parameter(Mandatory = $true)]$Members)
 
-    $none = [pscustomobject][ordered]@{ by = ''; version = ''; source = ''; partial = $false }
+    $none = [pscustomobject][ordered]@{ by = ''; version = ''; source = ''; reason = '' }
     $marked = @($Members | Where-Object { $_.managedBy })
-    if ($marked.Count -eq 0) { return $none }
+    if ($marked.Count -eq 0) {
+        $rejects = @($Members | Where-Object { $_.managedRejectReason } | ForEach-Object { $_.managedRejectReason } | Sort-Object -Unique)
+        $none.reason = ($rejects -join ';')
+        return $none
+    }
     $kinds = @($marked | ForEach-Object { $_.managedBy } | Sort-Object -Unique)
-    if ($kinds.Count -gt 1) { $none.partial = $true; return $none }
-    $unmarked = @($Members | Where-Object { -not $_.managedBy })
-    $allowed = @($unmarked | Where-Object { $kinds[0] -eq 'vhk-projection' -and $_.vendorDir -eq '.agents' })
-    if ($unmarked.Count -gt $allowed.Count) { $none.partial = $true; return $none }
+    if ($kinds.Count -gt 1) { $none.reason = 'mixed-marker-kinds'; return $none }
+    $shas = @($marked | Where-Object { $_.managedSha } | ForEach-Object { $_.managedSha })
+    $reasons = New-Object 'System.Collections.Generic.List[string]'
+    foreach ($copy in @($Members | Where-Object { -not $_.managedBy })) {
+        if ($copy.linkedOnly) { $reasons.Add("linked-copy:$($copy.vendorDir)"); continue }
+        $canon = [string]$copy.canonHash
+        if ($kinds[0] -eq 'vhk-projection' -and $copy.vendorDir -eq '.agents' -and $canon -and ($shas -contains $canon)) { continue }
+        $reasons.Add("unmarked-copy:$($copy.vendorDir)")
+    }
+    if ($reasons.Count -gt 0) { $none.reason = ($reasons.ToArray() -join ';'); return $none }
     $withVersion = @($marked | Where-Object { $_.managedVersion })
-
     $withSource = @($marked | Where-Object { $_.managedSource })
     return [pscustomobject][ordered]@{
         by      = [string]$kinds[0]
         # 사본끼리 버전이 다르면 대표 항목(벤더 우선순위 첫 사본)의 값을 쓴다.
         version = $(if ($withVersion.Count -gt 0) { [string]$withVersion[0].managedVersion } else { '' })
         source  = $(if ($withSource.Count -gt 0) { [string]$withSource[0].managedSource } else { '' })
-        partial = $false
+        reason  = ''
     }
 }
+
 
 # 킷 레지스트리 JSON 을 한 번만 읽는다.
 function Read-KitRegistry {
@@ -304,11 +393,16 @@ function Get-RepoAssetEntries {
 
     $add = {
         param($Kind, $Name, $VendorDir, $Relative, $FullPath, $DigestSource, $IsLink)
-        $marker = $(if ($IsLink) { $null } else { Get-ManagedMarker -Path $DigestSource })
+        $marker = $(if ($IsLink) { $null } else { Get-ManagedMarker -Path $DigestSource -Kind $Kind -Name $Name })
+        $canonHash = ''
+        if (-not $IsLink -and $Kind -eq 'skill') { try { $canonHash = Get-CanonicalTextHash -Text (Read-NormalizedText -Path $DigestSource) } catch { $canonHash = '' } }
         $entries.Add([pscustomobject][ordered]@{
                 managedBy      = $(if ($marker) { $marker.by } else { '' })
                 managedVersion = $(if ($marker) { $marker.version } else { '' })
                 managedSource  = $(if ($marker) { $marker.source } else { '' })
+                managedSha     = $(if ($marker) { $marker.sha } else { '' })
+                managedRejectReason = $(if ($marker) { $marker.reject } else { '' })
+                canonHash      = $canonHash
                 repo         = $RepoName
                 kind         = $Kind
                 name         = $Name
@@ -566,7 +660,7 @@ function Invoke-RepoScan {
                 managedBy      = $managed.by
                 managedVersion = $managed.version
                 managedSource  = $managed.source
-                markerPartial  = [bool]$managed.partial
+                managedRejectReason = [string]$managed.reason
                 key           = $displayKey
             })
     }
@@ -623,7 +717,7 @@ function Get-ManagedSummary {
     foreach ($byGroup in @($ManagedAssets | Group-Object -Property managedBy | Sort-Object -Property Name)) {
         $versionEntries = New-Object 'System.Collections.Generic.List[object]'
         foreach ($versionGroup in @($byGroup.Group | Group-Object -Property managedVersion)) {
-            $number = $(if ($versionGroup.Name -match '^v(\d+)$') { [int]$Matches[1] } else { -1 })
+            $number = $(if ($versionGroup.Name -match '^v(\d{1,9})$') { [int]$Matches[1] } else { -1 })
             $versionEntries.Add([pscustomobject][ordered]@{
                     version = [string]$versionGroup.Name
                     number  = $number
@@ -728,14 +822,18 @@ try {
         catch {
             $repoScan = New-RepoScanFailure ([string]$DevRoot) "레포 스캔 실패로 건너뜀: $($_.Exception.Message)" '스캔 예외'
         }
+        # 등록되지 않았어도 다른 도구가 관리하는 자산(마커 있음)은 미등록 수·Hook 알림에서 뺀다.
+        $repoManaged = @($repoScan.assets | Where-Object { -not $_.registered -and $_.managedBy })
+        # 요약 단계는 격리한다: 여기서 실패해도 검사 전체는 죽지 않고 경고만 남긴다.
+        try { $repoManagedSummary = @(Get-ManagedSummary -ManagedAssets $repoManaged) }
+        catch {
+            $repoManagedSummary = @()
+            $repoScan.warnings = @($repoScan.warnings) + "관리 자산 요약을 만들지 못해 건너뜀: $($_.Exception.Message)"
+        }
         # Human 은 본문 섹션에 경고를 싣는다. stderr 는 기계 출력(Hook/Json)일 때만 쓴다(중복 방지).
         if ($OutputFormat -ne 'Human') {
             foreach ($warning in @($repoScan.warnings)) { [Console]::Error.WriteLine("경고: $warning") }
         }
-
-        # 등록되지 않았어도 다른 도구가 관리하는 자산(마커 있음)은 미등록 수·Hook 알림에서 뺀다.
-        $repoManaged = @($repoScan.assets | Where-Object { -not $_.registered -and $_.managedBy })
-        $repoManagedSummary = @(Get-ManagedSummary -ManagedAssets $repoManaged)
         $repoUnregistered = @($repoScan.assets | Where-Object { -not $_.registered -and -not $_.managedBy })
         $repoNew = @($repoUnregistered | Where-Object { -not $_.inBaseline })
         $repoReported = @($(if ($NewOnly -or $OutputFormat -eq 'Hook') { $repoNew } else { $repoUnregistered }))
@@ -810,7 +908,7 @@ try {
             }
             foreach ($repoGroup in @($repoReported | Group-Object -Property repo)) {
                 if ($remaining -le 0) { break }
-                $take = @($repoGroup.Group | Select-Object -First $remaining | ForEach-Object { $_.name })
+                $take = @($repoGroup.Group | Select-Object -First $remaining | ForEach-Object { $_.name + $(if ($_.managedRejectReason) { '(관리 해제)' } else { '' }) })
                 $remaining -= $take.Count
                 $parts.Add("$($repoGroup.Name): " + ($take -join ', '))
             }
@@ -867,6 +965,7 @@ try {
                             managedBy    = [string]$_.managedBy
                             managedVersion = [string]$_.managedVersion
                             managedSource = [string]$_.managedSource
+                            managedRejectReason = [string]$_.managedRejectReason
                         }
                     })
                     groups            = @($repoScan.groups)
@@ -901,7 +1000,7 @@ try {
             foreach ($repoGroup in @($repoReported | Group-Object -Property repo)) {
                 Write-Output "  [$($repoGroup.Name)] 미등록:"
                 foreach ($item in $repoGroup.Group) {
-                    Write-Output "    - $($item.kind) $($item.name)  [$(@($item.vendorDirs) -join ', ')]$(if ($item.linkedOnly) { ' (링크)' })$(if ($item.nameMatchesKit) { ' (킷과 이름만 같음)' })"
+                    Write-Output "    - $($item.kind) $($item.name)  [$(@($item.vendorDirs) -join ', ')]$(if ($item.linkedOnly) { ' (링크)' })$(if ($item.nameMatchesKit) { ' (킷과 이름만 같음)' })$(if ($item.managedRejectReason) { " (관리 해제: $($item.managedRejectReason))" })"
                 }
             }
             if ($repoManagedSummary.Count -gt 0) {
@@ -909,8 +1008,9 @@ try {
                 foreach ($summary in $repoManagedSummary) {
                     $detail = $(if (@($summary.versions | Where-Object { $_.version }).Count -gt 0) {
                             (@($summary.versions | ForEach-Object {
-                                        $label = $(if ($_.version) { $_.version } else { '버전 없음' })
-                                        $old = $(if ($summary.outdatedRepos.Count -gt 0 -and @($_.repos | Where-Object { $summary.outdatedRepos -contains $_ }).Count -gt 0) { "($(@($_.repos | Where-Object { $summary.outdatedRepos -contains $_ }) -join ', '))" } else { '' })
+                                        $label = $(if ($_.version -ceq 'unknown') { '버전 불명' } elseif ($_.version) { $_.version } else { '버전 없음' })
+                                        $flag = @($_.repos | Where-Object { $summary.outdatedRepos -contains $_ })
+                                        $old = $(if ($_.version -ceq 'unknown') { "($(@($_.repos) -join ', '))" } elseif ($flag.Count -gt 0) { "($($flag -join ', '))" } else { '' })
                                         "$label $($_.count)곳$old"
                                     }) -join ' · ')
                         } else { "$($summary.count)건" })
