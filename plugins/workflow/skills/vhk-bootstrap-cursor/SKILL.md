@@ -1,7 +1,10 @@
 ---
 name: vhk-bootstrap-cursor
-description: VHK Cursor 독푸딩 — 설치+배선 한 번에. 트리거: "VHK 도입", "독푸딩", "vhk bootstrap", Claude→Cursor 전환.
+description: "전면 보류된 과거 절차. VHK 문제 해결과 사용자 재개 승인 전에는 선택·실행하지 않는다. 검증 스킬은 자동 호출하지 않는다."
+disable-model-invocation: true
 ---
+
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
 
 # VHK Bootstrap Cursor (설치 + 배선)
 

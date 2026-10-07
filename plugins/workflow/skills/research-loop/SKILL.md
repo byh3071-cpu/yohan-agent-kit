@@ -3,6 +3,8 @@ name: research-loop
 description: "Use when 요한 wants to run a research question through the full pipeline — fan-out search, adversarial verify, save a cited research-report to brain, wire it into the knowledge compound loop, and back-fill the Notion 리서치 파이프라인 DB. Triggers: '리서치 돌려', '이거 조사해줘 <질문>', '검증 리서치', '리서치 파이프라인', '<주제> 파고들어줘', 'research this'."
 ---
 
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
+
 # Research Loop
 
 ## Overview

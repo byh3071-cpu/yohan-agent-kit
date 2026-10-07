@@ -1,7 +1,10 @@
 ---
 name: new-repo
-description: Use PROACTIVELY whenever the user starts or even just mentions a NEW project·app·tool·product — '레포 만들어줘' 라고 콕 집지 않아도 된다 (예: "X 만들어보자", "새 앱 하나", "OO 짜보고 싶어", "프로젝트 시작하자", "이거 따로 빼서 만들자"). 새 프로젝트 낌새를 감지하면 그룹·이름을 제시해 1회 확인 후(사용자가 '바로/확인없이/그냥 만들어' 하면 즉시) add-repo.ps1 -Create 로 GitHub 생성·그룹폴더 클론·repos.json push, 멀티PC 자동 전파. Triggers - 새 프로젝트·앱·도구·제품 시작 낌새 전반 + "레포 만들어줘"·"새 레포"·"리포지토리 생성".
+description: >-
+  Use PROACTIVELY whenever the user starts or even just mentions a NEW project·app·tool·product — '레포 만들어줘' 라고 콕 집지 않아도 된다 (예: "X 만들어보자", "새 앱 하나", "OO 짜보고 싶어", "프로젝트 시작하자", "이거 따로 빼서 만들자"). 새 프로젝트 낌새를 감지하면 그룹·이름을 제시해 1회 확인 후(사용자가 '바로/확인없이/그냥 만들어' 하면 즉시) add-repo.ps1 -Create 로 GitHub 생성·그룹폴더 클론·repos.json push, 멀티PC 자동 전파. Triggers - 새 프로젝트·앱·도구·제품 시작 낌새 전반 + "레포 만들어줘"·"새 레포"·"리포지토리 생성".
 ---
+
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
 
 # new-repo
 

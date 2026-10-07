@@ -3,6 +3,8 @@ name: handoff
 description: Use when a session is ending/pausing, moving between machines, or the user asks for chat/session end verification — scan→close(기본)→full. 채팅 종료 검증=재고+안전 조치. Triggers - "채팅 종료 검증", "채팅 종료 섹션 검증", "세션 종료 검증", "핸드오프", "마무리하자", "오늘 끝", "내일 이어서", "노트북으로 전달", "정리하고 끝", "다른 기기에서 이어서", "컨텍스트 work로 남겨".
 ---
 
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
+
 # handoff
 
 세션 맥락을 디스크에 고정하고, 다른 기기 복원용 **전달 프롬프트**를 만든다.

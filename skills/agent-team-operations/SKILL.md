@@ -3,6 +3,8 @@ name: agent-team-operations
 description: Use when one conductor must coordinate or hand off a multi-session, multi-vendor team with shared work items, project-owned context, model/resource routing, stable artifacts, and explicit human gates. Use for deep planning lanes, team skills, worktree writers, and independent reviewers. Do not use for a solo bounded task, provider-native team configuration, or direct terminal control.
 ---
 
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
+
 # Agent Team Operations
 
 Operate a vendor-neutral team in which sessions and models are replaceable, project context is durable, and the user handles goals and meaningful gates instead of session mechanics.
