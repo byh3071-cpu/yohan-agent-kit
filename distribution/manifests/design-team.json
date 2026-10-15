@@ -9,8 +9,8 @@
                   },
                   {
                       "path":  "references/chatgpt-context.md",
-                      "bytes":  4266,
-                      "sha256":  "8F0BC16AE3FC49CDBD594825E2F4EA4D8CB7C5176AC12F7ECBDD3BC32891F3DB"
+                      "bytes":  5038,
+                      "sha256":  "EED25F5796D0C8666BDE998BB24BA8CEF44F62844F264E0A1F0836C475E16984"
                   },
                   {
                       "path":  "references/chatgpt-instructions.md",
@@ -68,5 +68,5 @@
                       "sha256":  "2591064D0F0FFA9A068524D812D53D4F117BEBD6294E2E0B8F3124B154F428DF"
                   }
               ],
-    "digest":  "871D256E4A62E8F0E86459AC47F9B289C6A7473AD1D08AA63FEEDA9FFE6E899B"
+    "digest":  "C2592753053312DA2043D6C47923D5F201739BFC0508CA192C321B359D3A52BC"
 }
