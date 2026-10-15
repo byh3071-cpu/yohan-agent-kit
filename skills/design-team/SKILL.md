@@ -21,6 +21,8 @@ Do not store project facts in this skill. The reusable method belongs here; proj
 
 ## Choose the work mode
 
+For ChatGPT mobile image work or a portable context export, use [chatgpt-context.md](references/chatgpt-context.md). Reuse the existing resolver and project-owned assets; export only selected material. This mode does not require a new taste survey, three generated directions, extra model evaluations, installation, or production changes. Current project instructions and the user's chosen comparison axes take precedence.
+
 - **Discover** — inventory context, identify uncertainty, and produce a design brief. Do not invent a visual direction.
 - **Resume** — restore an existing project-owned context, taste record, approval state, and exact continuation point. Do not reopen resolved questions unless evidence changed.
 - **Elicit** — establish or refresh the taste model with the design director through structured comparison, using [taste-interview.md](references/taste-interview.md). Produces confirmed taste rules and forbidden patterns, not artifacts.

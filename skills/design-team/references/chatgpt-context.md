@@ -1,0 +1,23 @@
+# Portable design context
+
+The shared instructions and medium profiles live next to this file. Project facts, references and decisions stay in the owner project; Brain keeps its existing index and evidence. Do not install or synchronize a harness to export a context bundle.
+
+Use the owner's existing design context where possible. The JSON input accepted by `scripts/Resolve-DesignContext.ps1` can also contain `projectId`, `references`, `taste`, and `sourceDocuments`. A reference has `id`, `media`, `source` (`repo`, relative `path`, immutable `gitRef`, `sha256`), `take`, `keep`, `exclude`, and `interpretationStatus`. `assetId` optionally links an existing approved Brain item; approval of that artifact is not adoption of its style for this request. Taste records have `state` (`confirmed`, `conditional`, `inferred`), `rule`, `scope`, `evidence`; confirmed records also need `approvedBy`, conditional records need `condition`.
+
+The work request preserves `workContext` and contains `bundle`: `medium`, `referenceIds`, `content`, `canvas`, `state`, `nextAction`, and `missing`. Keep work-specific copy and status here instead of rewriting the common profile. Missing references remain missing; no examples are silently substituted.
+
+From the Agent Kit repository run:
+
+```powershell
+node scripts/export-design-context.mjs --brain-root <brain> --project-root <owner-checkout> --project-context <relative-context.json> --request <relative-request.json> --repo-map <relative-local-map.json> --out .mova/chatgpt/<revision>
+```
+
+The local repository map is `{ "yohan-studio": "<local-checkout>", "mova": "<local-checkout>" }`. It is read-only input, never an attachment. The exporter uses the current Brain HEAD as an immutable catalog revision while the resolver retains its approved contract pin. Reference blobs come from their named repository and ref. The command creates a new output folder, refuses to overwrite, and does not upload, generate images, change taste, or record approvals.
+
+`PROJECT-INSTRUCTIONS.txt` is the short shared instruction. `START-HERE.md` contains only the selected medium, content, numbered images, transfer analysis, scoped taste, missing inputs, source revisions and next step. `feedback-template.json` returns the user's choice and reason tied to the bundle ID. `manifest.json` makes the generated copy reproducible; it is not a second editable source.
+
+For repeated work, put the short common instruction in a ChatGPT project's instructions and attach START-HERE plus its numbered images as project files or to the particular chat. For one image, paste START-HERE and attach the numbered images to that chat. Upload the actual images separately; a local path or an image link in Markdown does not attach its pixels. If a project/file UI is unavailable on mobile, use the per-chat attachment route. ChatGPT does not automatically read these local repositories or installed skills. See [official Projects guidance](https://learn.chatgpt.com/docs/projects?surface=app) and [file attachment guidance](https://learn.chatgpt.com/docs/use-chatgpt) (checked 2026-10-15). Availability in the user's actual mobile UI remains unverified.
+
+Update owner-project inputs and regenerate a new revision when content changes. Do not maintain the exported copy by hand or let conflicting revisions accumulate as project knowledge. Return feedback to the owner project's decision record with the exact image and scope; use the existing `Record-DesignDecision.ps1` only when Brain evidence actually needs an append. A proposed event can describe an unreviewed interpretation. `accepted` or `promoted` still requires a real human decision and its approval reference. Never infer approval from a filled template or from an export succeeding.
+
+Interpret everyday phrases as observable changes: “less busy” could mean fewer secondary labels, a larger empty region or fewer competing accents. Label that interpretation, keep the user's words and change only the selected axis on the same content. The reference analysis must say what transfers, what remains from the original, and what is excluded. Exact tokens/typesetting belong to code or editing; an image prompt alone does not enforce pixel values. No savings claim is valid without measurement.
