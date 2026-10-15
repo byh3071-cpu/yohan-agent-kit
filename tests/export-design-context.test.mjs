@@ -84,3 +84,31 @@ test('conditional and inferred taste stay scoped; unapproved confirmed taste is 
   f.context.taste.push({ state: 'confirmed', rule: '근거 없는 확정', scope: ['instagram-thumbnail'], evidence: 'agent guess' });
   assert.throws(f.run, /human approver/);
 });
+
+test('new attachments export as hashed local drafts without Git approval or a second source of instructions', t => {
+  const f = fixture(t);
+  mkdirSync(path.join(f.root, '.mova/drafts'), { recursive: true });
+  writeFileSync(path.join(f.root, '.mova/drafts/attachment.png'), f.pixels);
+  f.context.references[0].source = { kind: 'local-draft', repo: 'fixture', path: '.mova/drafts/attachment.png', sha256: f.context.references[0].source.sha256 };
+  f.request.bundle.chatPrompt = '사진을 다시 만들지 말고 이 작업의 문구 교체 방식을 정리해줘.';
+  const result = f.run();
+  assert.deepEqual(result.files.find(file => file.name === 'reference-01.png').bytes, f.pixels);
+  assert.equal(result.manifest.references[0].source.gitRef, undefined);
+  assert.equal(result.manifest.approvedSources.length, 0);
+  assert.match(result.files[0].bytes.toString(), /로컬 첨부 작업본/);
+  assert.doesNotMatch(result.files[0].bytes.toString(), /@undefined/);
+  assert.equal(result.files.find(file => file.name === 'USE-IN-CHATGPT.txt').bytes.toString(), f.request.bundle.chatPrompt + '\n');
+  writeFileSync(path.join(f.root, '.mova/drafts/attachment.png'), 'changed bytes');
+  assert.throws(f.run, /hash mismatch/);
+});
+
+test('local drafts cannot claim a catalog approval, an immutable ref or an arbitrary project file', t => {
+  const f = fixture(t);
+  f.context.references[0].source.kind = 'local-draft';
+  assert.throws(f.run, /without claiming a Git ref/);
+  delete f.context.references[0].source.gitRef;
+  assert.throws(f.run, /must stay in .mova/);
+  f.context.references[0].source.path = '.mova/drafts/attachment.png';
+  f.context.references[0].assetId = 'pretend-approved';
+  assert.throws(f.run, /cannot claim an approved catalog asset/);
+});

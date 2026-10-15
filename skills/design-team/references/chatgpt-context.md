@@ -6,6 +6,8 @@ Use the owner's existing design context where possible. The JSON input accepted 
 
 The work request preserves `workContext` and contains `bundle`: `medium`, `referenceIds`, `content`, `canvas`, `state`, `nextAction`, and `missing`. Keep work-specific copy and status here instead of rewriting the common profile. Missing references remain missing; no examples are silently substituted.
 
+For new user attachments that are not in Git, preserve the original bytes in the current authorized workspace's `.mova/` draft area. A reference can use `source.kind: local-draft`, a mapped workspace name in `repo`, its `.mova/` relative `path`, and `sha256`, without a `gitRef` or an approved `assetId`. The export labels it as a local draft; this does not assign a permanent owner or approve a style. If the owner project is unresolved, keep the inputs and output in that draft workspace until ownership is confirmed. Do not commit personal media into an unrelated repository merely to obtain a Git ref. Optional `bundle.chatPrompt` exports a short `USE-IN-CHATGPT.txt` from the same request source for mobile copy/paste; it is not a separately maintained instruction.
+
 From the Agent Kit repository run:
 
 ```powershell
