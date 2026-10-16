@@ -8,9 +8,24 @@
                       "sha256":  "9E5A2BA72EFA6DE00A90B844F95B339F31B6D4C3FA7BEE11320343C9ED88AB5F"
                   },
                   {
+                      "path":  "references/chatgpt-context.md",
+                      "bytes":  5038,
+                      "sha256":  "EED25F5796D0C8666BDE998BB24BA8CEF44F62844F264E0A1F0836C475E16984"
+                  },
+                  {
+                      "path":  "references/chatgpt-instructions.md",
+                      "bytes":  1494,
+                      "sha256":  "2B0CB0132664511326B01A3DF8F68433BB7BF13FC8118282DC36DB5B971EBA9D"
+                  },
+                  {
                       "path":  "references/context-contract.md",
                       "bytes":  6459,
                       "sha256":  "6A6C90D12CB2A45EA9C666A6F8B7ADCDB095A2119053F67F00F0FFAB379F1BF7"
+                  },
+                  {
+                      "path":  "references/media-profiles.json",
+                      "bytes":  3226,
+                      "sha256":  "7692895F4D2CD1719C0E9DB93FF1AFF135608AA61EF532D507BF62ADCB728D8A"
                   },
                   {
                       "path":  "references/operating-manual.md",
@@ -49,9 +64,9 @@
                   },
                   {
                       "path":  "SKILL.md",
-                      "bytes":  9708,
-                      "sha256":  "96F11839A5CE2F9C6E72A7F80E72F3D616537B5AC455904D9583AE3E7CCB776A"
+                      "bytes":  10132,
+                      "sha256":  "2591064D0F0FFA9A068524D812D53D4F117BEBD6294E2E0B8F3124B154F428DF"
                   }
               ],
-    "digest":  "68A4937B956ADDACE7B47A3C0782D886FF8F1A0938B961645048351C6733787C"
+    "digest":  "6D6F4F2E647969F40953630E8C0F9EA76B1E6923BF8886B126235AC72D27897B"
 }

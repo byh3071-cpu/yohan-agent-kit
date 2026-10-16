@@ -7,11 +7,16 @@ param(
     [Parameter(Mandatory = $true)][string]$CurrentRequestPath,
     [Parameter(Mandatory = $true)][string]$ProjectContextPath,
     [string]$ContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823',
+    [ValidatePattern('^[a-f0-9]{40}$')][string]$IndexRef = '37068a625d85bb3955579a04d87cc0f5c503c823',
+    [string]$SourceRepositoriesPath,
+    [ValidatePattern('^[a-z0-9][a-z0-9-]*(,[a-z0-9][a-z0-9-]*)*$')][string]$SelectedSourceIds,
+    [switch]$SelectNoSources,
     [ValidateSet('Json', 'Human')][string]$OutputFormat = 'Json'
 )
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
 
 $script:pinnedContractRef = '37068a625d85bb3955579a04d87cc0f5c503c823'
 $script:indexPath = 'memory/design-intelligence/index.yaml'
@@ -166,7 +171,7 @@ try {
 
     $resolvedCommit = (Get-StrictUtf8 -Bytes (Invoke-GitBytes -RepositoryRoot $brain -Arguments @('rev-parse', '--verify', "$ContractRef^{commit}")) -Label 'Git commit').Trim()
     if ($resolvedCommit -cne $script:pinnedContractRef) { throw 'Pinned contract commit does not resolve exactly' }
-    $indexText = Get-StrictUtf8 -Bytes (Invoke-GitBytes -RepositoryRoot $brain -Arguments @('show', "$ContractRef`:$script:indexPath")) -Label 'Design intelligence index'
+    $indexText = Get-StrictUtf8 -Bytes (Invoke-GitBytes -RepositoryRoot $brain -Arguments @('show', "$ContractRef`:$script:indexPath")) -Label 'Design intelligence contract'
     foreach ($required in @(
         'metadata_schema_index_evidence: yohan-brain',
         'resolver_recording_execution: yohan-agent-kit',
@@ -177,7 +182,17 @@ try {
     )) {
         if (-not $indexText.Contains($required)) { throw "Pinned contract invariant is missing: $required" }
     }
+    # The contract stays pinned. Callers may select a newer, immutable catalog revision.
+    $indexText = Get-StrictUtf8 -Bytes (Invoke-GitBytes -RepositoryRoot $brain -Arguments @('show', "$IndexRef`:$script:indexPath")) -Label 'Design intelligence index'
     $items = Get-IndexItems -IndexText $indexText
+    $repositories = @{ 'yohan-brain' = $brain }
+    if (-not [string]::IsNullOrWhiteSpace($SourceRepositoriesPath)) {
+        $map = Read-JsonFile -Path (Get-SafeProjectFile -Root $project -RelativePath $SourceRepositoriesPath)
+        foreach ($property in @($map.PSObject.Properties)) {
+            if ($property.Name -notmatch '^[a-z0-9][a-z0-9-]*$') { throw 'Invalid source repository name' }
+            $repositories[$property.Name] = Get-NormalizedRoot -Path ([string]$property.Value) -Label $property.Name
+        }
+    }
     $current = Read-JsonFile -Path $currentFile
     $projectContext = Read-JsonFile -Path $projectFile
     if ([int]$current.schemaVersion -ne 1 -or [int]$projectContext.schemaVersion -ne 1) { throw 'Context inputs must use schemaVersion 1' }
@@ -188,7 +203,11 @@ try {
     Add-Constraints -Target $constraints -Constraints $projectContext.constraints
 
     $selectedIds = New-Object Collections.Generic.List[string]
-    foreach ($candidate in @(@($current.approvedReferenceIds) + @($projectContext.approvedReferenceIds))) {
+    if ($SelectNoSources -and $PSBoundParameters.ContainsKey('SelectedSourceIds')) { throw 'SelectNoSources and SelectedSourceIds are mutually exclusive' }
+    $candidates = @(@($current.approvedReferenceIds) + @($projectContext.approvedReferenceIds))
+    if ($SelectNoSources) { $candidates = @() }
+    elseif ($PSBoundParameters.ContainsKey('SelectedSourceIds')) { $candidates = @($SelectedSourceIds -split ',') }
+    foreach ($candidate in $candidates) {
         $id = [string]$candidate
         if ([string]::IsNullOrWhiteSpace($id)) { continue }
         if (-not $selectedIds.Contains($id)) { $selectedIds.Add($id) }
@@ -200,7 +219,9 @@ try {
         if ([string]$item.status -cne 'approved') { throw "Reference is not approved: $id" }
         $sourcePath = [string]$item.sourceRef.path
         if ($sourcePath -notmatch '^[a-zA-Z0-9._/-]+$' -or $sourcePath -match '(^|/)\.\.(/|$)') { throw "Unsafe source path: $sourcePath" }
-        $blob = Invoke-GitBytes -RepositoryRoot $brain -Arguments @('show', "$($item.sourceRef.gitRef):$sourcePath")
+        $sourceRepo = [string]$item.sourceRef.repo
+        if (-not $repositories.ContainsKey($sourceRepo)) { throw "Source repository is not mapped: $sourceRepo" }
+        $blob = Invoke-GitBytes -RepositoryRoot $repositories[$sourceRepo] -Arguments @('show', "$($item.sourceRef.gitRef):$sourcePath")
         $actualHash = Get-Sha256Bytes -Bytes $blob
         $hashMode = 'git-blob'
         if ($actualHash -cne [string]$item.sourceRef.sha256 -and $sourcePath -match '\.(?:md|json|ya?ml|txt)$') {
@@ -225,6 +246,7 @@ try {
         schemaVersion = 1
         designContext = [pscustomobject][ordered]@{
             contract = [pscustomobject][ordered]@{ repo = 'yohan-brain'; ref = $script:pinnedContractRef; path = $script:indexPath }
+            index = [pscustomobject][ordered]@{ repo = 'yohan-brain'; ref = $IndexRef; path = $script:indexPath }
             resolutionOrder = $script:resolutionOrder
             tiers = $tiers
             constraints = [pscustomobject]$constraints
