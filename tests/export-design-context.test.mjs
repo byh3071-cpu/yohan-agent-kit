@@ -59,6 +59,19 @@ test('missing references remain missing and only the selected medium profile is 
   assert.doesNotMatch(result.files[0].bytes.toString(), /76px|페이지 번호·CTA/);
 });
 
+test('Muse export keeps desktop taste out and leaves missing references unresolved', t => {
+  const f = fixture(t);
+  f.request.bundle.referenceIds = [];
+  f.request.bundle.medium = 'muse-ui';
+  f.context.taste = [{ state: 'confirmed', rule: 'desktop-only-fixture', scope: ['mova-ui'], evidence: 'fixture', approvedBy: 'fixture' }];
+  const result = f.run();
+  assert.equal(result.manifest.medium, 'muse-ui');
+  assert.equal(result.manifest.references.length, 0);
+  assert.deepEqual(result.manifest.taste, []);
+  assert.doesNotMatch(result.files[0].bytes.toString(), /desktop-only-fixture/);
+  assert.equal(result.manifest.productionAuthorized, false);
+});
+
 test('rejects changed bytes, unknown references, wrong medium and unsupported approval claims', t => {
   const f = fixture(t);
   f.context.references[0].source.sha256 = '0'.repeat(64);
