@@ -24,8 +24,8 @@
                   },
                   {
                       "path":  "references/media-profiles.json",
-                      "bytes":  2592,
-                      "sha256":  "94F3C5B50146423585E8E01D46C903D7550131F19F9819ACC25FC6BD83FB1FAB"
+                      "bytes":  3226,
+                      "sha256":  "7692895F4D2CD1719C0E9DB93FF1AFF135608AA61EF532D507BF62ADCB728D8A"
                   },
                   {
                       "path":  "references/operating-manual.md",
@@ -68,5 +68,5 @@
                       "sha256":  "2591064D0F0FFA9A068524D812D53D4F117BEBD6294E2E0B8F3124B154F428DF"
                   }
               ],
-    "digest":  "C2592753053312DA2043D6C47923D5F201739BFC0508CA192C321B359D3A52BC"
+    "digest":  "6D6F4F2E647969F40953630E8C0F9EA76B1E6923BF8886B126235AC72D27897B"
 }
