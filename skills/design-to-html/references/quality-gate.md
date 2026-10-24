@@ -1,25 +1,11 @@
-# Quality Gate
+# 변경에 필요한 직접 확인
 
-Read this gate before implementation and before handoff. A handoff passes only when every applicable requirement has evidence in `design-qa.md`.
+프로젝트의 실제 계약과 변경 영향을 기준으로 선택한다. 이 문서는 매 작업의 필독 목록이나 별도 승인 게이트가 아니다.
 
-## Required checks
+- 기능: 변경한 주요 행동을 시작부터 결과까지 조작한다. 추가한 입력·탭·메뉴만 관련 상태를 확인한다.
+- 레이아웃: 영향을 받는 대표 화면 크기에서 잘림·가로 넘침·읽기 순서를 확인한다. 다섯 고정 크기의 캡처를 매번 요구하지 않는다.
+- 접근성: 관련된 대비·포커스·키보드 경로·터치 영역·모션 감소를 확인한다. 글자 크기는 기존 제품 시스템과 실제 가독성을 따른다.
+- 시각: 원본 재현 작업이면 같은 화면 크기·상태의 원본과 구현을 비교한다. 불필요한 문구·장식, 잘못된 계층, 깨진 자산을 수정한다.
+- 코드: 기존 컴포넌트와 아이콘·토큰을 재사용하고 해당 변경에 필요한 타입·테스트·콘솔 오류를 확인한다.
 
-| Area | Requirement | Evidence |
-| --- | --- | --- |
-| Typography and contrast | Body text is 16px, secondary text is 14px, and text contrast meets WCAG AA. | Computed styles and contrast check |
-| Responsive layout | Check 360, 432, 768, 1280, and 1440px for responsive behavior and horizontal overflow. At 432px, use a responsive layout; do not scale a desktop diagram. | Viewport captures and overflow result |
-| Icons | Use a real icon library for icons. Do not use CSS art, handwritten SVG, or emoji substitutes. | Library and icon usage location |
-| Interaction | Complete the full interaction path, including each introduced tab, menu, input, expand, and selection state. | Interaction checklist |
-| Browser and keyboard | Record zero console errors and a keyboard path through the interactive controls. | Console output and keyboard steps |
-| Visual QA | Compare the approved source and implementation in the same viewport and UI state; resolve P0 and P1 findings and record any P2 findings. | Side-by-side same-state captures and issue list |
-| Preservation | Save the approved source and final evidence in project Git. | Tracked paths or stable refs |
-
-## Handoff record
-
-`design-qa.md` must include the required evidence and end with this literal line:
-
-```text
-final result: passed
-```
-
-Without that exact result, do not hand off the implementation.
+필요한 품질 확인을 끝내면 종료한다. 새로운 오류·변경·사용자 피드백이 없으면 재검사·추가 시안·평가 모델을 실행하지 않는다. 확인 결과는 채팅에 짧게 남기며 `design-qa.md`와 `final result: passed` 문자열을 완료 조건으로 요구하지 않는다. 재현에 필요한 증거나 사용자가 요청한 기록만 소유 프로젝트의 기존 위치에 남긴다.

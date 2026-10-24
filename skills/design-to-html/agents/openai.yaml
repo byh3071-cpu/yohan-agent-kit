@@ -1,7 +1,7 @@
 interface:
-  display_name: "디자인을 HTML로"
-  short_description: "승인 시안을 반응형 HTML로 구현하고 검증합니다"
-  default_prompt: "이 시각 기준을 $design-to-html로 구현하고 브라우저 검증까지 완료해 주세요."
+  display_name: "디자인을 코드로"
+  short_description: "선택한 시안을 기존 앱 또는 필요한 HTML에 구현합니다"
+  default_prompt: "이 시각 기준을 $design-to-html로 구현하고 변경한 동작을 확인해 주세요."
 
 policy:
   allow_implicit_invocation: true
