@@ -10,7 +10,7 @@
 
 # Yohan Agent Kit — 프로젝트 규칙 단일 소스 (Single Source of Truth)
 
-> ⚡ 규칙 변경은 **여기서만** — `vhk sync` 로 AGENTS.md · .cursorrules 전파.
+> 규칙 변경은 이 파일과 필요한 진입점에 직접 반영한다. VHK 자동 동기화는 중단했다.
 
 ## 서문
 
