@@ -1,58 +1,9 @@
-# Context Contract
+# 디자인 출처와 소유권
 
-## Source of truth
-
-Resolve conflicts in this order; a lower-priority source cannot override a higher-priority source.
-
-1. Current request
-2. Project Git
-3. Approved media
-4. Common taste rules
-5. Golden references
-
-The resolver execution contract is pinned to yohan-brain commit `37068a625d85bb3955579a04d87cc0f5c503c823`. The yohan-brain design context is the metadata/schema/index authority. A Notion view may aid discovery, but it is not a resolution tier and cannot override an approved Git source.
-
-Use repository-relative paths, Git refs, stable links, or source names in tracked files. Do not record absolute machine paths.
-
-## Minimal DesignContext envelope
-
-Place a minimal `DesignContext` before the existing `WorkContext`. It identifies the pinned contract, the five-tier resolution order, resolved constraints, and approved source refs. Keep unresolved tiers explicit and empty; never invent taste, media, or golden records and never promote a candidate automatically.
-
-```json
-{
-  "contract": { "repo": "yohan-brain", "ref": "<40-hex commit>", "path": "memory/design-intelligence/index.yaml" },
-  "resolutionOrder": ["current-request", "project-git", "media", "common-taste", "golden"],
-  "constraints": {},
-  "approvedSources": []
-}
-```
-
-`Resolve-DesignContext.ps1` is read-only and resolves Git objects instead of a dirty checkout. `Record-DesignDecision.ps1` records only `reuse`, `adapt`, `remix`, or `create` as append-only evidence. Stable promotion always remains a human gate.
-
-## Required context record
-
-Display this `WorkContext` before implementation:
-
-```markdown
-## 작업 컨텍스트 요약
-- goal:
-- user and target screen:
-- approved visual source:
-- selected source of truth:
-- applicable project rules:
-- acceptance criteria:
-```
-
-`WorkContext` is the structured record used to resolve sources and constraints. `검증 리포트` is the handoff record containing the viewport checks, same-state comparison, unresolved P0/P1/P2 items, `design-qa.md` result, and commit SHA.
-
-## Same branch on two PCs
-
-For one branch, finish work on the first PC with commit and push. On the second PC, pull and continue only after that push is available. Do not edit the same branch concurrently on two PCs, especially the same files.
-
-## Three independent promises
-
-| Promise | Must remain true | Evidence |
-| --- | --- | --- |
-| File identity | The approved source, implementation, and evidence identify the exact files or stable refs used. | Source and output paths or refs in the 검증 리포트 |
-| Design consistency | The implementation matches the approved source at the compared viewport and UI state. | Same-state source and implementation captures |
-| Creative consistency | Decisions not explicit in the source stay intentional and consistent across related screens and states. | Reused decision rule recorded in the 검증 리포트 |
+- 현재 사용자 요청과 선택한 시안, 소유 프로젝트의 코드·컴포넌트·토큰·자산을 기준으로 한다. 충돌로 결과가 달라질 때만 구체적으로 확인한다.
+- 사용자 피드백은 해당 화면의 변경으로 해석한다. 특정 화면의 취향을 모든 프로젝트의 전역 금지로 확대하지 않는다.
+- 기존 디자인 기록·공통 취향·참고 자료는 필요할 때만 읽는다. Brain 전체 문맥 조회, 고정 commit resolver, DesignContext/WorkContext 출력, 결정 기록 스크립트는 기본 절차가 아니다.
+- Notion을 조회·기록·동기화에 사용하지 않는다. 출처는 필요한 프로젝트 상대경로·안정적인 링크·Git ref로 가리킨다.
+- 동작·디자인 구현은 소유 프로젝트 Git이 정본이다. 코드에 보이지 않는 제외 이유·제약만 기존 기록 한 곳에 남긴다. 선택하지 않은 후보의 자동 장기 보관이나 공통 패턴 승격은 하지 않는다.
+- 배포용 디자인은 소유 프로젝트와 기존 아카이브 계약을 따른다. 채팅·Temp 폴더를 장기 정본으로 삼지 않는다.
+- 다른 PC로 이어갈 때는 실제 최신 변경과 기존 사용자 작업을 확인한다. commit·push·공유·업로드는 승인 범위 안에서만 수행한다.

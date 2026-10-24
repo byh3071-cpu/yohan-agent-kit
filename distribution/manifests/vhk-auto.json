@@ -1,17 +1,17 @@
 {
-    "schemaVersion":  1,
-    "skill":  "vhk-auto",
-    "files":  [
-                  {
-                      "path":  "references/review-adapters.md",
-                      "bytes":  876,
-                      "sha256":  "2D4298D934C1EB5261C5E1F9AFBD519E07FE8A89879271FD3FFCFBACAAA1B34F"
-                  },
-                  {
-                      "path":  "SKILL.md",
-                      "bytes":  9760,
-                      "sha256":  "41B28BAA366DC0C6CD2B52772EE03DE868E8B883F4E032A832CCF361A179EFF7"
-                  }
-              ],
-    "digest":  "35ABA090FDD27E14430A85C04922161D3AD50DC45E8CDAFDD16DF1721FFB5E67"
+  "schemaVersion": 1,
+  "skill": "vhk-auto",
+  "files": [
+    {
+      "path": "references/review-adapters.md",
+      "bytes": 1395,
+      "sha256": "A5AB6A85AF966448116B716E2F2373849355BF7FA2B45C7C1F81F4B7C9EE62DE"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 10397,
+      "sha256": "2F0D524C1C2E211FD11BD5F1194715D94F3663D9D0F903340E4224A1F4ED13CA"
+    }
+  ],
+  "digest": "EBDE18D67D3D27DC516C519812E0180193E76604509416EDBFFBB0A644B2D0A0"
 }

@@ -4,9 +4,9 @@
     "files":  [
                   {
                       "path":  "SKILL.md",
-                      "bytes":  977,
-                      "sha256":  "54681515FC2C9CB61BF9EA72FBB442F088F0D8A52032FE2EF552F3F2A6B220AB"
+                      "bytes":  929,
+                      "sha256":  "11A0F77917C38773E4A2A533586D0018A8C74D0B669159DA8218FD8870F69BDD"
                   }
               ],
-    "digest":  "2651065157EDB578E712948479E56D829409D7B5875F5E46C2B99EA033F9DA2A"
+    "digest":  "B926BDB448B8A99723EAB0A3A638AB6A106C33EFC9C4A4A1EA4B4D1B7E779758"
 }

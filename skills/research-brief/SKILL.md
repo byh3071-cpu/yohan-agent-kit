@@ -1,25 +1,15 @@
 ---
 name: research-brief
 description: >-
-  Lightweight competitor/market research to Notion (not yohan-brain by default).
-  Uses agent-reach/WebSearch; optional parallel research-scout. Triggers - 경쟁사,
-  리서치 브리프, 비교해줘, 시장 조사. Say 병렬 for scouts (max 4).
+  경쟁사·시장·제품 비교를 필요한 범위로 조사해 출처와 함께 대화에서 간결하게 정리한다.
+  리서치 브리프나 근거 있는 비교를 요청했을 때 사용한다. Notion 조회·기록이나 문서 생성을 기본 절차로 두지 않는다.
 ---
 
 # research-brief
 
-## Default path
-1. Normalize question + axes
-2. If owner said 병렬 / 경쟁사 각각 → spawn **research-scout** ≤4 (readonly)
-3. Else gather with agent-reach / WebSearch
-4. Write Notion row (Research Pipeline `8b0690cc` preferred, or Copilot Session `7697d25a` if inbox-only)
-5. Leave empty **판정** field for owner
-6. **Do not** open brain PR / research-loop full pipe in v1
+1. 대화에서 조사 질문과 비교 기준을 파악한다. 결론을 바꾸는 누락만 질문한다.
+2. 필요한 웹·1차 자료를 조사한다. 병렬 조사가 시간을 줄일 때만 독립 범위를 나누며 별도 검증·평가 루프를 만들지 않는다.
+3. 결론과 근거, 사실과 추론, 중요한 미확인을 구분해 대화에 간결히 정리한다. 비교는 표가 유용할 때 쓰고 주장 가까이에 확인한 출처 링크를 단다.
+4. 사용자가 파일 저장을 요청한 경우 소유 프로젝트의 적절한 기존 기록에 남긴다. 프로젝트가 정해지지 않았다면 현재 작업 공간에 초안으로 두며 임의로 새 정본을 만들지 않는다.
 
-## Requires
-Notion MCP authenticated (Cursor OAuth). If needsAuth → tell owner to auth; offer paste block for manual Notion entry.
-
-## Output
-- Notion URL or page id
-- Summary table
-- Empty 판정란 reminder
+Notion·Brain PR·research-loop·긴 보고서·기록 DB 적재·별도 판정표를 자동 생성하거나 호출하지 않는다. 현재 요청을 답하는 데 충분한 근거가 모이면 종료한다.

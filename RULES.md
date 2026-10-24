@@ -1,6 +1,16 @@
+<!-- YOHAN-VHK-AUTO-STOP:BEGIN -->
+## VHK 전면 보류 (2026-10-07 사용자 결정)
+
+- VHK는 문제가 해결되고 사용자가 명시적으로 재개를 승인할 때까지 모든 작업에서 전면 보류한다. 실행·설치·업데이트·주입·동기화·Goal 관리·verify/receipt/review·watch·autopilot을 호출하지 않는다.
+- 검증 스킬(cross-check, release-gate, plan-audit, dogfood-crosscheck 등), Evaluator·평가 로그·적대적 리뷰 반복·검증용 자동 모델 호출도 기본 작업 절차로 실행하지 않는다. 추가 검토는 해당 작업에서 사용자가 명시적으로 요청한 경우에만 선택하며 VHK 재개는 별도 승인이다.
+- goal-cycle·adr-cycle·오케스트레이션 등 다른 스킬로 우회해 중단한 절차를 연쇄 호출하지 않는다. 과거 문서·메모리·스킬·플러그인의 의무보다 이 결정이 우선한다. 개별 이슈 해결·새 버전 설치만으로 자동 재개하지 않는다.
+- 변경 영향에 필요한 직접 확인·관련 테스트만 수행하고 관련 코드·테스트·입력·의존성·환경이 같은 통과 결과는 재사용한다. 관련 변경·실패 근거가 없는 전체 재검사와 기록 복제를 하지 않는다.
+- 사용자 변경·시크릿 보호, 삭제·외부 전송·merge·배포·publish에 대한 사람 승인 경계는 유지한다.
+<!-- YOHAN-VHK-AUTO-STOP:END -->
+
 # Yohan Agent Kit — 프로젝트 규칙 단일 소스 (Single Source of Truth)
 
-> ⚡ 규칙 변경은 **여기서만** — `vhk sync` 로 AGENTS.md · .cursorrules 전파.
+> 규칙 변경은 이 파일과 필요한 진입점에 직접 반영한다. VHK 자동 동기화는 중단했다.
 
 ## 서문
 

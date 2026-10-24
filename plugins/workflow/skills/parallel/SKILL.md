@@ -3,6 +3,8 @@ name: parallel
 description: Use PROACTIVELY when the user wants parallel/동시 작업, OR when the repo being worked on is already occupied by another session (메인 트리 dirty·untracked 多·다른 worktree 존재) — git worktree 로 별도 작업방을 자동 격리해 충돌 0 으로 만든다. 사용자는 worktree 를 전혀 몰라도 된다(Claude 가 만들고·쓰고·치운다). Triggers - "병렬로 작업", "동시에 여러개", "딴것도 같이", "빠르게 같이 하자", "다른 거 작업 중인데 이것도", + 작업 레포가 다른 세션 점유된 낌새 감지 시.
 ---
 
+> **2026-10-07 전면 보류 적용:** VHK의 실행·설치·업데이트·주입·동기화·Goal/verify/receipt/review·watch·autopilot은 문제 해결과 사용자 재개 승인 전까지 중단한다. 아래 과거 절차의 강제 검토·검증 스킬·Evaluator·평가 로그·자동 모델 호출·중복 기록 요구는 적용하지 않는다. 추가 검토는 해당 작업의 명시 요청이 있는 경우에만 선택한다. 사용자 변경·시크릿 보호·사람 승인 경계는 유지한다.
+
 # parallel (병렬 작업 자동 격리)
 
 여러 작업을 충돌 없이 병렬로. **사용자가 worktree를 몰라도** Claude가 별도 작업방(git worktree)을 자동으로 만들고·쓰고·치운다. "같은 폴더에서 동시 작업 → 충돌·rebase 지옥"을 원천 제거.

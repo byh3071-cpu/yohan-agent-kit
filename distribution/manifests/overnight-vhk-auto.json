@@ -1,12 +1,12 @@
 {
-    "schemaVersion":  1,
-    "skill":  "overnight-vhk-auto",
-    "files":  [
-                  {
-                      "path":  "SKILL.md",
-                      "bytes":  3170,
-                      "sha256":  "6E2E55F8FD515960091CF7E614E90D625FF87A813157E400BD3FD34CF65D786A"
-                  }
-              ],
-    "digest":  "050CC5D944B9B1CBF7407623CF340AC4DA084F498444DCF2EED4C3A8B0E5D78B"
+  "schemaVersion": 1,
+  "skill": "overnight-vhk-auto",
+  "files": [
+    {
+      "path": "SKILL.md",
+      "bytes": 3850,
+      "sha256": "F4AD00ABCE0DE84B261CEDCEC98CBE1FF9B34A146409E06F8A62F2D78FBACD63"
+    }
+  ],
+  "digest": "119E7EF6361394B95CF3343E64879C54343026A76ADC49FF7BAFAA4690A082E1"
 }

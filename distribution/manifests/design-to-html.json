@@ -1,27 +1,27 @@
 {
-    "schemaVersion":  1,
-    "skill":  "design-to-html",
-    "files":  [
-                  {
-                      "path":  "agents/openai.yaml",
-                      "bytes":  300,
-                      "sha256":  "64E750B926371B0E7C17D93DE29074ED172BDAC9AB68F242B5AD9D6D03890485"
-                  },
-                  {
-                      "path":  "references/context-contract.md",
-                      "bytes":  2886,
-                      "sha256":  "110CFC849ADD6B3D6B65F69B77254EBFA4619ACFAAD7D1B9F6EEAC979D198D95"
-                  },
-                  {
-                      "path":  "references/quality-gate.md",
-                      "bytes":  1545,
-                      "sha256":  "4C160FE266105C95A2ED03FD88E9802B7AF443AB15AB513E58A1E43DEE12CCA9"
-                  },
-                  {
-                      "path":  "SKILL.md",
-                      "bytes":  1659,
-                      "sha256":  "19DDE776B47BC2DA5D88B3AFC6655BA5468C42A9ED0612A9C48F778DAC37C05B"
-                  }
-              ],
-    "digest":  "15F898CD4B39CCE061E2C5E4152154322EFEC720B113F807038C4360AD3B7F6D"
+  "schemaVersion": 1,
+  "skill": "design-to-html",
+  "files": [
+    {
+      "path": "agents/openai.yaml",
+      "bytes": 304,
+      "sha256": "03CB035E3FECB96DDF033EA0C2472C6B81CD2FB553F7D8D2323D2918E56DBF0E"
+    },
+    {
+      "path": "references/context-contract.md",
+      "bytes": 1361,
+      "sha256": "E0B4DDFFBC01F28CB3198045E3E8CC28F7F2EB97C12089722296F67E6B0C9C92"
+    },
+    {
+      "path": "references/quality-gate.md",
+      "bytes": 1464,
+      "sha256": "FA77248412109A733E66877283153757BC27F08EB45642E084758056CF5B0D50"
+    },
+    {
+      "path": "SKILL.md",
+      "bytes": 2770,
+      "sha256": "B6812F2584FA1DD9206E2B9EF8671D51909D5CBA6CEAA1496B235527B1DA6CED"
+    }
+  ],
+  "digest": "2972A4265021BF187473592B116C481B7BCDEB7825C7A15EDC5DAB0F9A94E236"
 }

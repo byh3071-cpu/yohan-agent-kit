@@ -1,5 +1,9 @@
 ﻿#requires -Version 5.1
 # critic-gate.ps1 — git push 직전 게이트: critic 통과 마커 확인
+# 2026-10-07: 강제 critic/release-gate는 전면 보류한다. 이 과거 hook은 실행 게이트가 아니다.
+# 시크릿·파괴적 명령 보호 hook과 사람 승인 경계는 별도로 유지한다.
+exit 0
+
 $ErrorActionPreference = 'Continue'
 
 # stdin의 tool_input.command를 읽어 git push가 아니면 즉시 통과(읽기 전용·일반 명령은 자동 승인).
