@@ -1780,6 +1780,28 @@
       ]
     },
     {
+      "id": "script.export-design-context",
+      "kind": "script",
+      "owner": "yohan-agent-kit",
+      "sourcePath": "scripts/export-design-context.mjs",
+      "portability": "ADAPTER_REQUIRED",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ],
+      "lifecycle": "reviewed",
+      "provenance": "repo-authored",
+      "license": "UNLICENSED",
+      "requiredEnv": [],
+      "evidenceRefs": [
+        "scripts/export-design-context.mjs",
+        "skills/design-team/references/chatgpt-context.md",
+        "tests/export-design-context.test.mjs"
+      ]
+    },
+    {
       "id": "template.workflow.research-report",
       "kind": "template",
       "owner": "workflow",

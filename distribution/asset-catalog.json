@@ -1,5 +1,5 @@
 {
-  "assetCount": 226,
+  "assetCount": 227,
   "assets": [
     {
       "contentDigest": "154ac347d643007f52f624f5a75592660065a5ff3f7fbb52a9f014b4447ff3be",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "contentDigest": "9b01e71c1b84c8e4e633ba3a77639a961a4d803b60a76ebac96f0d38dd89cbcd",
+      "contentDigest": "f0f7aafd2580c264b431e2eb244b3f41b2c2326bd177b169994d35f067fe7260",
       "evidenceRefs": [
         "plugins/yohan-core/agents/critic.md"
       ],
@@ -387,7 +387,7 @@
       ]
     },
     {
-      "contentDigest": "dfa071c6c43085611cfb594dc1543c4dde5d1fb731c842bea1ae8f77b7711534",
+      "contentDigest": "fd1ba8a27b1cf9fb0e33e845d86ab4ca3fbb73bac9bf97ad5d19e7510b4e5967",
       "evidenceRefs": [
         "plugins/yohan-core/commands/flow.md"
       ],
@@ -656,7 +656,7 @@
       ]
     },
     {
-      "contentDigest": "44efc439ceef59b979ac0de8337ba6900af22dd9a9fad52ef10a32378da58678",
+      "contentDigest": "15ad10509062bd7f35a74489d510a6c50bb794a6f0d2f2125eb12969d1667aee",
       "evidenceRefs": [
         "plugins/yohan-core/hooks"
       ],
@@ -732,7 +732,7 @@
       ]
     },
     {
-      "contentDigest": "4e959e03a14ef0a08bc7319310368ee31cea5e6c430e5b95650ef4d1a54b6e04",
+      "contentDigest": "f1356bf46c4ee41b7fce4d44a21b53a36054701d88772681775b38c935e78f23",
       "evidenceRefs": [
         "distribution/manifests/agent-team-operations.json"
       ],
@@ -754,7 +754,7 @@
       ]
     },
     {
-      "contentDigest": "eea86772cb8b18afa6d5a6e2a1a8541ea98cdeeeb4c2d5dcb4d72f3f73187888",
+      "contentDigest": "8e55c0b7075b37cce67f69faaa0d9ebe58693ad0e7ed7e65ad734e8bfddd993f",
       "evidenceRefs": [
         "distribution/manifests/design-team.json"
       ],
@@ -776,7 +776,7 @@
       ]
     },
     {
-      "contentDigest": "a264e5eb4d7c48efe40be4544937b5d797946cfc333b3abcc66ccdcb861d9ad1",
+      "contentDigest": "668e9ac456afd000a377a653ce20a544bb4073f818d65d15c77b6d7d077306c6",
       "evidenceRefs": [
         "distribution/manifests/design-to-html.json"
       ],
@@ -819,7 +819,7 @@
       ]
     },
     {
-      "contentDigest": "82b0ee44aea6a653db4d5e5e9fa504af25f92385d85c41fd863393d4c9c15907",
+      "contentDigest": "636838bb8ab2e0f2c51c7d70bb20e3c4362681c2c332147544b5184a055e469c",
       "evidenceRefs": [
         "distribution/manifests/goal-cycle.json"
       ],
@@ -841,7 +841,7 @@
       ]
     },
     {
-      "contentDigest": "caaffb171335a40215447ee3d596ef701a45952f54dcd1da37a4de5989a1548c",
+      "contentDigest": "d1796af442383aab72d09a55c03cb96e1aa9708d742ca0f9584601c4e7926f38",
       "evidenceRefs": [
         "distribution/manifests/html-doc.json"
       ],
@@ -901,7 +901,7 @@
       ]
     },
     {
-      "contentDigest": "1baf5fa8ae135bd8be4e0dd8405e6a915f317848e31e055d4581a21c22fd1eba",
+      "contentDigest": "53f7a9d85ab8bc21fe6df53b4981fd718dddb16229f6031a03a515fd8a0a6d51",
       "evidenceRefs": [
         "distribution/manifests/notion-inbox-pickup.json"
       ],
@@ -922,7 +922,7 @@
       ]
     },
     {
-      "contentDigest": "b4f0d0905cf73157b318cc417f2b28e62e6d3783a6d5024e40bdb7f0a343d550",
+      "contentDigest": "2ca0cbc29593414fc192ddc14dcd1cad9619b997e4b7e37ed194161eabe6cf41",
       "evidenceRefs": [
         "distribution/manifests/overnight-vhk-auto.json"
       ],
@@ -961,7 +961,7 @@
       ]
     },
     {
-      "contentDigest": "c2a397e3628247a8ebbaae0b007f1a8d4f3ce0bcb2079438d77be9286b75313c",
+      "contentDigest": "4fbff6c6c0770213b2e9133d28c0d574a34501e5be2efb537d5112dd87e3726b",
       "evidenceRefs": [
         "distribution/manifests/research-brief.json"
       ],
@@ -1026,7 +1026,7 @@
       ]
     },
     {
-      "contentDigest": "ba3141b2a54eb7ad6ef68921e2ea58552c8881d9fc511997650b8acb49c26fc4",
+      "contentDigest": "8d70b01e2300167f69c2f6427e4929b1458cd94672493704e31f308ef2ae4271",
       "evidenceRefs": [
         "distribution/manifests/secret-pr-guard.json"
       ],
@@ -1047,7 +1047,7 @@
       ]
     },
     {
-      "contentDigest": "e1f9cfe797666361dec35be76348476fb45fe450135f3d6ab04db5133f124beb",
+      "contentDigest": "808fdbf354eba5b62f0f8658ba83f673768fe57e70e994222864c5cf7e6fbc7b",
       "evidenceRefs": [
         "distribution/manifests/session-card.json"
       ],
@@ -1111,7 +1111,7 @@
       ]
     },
     {
-      "contentDigest": "7fbde2a6f2f94592c1c059d5010b0fac7e6041f217729679bd5477526f8fdd76",
+      "contentDigest": "4b48b71f2224f97f3954812e32bd14042352706df5a72a910fcbf5cd2ae4f9eb",
       "evidenceRefs": [
         "distribution/manifests/thought-to-prompt.json"
       ],
@@ -1132,7 +1132,7 @@
       ]
     },
     {
-      "contentDigest": "db184fb2d5da0df97ba964ed97d7524411e4db8a868f89f153b0a5c44799a96d",
+      "contentDigest": "363b6459a3049875c7a0f7abc688d55901de124cff66975c9e12a21962a8c50f",
       "evidenceRefs": [
         "distribution/manifests/vhk-auto.json"
       ],
@@ -1153,7 +1153,7 @@
       ]
     },
     {
-      "contentDigest": "c9ecae754d18f3e99c57afe15a459b1a76f2d9ce0de868093f81374a6882a6e0",
+      "contentDigest": "a54fe9db858630e3abc3aa2eafc3f31f7e1b932cef3ece4507e152e56df6fe02",
       "evidenceRefs": [
         "distribution/manifests/yohan-start.json"
       ],
@@ -1353,7 +1353,7 @@
       ]
     },
     {
-      "contentDigest": "6469b0b889fe921ae8d0ca7dd6b16efb4afd3845bb47c6146ee70062a3364af7",
+      "contentDigest": "2526ebc37f643a3bcbacc82f06b2ba38c1de5b602f975d49626a8d49b23aaa15",
       "evidenceRefs": [
         "CLAUDE.md"
       ],
@@ -1389,7 +1389,7 @@
       ]
     },
     {
-      "contentDigest": "5d8d1423f91c6656f9444f2dbc3ac04b7f197dda3e4844e2bb57c838e2dff9bd",
+      "contentDigest": "0a6c95c3e9587c0c7f10a648445a5fee33d27191765d6ef092881090b59612de",
       "evidenceRefs": [
         "RULES.md"
       ],
@@ -1522,7 +1522,7 @@
       ]
     },
     {
-      "contentDigest": "44956d96b5c22cbd19276a2fc637cd0a0997e1c5f08f6e3c8f651b23975920cf",
+      "contentDigest": "0d8eb0cfa6b7239ef9f2aaa041f5883665abfe8926fcb9929dcb78fdba11ac90",
       "evidenceRefs": [
         "plugins/yohan-core/CLAUDE.md"
       ],
@@ -2039,6 +2039,29 @@
       ]
     },
     {
+      "contentDigest": "a7a073ac1af2a4688844370d64e0e858b46f96587ccffc6f6f659d927f6c5359",
+      "evidenceRefs": [
+        "scripts/export-design-context.mjs",
+        "skills/design-team/references/chatgpt-context.md",
+        "tests/export-design-context.test.mjs"
+      ],
+      "id": "script.export-design-context",
+      "kind": "script",
+      "license": "UNLICENSED",
+      "lifecycle": "reviewed",
+      "owner": "yohan-agent-kit",
+      "portability": "ADAPTER_REQUIRED",
+      "provenance": "repo-authored",
+      "requiredEnv": [],
+      "sourcePath": "scripts/export-design-context.mjs",
+      "vendors": [
+        "claude-code",
+        "codex",
+        "cursor",
+        "antigravity"
+      ]
+    },
+    {
       "contentDigest": "9b2b0ebd34ac025aa07888af75e064a791c60a5ffc8754e89555921b73fb8e26",
       "evidenceRefs": [
         "scripts/Get-AgentAssetDrift.ps1"
@@ -2309,7 +2332,7 @@
       ]
     },
     {
-      "contentDigest": "a2481d84267e86eee18ba55695d275c9108bc3280e393f43b10d64ed56eb587b",
+      "contentDigest": "ad90ec96a610876521e1cfafed4340eba7791447af8b8d50195baae683d0f28b",
       "evidenceRefs": [
         "scripts/Resolve-DesignContext.ps1"
       ],
@@ -2568,7 +2591,7 @@
       ]
     },
     {
-      "contentDigest": "628ae0d6fae3192ad93d3742b0d0ecacaa76de94b78613ebc082e4cfd0270566",
+      "contentDigest": "fabfb688190de8333a22f4e8e529f940836abfe2c34be68023465e23a4cddbd8",
       "evidenceRefs": [
         "skills/agent-team-operations",
         "docs/audits/agent-team-operations-promotion-2026-08-26.md"
@@ -2765,7 +2788,7 @@
       ]
     },
     {
-      "contentDigest": "14ee8139443ace8ba82614f83eb750b2ac592e71da7dbffd9dc85789784e8036",
+      "contentDigest": "4da3caefc9f527123bb987a4d2bad3af6ddc68093bc57bb78e8c6faefcdc9e2b",
       "evidenceRefs": [
         "plugins/critical-thinking/skills/critical-thinking"
       ],
@@ -2787,7 +2810,7 @@
       ]
     },
     {
-      "contentDigest": "6a9e29f73e40107b075f8dce0c5f280256142bcad09b45d5276b647558d14d06",
+      "contentDigest": "09a4f99ddbd9509c767ced7b156ed9d4a69480653fb96f1a9ac54b46ef6dbf8e",
       "evidenceRefs": [
         "skills/design-team",
         "docs/audits/design-team-skill-2026-08-22.md"
@@ -2810,7 +2833,7 @@
       ]
     },
     {
-      "contentDigest": "ec9cb4bf20f49f3ec35142ae8bab5a907170c87ccdc522b773d816745b3a1597",
+      "contentDigest": "e5ba24be8ddaf80e29f50b1e6128a72b774cdbc7b56d25c1788efeb5ddd19c3f",
       "evidenceRefs": [
         "skills/design-to-html"
       ],
@@ -2918,7 +2941,7 @@
       ]
     },
     {
-      "contentDigest": "97d920812bc2e405614d8e59e804985e5795998c2c82e9e002e0d6c6361e54a2",
+      "contentDigest": "d514b9112445ecbcd44b114ad57d2dccb55029ec2e24244f2a62584f6ea1685e",
       "evidenceRefs": [
         "skills/goal-cycle"
       ],
@@ -2961,7 +2984,7 @@
       ]
     },
     {
-      "contentDigest": "103c4132b88792c86519c47e7ac9ee3a7d6749194de1f927ff78e9a0ed200912",
+      "contentDigest": "0f5b9b24fdbf79e0cdf68dea30372820ada58d217624b8a06297c5663ad3b908",
       "evidenceRefs": [
         "skills/html-doc",
         "distribution/manifests/html-doc.json"
@@ -3068,7 +3091,7 @@
       ]
     },
     {
-      "contentDigest": "0b70925afea2ef386bf999148a5a816047d008255a9cb6dcb5efc814c40f6bf2",
+      "contentDigest": "36a22da7104d5d9128185b4f8ccdfeef802662ea2654d2d712245a6c08942615",
       "evidenceRefs": [
         "skills/notion-inbox-pickup",
         "distribution/manifests/notion-inbox-pickup.json"
@@ -3134,7 +3157,7 @@
       ]
     },
     {
-      "contentDigest": "ba1e3f534e371a83912938dc5ca0db3630f90edda9512726ff5336ef54a880d2",
+      "contentDigest": "1edc41e9256c13339344bf2e660c67c3b59cf4aec5f898785d1f9e04df86b80b",
       "evidenceRefs": [
         "skills/overnight-vhk-auto",
         "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
@@ -3219,7 +3242,7 @@
       ]
     },
     {
-      "contentDigest": "d4a0c9c03c624be099f344b24dab3e063ac91ba8cb2806158cb296297d457fe9",
+      "contentDigest": "78adc25fdd2613bdcf3e3cb4579d4eb3c5b0161d82c6bec5ec09dab90849b492",
       "evidenceRefs": [
         "skills/research-brief",
         "distribution/manifests/research-brief.json"
@@ -3309,7 +3332,7 @@
       ]
     },
     {
-      "contentDigest": "a81613760e769912628c0f306dca0de8eb2d7ad40632c8897a5cba3a930de855",
+      "contentDigest": "2c4fa0cc7e8ca3856ffe00060daf5f1780e2c8a2a8a6df5a21af124808e286b2",
       "evidenceRefs": [
         "skills/secret-pr-guard",
         "distribution/manifests/secret-pr-guard.json"
@@ -3331,7 +3354,7 @@
       ]
     },
     {
-      "contentDigest": "fafadf8f5234a9dd6dc3ae44c24a794f379a8482ac3277efd645e1ae2f031ff1",
+      "contentDigest": "afd3972d220e8d1efa4d4317acebc645fb792aee43eed8cdd11e28a5403a8d77",
       "evidenceRefs": [
         "skills/session-card",
         "distribution/manifests/session-card.json"
@@ -4027,7 +4050,7 @@
       ]
     },
     {
-      "contentDigest": "6a8c06d1cf23fbddc860c3ff49e433527389fecb00d29af3953f3b3caf7e0028",
+      "contentDigest": "4d284b21de1b4d433d12fbee33ba6d1e2bd5afa5f25ac3fbf9d0373f4daf5472",
       "evidenceRefs": [
         "skills/thought-to-prompt",
         "distribution/manifests/thought-to-prompt.json"
@@ -4071,7 +4094,7 @@
       ]
     },
     {
-      "contentDigest": "ad25eabfa2da9badeea6efea26e6fb94a123ea5e2e2a75b2d933e2023a9546cd",
+      "contentDigest": "54c7c9f1d9f351ef0e990757e1d424dfbcd59b9ac8e2cd85eddc314d691210df",
       "evidenceRefs": [
         "skills/vhk-auto",
         "https://github.com/byh3071-cpu/vhk@b0004cd50d2841760e118eabd3981b578341b452",
@@ -4157,7 +4180,7 @@
       ]
     },
     {
-      "contentDigest": "f96a60b04552a0cb36fe7c38b0f3abed651ab17d3231a842072da4edb1ef3860",
+      "contentDigest": "530367b952d002d7e41a4c1a92087f9f9aebdb07d396f2e3a3b8993129140ba9",
       "evidenceRefs": [
         "plugins/workflow/skills/dogfood-crosscheck"
       ],
@@ -4178,7 +4201,7 @@
       ]
     },
     {
-      "contentDigest": "1acbe86144fc871867fd07918fd0233cf7bb42a53f4c844f07e91f18ed3d7439",
+      "contentDigest": "50605062c7e394f1acf95d7beb654414d493243e2987dfc9847b09a20ce9ce77",
       "evidenceRefs": [
         "plugins/workflow/skills/handoff"
       ],
@@ -4196,7 +4219,7 @@
       ]
     },
     {
-      "contentDigest": "4d80150f693d36ca1cdf28fe0f7c908fdffb611ecd0f1a3bea0a5359587eede7",
+      "contentDigest": "cac8930418973c5cf6196347340a90303b8b6b348c9a2ab7a2c04e256bb4817c",
       "evidenceRefs": [
         "plugins/workflow/skills/new-repo"
       ],
@@ -4217,7 +4240,7 @@
       ]
     },
     {
-      "contentDigest": "98f369dbf592a5465aed15043f487785373d31dd59cd4a90ef29446a0439a593",
+      "contentDigest": "06bf72a55ac8c36df8c3575c6b0c06bf3b317a9035ed312186b3f204cffb7c10",
       "evidenceRefs": [
         "plugins/workflow/skills/overnight-autoloop"
       ],
@@ -4238,7 +4261,7 @@
       ]
     },
     {
-      "contentDigest": "6a190548f94b5a3b8340ae1e6d9163fe6a5e65684a2fb3ffbd032631f8e463c5",
+      "contentDigest": "16f96a9a053dec392dc118e7437b6b97af50a2dd9570b05832c6d70e35d0e613",
       "evidenceRefs": [
         "plugins/workflow/skills/parallel"
       ],
@@ -4256,7 +4279,7 @@
       ]
     },
     {
-      "contentDigest": "5a6dc9896ec35d901df638c6e6d940b7766153efdc802efc250a264581df7866",
+      "contentDigest": "67633a1145ebcce7ac8916670225fbb9c59e73d970fb0a46e03cc7a0f461f2d2",
       "evidenceRefs": [
         "plugins/workflow/skills/release-gate"
       ],
@@ -4274,7 +4297,7 @@
       ]
     },
     {
-      "contentDigest": "ea46d0d2d0e2bdc5a7397e6b388ce0d3c16cee1d512021ae5653a1a9786ef7e8",
+      "contentDigest": "519345325f7e384c68f34856b1bea0e77eed9f642b033f187a40b239ab7bf84b",
       "evidenceRefs": [
         "plugins/workflow/skills/research-loop"
       ],
@@ -4316,7 +4339,7 @@
       ]
     },
     {
-      "contentDigest": "300b0d4b8c7c6b7440af8a99ef60458fd0171fbd2b205f4dacb6e6d671a11ecf",
+      "contentDigest": "21d3f485ebe34df6c4e0de7957d94a2690084fa449f6015c879fa0b7a75fa30e",
       "evidenceRefs": [
         "plugins/workflow/skills/vhk-bootstrap-cursor"
       ],
@@ -4337,7 +4360,7 @@
       ]
     },
     {
-      "contentDigest": "213056953a9220bd84314d568c0de577f8d1bc4e35d850ff8b31244009ce1111",
+      "contentDigest": "a15dd9836287ddfc0f42148dbb8910cd981264cbcf3dfeea212706676261da2e",
       "evidenceRefs": [
         "plugins/workflow/skills/vhk-dogfood-issue"
       ],
@@ -4358,7 +4381,7 @@
       ]
     },
     {
-      "contentDigest": "867ed8215572d715e3b09510d6c3c2dc1da002c451220d25ff9dc8595e04e483",
+      "contentDigest": "8c2f8ebbd3397a1cc37e22fa454709e1f6dbed67281b64b823e7e19a5fd09413",
       "evidenceRefs": [
         "plugins/workflow/skills/vhk-evolve-loop"
       ],
@@ -4379,7 +4402,7 @@
       ]
     },
     {
-      "contentDigest": "28d5a00af1661eadc66fddffcaa55dd48f66e800277c28bf913cbd690f72a31e",
+      "contentDigest": "8a7793aa33b3a81b55f1480f559b1e06b246fa1c7e3e817561f3e36785eb5325",
       "evidenceRefs": [
         "plugins/workflow/skills/vhk-gate"
       ],
@@ -4400,7 +4423,7 @@
       ]
     },
     {
-      "contentDigest": "f2bdea24416d1c4a9b26d65bb73d94be1a6d0ce7b5d5b2fbe94ba109f2a3a68c",
+      "contentDigest": "3a0d153301a7530121bc3f399bae836b1bcaa9a3004d40b098d56e06d00db9e3",
       "evidenceRefs": [
         "plugins/workflow/skills/vhk-goal-health"
       ],
@@ -4421,7 +4444,7 @@
       ]
     },
     {
-      "contentDigest": "abdab6d94eda567ff1bf4bb6f16e9a504c94763902b198ee7ddb930830e72407",
+      "contentDigest": "17345e7c19e8b33cf9b55d3fc8eeb0fc3027cc069a11c6bd06d28c1322bcfdeb",
       "evidenceRefs": [
         "plugins/workflow/skills/visualize"
       ],
@@ -4526,7 +4549,7 @@
       ]
     },
     {
-      "contentDigest": "5279119f942d6877640d869f0c9c8c93244e49355c0063e15fb29c73c968c41d",
+      "contentDigest": "cb21b0babdb6dbf8f5bf9b8bbf7d5470d7810a8f6403589392965947b6dd4491",
       "evidenceRefs": [
         "plugins/yohan-core/skills/cross-check"
       ],
@@ -4588,7 +4611,7 @@
       ]
     },
     {
-      "contentDigest": "bbebcaf652675e1328f72a281adacc01f765deaa2a5a889fd84432d277bceb1b",
+      "contentDigest": "bc8e7cd66bd04639d88c2a3b1ea08803ffda3bb7a44bcc6dbe2dd128f581e4d3",
       "evidenceRefs": [
         "plugins/yohan-core/skills/plan-audit"
       ],
@@ -4609,7 +4632,7 @@
       ]
     },
     {
-      "contentDigest": "1449f57c3728d9b0ee74da15d45634dc7918566cf4e7530ffcf87b90005dba87",
+      "contentDigest": "bed311a7c1ebaa77c2e915126446b211120358b03e22b8c44811c191cb2b146c",
       "evidenceRefs": [
         "plugins/yohan-core/skills/ship-it"
       ],
@@ -4630,7 +4653,7 @@
       ]
     },
     {
-      "contentDigest": "69c096610f2987b3fa27e9aedfc26116cb56c7fd10fba5d722df8c67398e824a",
+      "contentDigest": "151486d8b39c62e32706371d85989a051c86c5a5be72dd322762f0757d0f1a5b",
       "evidenceRefs": [
         "plugins/yohan-core/skills/studio-post"
       ],
@@ -4696,7 +4719,7 @@
       ]
     },
     {
-      "contentDigest": "8b7680e831d77856534d0572b4f52fbbd60a185311755f0f0fd5c3052e77bb8f",
+      "contentDigest": "264cae8fb760bf8d19eb0701069387e47a32f4d28d2b0f9bf96f793f5cfba786",
       "evidenceRefs": [
         "skills/yohan-start",
         "distribution/manifests/yohan-start.json"
@@ -4740,9 +4763,9 @@
       ]
     }
   ],
-  "catalogDigest": "eb35c477e7f10a502f48998f2ee3fd2197e7cab059de7ca5a0b2713a9b61af84",
+  "catalogDigest": "6a17691b3a34e899e94ee7d472c372203c363a7f2cc93f298d794bd13c8db8f3",
   "catalogId": "yohan-agent-assets",
   "generatedFrom": "registry/assets.yaml",
-  "registryDigest": "0839a487b2b5c617e3ba9f004568b502baad7925422b835656a55cb4e07c7e72",
+  "registryDigest": "a4ea5be3a772b3c672d61dd9559e84d7cfb319a12e248db8020777f5e3c8f9c4",
   "schemaVersion": 1
 }
