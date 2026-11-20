@@ -2,8 +2,7 @@
 name: secret-pr-guard
 description: >-
   Pre-commit/PR secret gate. Scans for _env_backup, tokens, .env, cookies before
-  push/PR. Triggers - PR 전, 시크릿, secret check, before auto_pr. Inspired by
-  #131 incident.
+  push/PR. Triggers - PR 전, 시크릿, secret check, before auto_pr.
 ---
 
 # secret-pr-guard

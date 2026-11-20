@@ -44,15 +44,12 @@ SoT: `<개발 루트>/.agents/operator/project-docs-paths.md`
 ## [실행] handoff (F9)
 | kind | action |
 |------|--------|
-| research | research-brief → Notion |
+| research | research-brief (대화에 정리) |
 | plan_design / impl_plan | brief confirmed → `docs/plans/` short plan → CreatePlan/planner |
 | idea | offer prd-generator / interview-me |
 | ops | master-orchestrator |
 | decision | show options; wait |
 | rumination | no execute |
-
-## Phone / cafe
-Cafe uses **Notion AI** pack, not this CLI 3-pass. When picking up Notion rows, if no audit trail → run auditor only before trust.
 
 ## 파이프라인 계약
 계약 SoT: `<개발 루트>/.agents/SKILL_PIPELINE.md` (골 사이클 ②스펙)
